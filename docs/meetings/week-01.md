@@ -6,10 +6,7 @@
 |  Location :  |  DW PC1 Cubicle 9  |  
 |  Chair  |  Maksymilian Sobiech  |  
 |  Minute  Taker  |  Aurelian Buia |  
-|  Attendees :  |   Lapo Masiero 
-- | Tijn Bosman
-- | Luca van der Westerlaken
-- | Floris van Engelen 
+|  Attendees :  |   Lapo Masiero , Tijn Bosman, Luca van der Westerlaken, Floris van Engelen 
 Agenda  Items :  
 -  Opening  by  chair  (1  min)  
 -  Introductions   (5  min)  
