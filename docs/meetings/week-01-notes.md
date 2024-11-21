@@ -31,7 +31,7 @@ Agenda  Items :
 Notes :
 - Time tracking for issues.
 - Conventional commits:
-  - **fix **
+  - **fix**
   - **feat**
 - Entity for Note - **Note** Data Structure
 - Focus on **Self-Study**
