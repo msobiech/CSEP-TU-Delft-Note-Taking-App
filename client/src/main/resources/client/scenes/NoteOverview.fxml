@@ -61,7 +61,7 @@
 
 
             <ScrollPane fx:id="markdownPreview" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333;" fitToHeight="true" fitToWidth="true" HBox.hgrow="ALWAYS" prefWidth="350.0">
-                <VBox fx:id="markdownContent" style="-fx-padding: 10px; -fx-background-color: #E0E5B6; -fx-text-fill: #333333">
+                <VBox fx:id="markdownContent" VBox.vgrow="ALWAYS" style="-fx-padding: 10px; -fx-background-color: #E0E5B6; -fx-text-fill: #333333;">
                     <!-- Rendered Markdown Content Will Be Added Dynamically -->
                 </VBox>
             </ScrollPane>
