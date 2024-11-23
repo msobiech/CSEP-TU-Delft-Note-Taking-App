@@ -7,13 +7,13 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.QuoteOverviewCtrl">
    <children>
-      <Button layoutX="503.0" layoutY="360.0" mnemonicParsing="false" onAction="#addQuote" text="Add Quote" />
-      <Button layoutX="431.0" layoutY="360.0" mnemonicParsing="false" onAction="#refresh" text="Refresh" />
-      <TableView fx:id="table" layoutX="14.0" layoutY="14.0" prefHeight="337.0" prefWidth="572.0">
+      <Button mnemonicParsing="false" onAction="#addQuote" text="Add Quote" AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="10.0"/>
+      <Button mnemonicParsing="false" text="Refresh" onAction="#refresh" AnchorPane.rightAnchor="90.0" AnchorPane.bottomAnchor="10.0" />
+      <TableView fx:id="table" AnchorPane.topAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="50.0">
         <columns>
-          <TableColumn fx:id="colFirstName" prefWidth="113.0" text="First Name" />
-          <TableColumn fx:id="colLastName" prefWidth="114.0" text="Last Name" />
-            <TableColumn fx:id="colQuote" prefWidth="344.0" text="Quote" />
+          <TableColumn fx:id="colFirstName" text="First Name" />
+          <TableColumn fx:id="colLastName" text="Last Name" />
+            <TableColumn fx:id="colQuote" text="Quote" />
         </columns>
       </TableView>
    </children>

@@ -27,55 +27,58 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 
-public class QuoteOverviewCtrl implements Initializable {
+public class NoteOverviewCtrl implements Initializable {
 
     private final ServerUtils server;
     private final MainCtrl mainCtrl;
 
-    private ObservableList<Quote> data;
+    @FXML
+    private TextField searchBar;
 
     @FXML
-    private TableView<Quote> table;
+    private ListView<String> notesList;
+
     @FXML
-    private TableColumn<Quote, String> colFirstName;
+    private TextArea noteDisplay;
+
     @FXML
-    private TableColumn<Quote, String> colLastName;
+    private ScrollPane markdownPreview;
+
     @FXML
-    private TableColumn<Quote, String> colQuote;
+    private VBox markdownContent;
+
+    @FXML
+    private Button addNoteButton, removeNoteButton, refreshNotesButton;
+
+    private ObservableList<String> notes;
+
 
     @Inject
-    public QuoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl) {
+    public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl) {
         this.server = server;
         this.mainCtrl = mainCtrl;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-
-        colFirstName.setMinWidth(100);
-        colLastName.setMinWidth(100);
-        colQuote.setMinWidth(300);
-
-        colFirstName.setMaxWidth(200);
-        colLastName.setMaxWidth(200);
-        colQuote.setMaxWidth(Double.MAX_VALUE);
-
-        colFirstName.setCellValueFactory(q -> new SimpleStringProperty(q.getValue().person.firstName));
-        colLastName.setCellValueFactory(q -> new SimpleStringProperty(q.getValue().person.lastName));
-        colQuote.setCellValueFactory(q -> new SimpleStringProperty(q.getValue().quote));
+        notesList.setItems(notes);
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newNote) -> {
+            if (newNote != null) {
+                updateNoteDisplay(newNote);
+            }
+        });
     }
 
-    public void addQuote() {
-        mainCtrl.showAdd();
+    private void updateNoteDisplay(String note) {
+        noteDisplay.setText(note);
     }
 
     public void refresh() {
-        var quotes = server.getQuotes();
-        data = FXCollections.observableList(quotes);
-        table.setItems(data);
+        //var quotes = server.getQuotes();
+        notes = FXCollections.observableArrayList();
+        notesList.setItems(notes);
     }
 }
