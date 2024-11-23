@@ -24,7 +24,7 @@
             <VBox fx:id="notesContainer" spacing="5.0" style="-fx-padding: 5px;-fx-background-color: #CCD5AE; -fx-text-fill: #333333" prefWidth="300.0">
                 <ListView fx:id="notesList" VBox.vgrow="ALWAYS" style = "-fx-background-color: #E0E5B6; -fx-text-fill: #333333"/>
                 <HBox spacing="5.0" alignment="CENTER" style = "-fx-background-color: #E0E5B6; -fx-text-fill: #333333">
-                    <Button mnemonicParsing="false" fx:id="addNoteButton">
+                    <Button mnemonicParsing="false" fx:id="addNoteButton" onAction="#addNote">
                         <graphic>
                             <FontIcon iconLiteral="fa-plus" />
                         </graphic>
@@ -33,7 +33,7 @@
                             <String fx:value="flat" />
                         </styleClass>
                     </Button>
-                    <Button fx:id="removeNoteButton">
+                    <Button mnemonicParsing="false" fx:id="removeNoteButton" onAction="#removeNote">
                         <graphic>
                             <FontIcon iconLiteral="fa-minus" />
                         </graphic>
@@ -42,7 +42,7 @@
                             <String fx:value="flat" />
                         </styleClass>
                     </Button>
-                    <Button fx:id="refreshNotesButton" >
+                    <Button mnemonicParsing="false" fx:id="refreshNotesButton" onAction="#refreshNotes">
                         <graphic>
                             <FontIcon iconLiteral="fa-rotate-right" />
                         </graphic>
@@ -54,7 +54,11 @@
                 </HBox>
             </VBox>
 
-            <TextArea fx:id="noteDisplay" wrapText="true" HBox.hgrow="ALWAYS" style = "-fx-background-color: #CCD5AE; -fx-text-fill: #333333"/>
+            <VBox>
+                <TextField fx:id="noteTitle" promptText="Note title" VBox.vgrow="ALWAYS" style = "-fx-background-color: #e2e4d0; -fx-text-fill: #211f1f" maxHeight="20.0" minHeight="20.0"/>
+                <TextArea fx:id="noteDisplay" wrapText="true" VBox.vgrow="ALWAYS" style = "-fx-background-color: #CCD5AE; -fx-text-fill: #333333"/>
+            </VBox>
+
 
             <ScrollPane fx:id="markdownPreview" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333;" fitToHeight="true" fitToWidth="true" HBox.hgrow="ALWAYS" prefWidth="350.0">
                 <VBox fx:id="markdownContent" style="-fx-padding: 10px; -fx-background-color: #E0E5B6; -fx-text-fill: #333333">

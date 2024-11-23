@@ -34,6 +34,9 @@ public class NoteOverviewCtrl implements Initializable {
     private final MainCtrl mainCtrl;
 
     @FXML
+    private TextField noteTitle;
+
+    @FXML
     private TextField searchBar;
 
     @FXML
@@ -71,12 +74,23 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     private void updateNoteDisplay(String note) {
-        noteDisplay.setText(note);
+        noteTitle.setText(note);
     }
 
-    public void refresh() {
-        //var quotes = server.getQuotes();
+    public void refreshNotes() {
+        var quotes = server.getQuotes();
+        System.out.println("Refreshed the note list");
         notes = FXCollections.observableArrayList();
+        notes.add("Note 1");
         notesList.setItems(notes);
+    }
+
+    public void addNote(){
+        System.out.println("Adding a new note");
+        mainCtrl.showAdd();
+    }
+
+    public void removeNote(){
+        System.out.println("Removing a note");
     }
 }

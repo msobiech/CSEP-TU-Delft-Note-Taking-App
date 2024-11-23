@@ -50,7 +50,7 @@ public class MainCtrl {
         primaryStage.setScene(overview);
         overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         primaryStage.setResizable(true);
-        overviewCtrl.refresh();
+        overviewCtrl.refreshNotes();
     }
 
     public void showAdd() {
