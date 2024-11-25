@@ -6,7 +6,7 @@
 <!--
 This document checks the following things:
 1. Only java files
-2. No tests
+2. No tests (as in it does not check for tests)
 3. Checks for unused imports
 4. Gives warning for missing javadocs if they are not the main method, a constructor
    or have the annotations @Override, @Bean or @Inject
