@@ -48,11 +48,17 @@ public class AddQuoteCtrl {
 
     }
 
+    /**
+     * Functionality of canceling the adding process
+     */
     public void cancel() {
         clearFields();
         mainCtrl.showOverview();
     }
 
+    /**
+     * Confirming the adding process
+     */
     public void ok() {
         try {
             server.addQuote(getQuote());
@@ -81,6 +87,10 @@ public class AddQuoteCtrl {
         quote.clear();
     }
 
+    /**
+     * Method to detect keypresses while addQuote window is active and to respond correctly
+     * @param e key that was pressed
+     */
     public void keyPressed(KeyEvent e) {
         switch (e.getCode()) {
         case ENTER:

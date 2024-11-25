@@ -41,6 +41,11 @@ public class Person {
 		// for object mapper
 	}
 
+	/**
+	 * Constructor for the person Entity
+	 * @param firstName first name of the person
+	 * @param lastName last name of the person
+	 */
 	public Person(String firstName, String lastName) {
 		this.firstName = firstName;
 		this.lastName = lastName;

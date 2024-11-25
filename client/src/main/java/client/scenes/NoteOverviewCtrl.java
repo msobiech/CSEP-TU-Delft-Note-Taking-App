@@ -93,6 +93,9 @@ public class NoteOverviewCtrl implements Initializable {
         noteTitle.setText(note);
     }
 
+    /**
+     * Method that refreshes the notes. (Currently not connected to the server)
+     */
     public void refreshNotes() {
         var quotes = server.getQuotes();
         System.out.println("Refreshed the note list");
@@ -101,11 +104,17 @@ public class NoteOverviewCtrl implements Initializable {
         notesList.setItems(notes);
     }
 
+    /**
+     * Method to add notes (Currently not functional)
+     */
     public void addNote(){
         System.out.println("Adding a new note");
         mainCtrl.showAdd();
     }
 
+    /**
+     * Method to remove notes(Currently not functional)
+     */
     public void removeNote(){
         System.out.println("Removing a note");
     }

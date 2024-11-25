@@ -32,16 +32,28 @@ public class PersonListingController {
 
 	private List<Person> people = new LinkedList<>();
 
+	/**
+	 * Constructor for PersonListingController
+	 */
 	public PersonListingController() {
 		people.add(new Person("Mickey", "Mouse"));
 		people.add(new Person("Donald", "Duck"));
 	}
 
+	/**
+	 * Method to return the list of people
+	 * @return the list of people
+	 */
 	@GetMapping("/")
 	public List<Person> list() {
 		return people;
 	}
 
+	/**
+	 * Method to add a person
+	 * @param p person to add
+	 * @return a new list of people
+	 */
 	@PostMapping("/")
 	public List<Person> add(@RequestBody Person p) {
 		if (!people.contains(p)) {

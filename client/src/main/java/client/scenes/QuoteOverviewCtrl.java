@@ -69,10 +69,16 @@ public class QuoteOverviewCtrl implements Initializable {
         colQuote.setCellValueFactory(q -> new SimpleStringProperty(q.getValue().quote));
     }
 
+    /**
+     * Switch to the addQuote scene
+     */
     public void addQuote() {
         mainCtrl.showAdd();
     }
 
+    /**
+     * Refresh the quotes
+     */
     public void refresh() {
         var quotes = server.getQuotes();
         data = FXCollections.observableList(quotes);
