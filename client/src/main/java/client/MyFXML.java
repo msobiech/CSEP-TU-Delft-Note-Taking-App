@@ -33,10 +33,21 @@ public class MyFXML {
 
     private Injector injector;
 
+    /**
+     * Constructs a new instance of MyFXML with the specified dependency injector.
+     * @param injector the Injector used for dependency injection allowing automatic resolution of controller dependencies.
+     */
     public MyFXML(Injector injector) {
         this.injector = injector;
     }
 
+    /**
+     * Loads an FXML file and returns its controller along with the root parent node.
+     * @param c the type of the controller associated with the FXML file.
+     * @param parts the path segments that, when combined, specify the location of the FXML file.
+     * @return a Pair containing the controller of type T and the root Parent node.
+     * @param <T> the type of the controller associated with the FXML file.
+     */
     public <T> Pair<T, Parent> load(Class<T> c, String... parts) {
         try {
             var loader = new FXMLLoader(getLocation(parts), null, null, new MyFactory(), StandardCharsets.UTF_8);

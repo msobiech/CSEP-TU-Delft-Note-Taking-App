@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+
+<?import javafx.scene.layout.BorderPane?>
+
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ScrollPane?>
+
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<?import java.lang.String?>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.NoteOverviewCtrl">
+    <top>
+        <TextField fx:id = "searchBar" promptText="Search your note..." HBox.hgrow="ALWAYS" style="-fx-background-color: #FEFAE0; -fx-text-fill: #333333; -fx-padding: 5px;"/>
+    </top>
+
+    <center>
+        <HBox spacing="5.0">
+            <VBox fx:id="notesContainer" spacing="5.0" style="-fx-padding: 5px;-fx-background-color: #CCD5AE; -fx-text-fill: #333333" prefWidth="300.0">
+                <ListView fx:id="notesList" VBox.vgrow="ALWAYS" style = "-fx-background-color: #E0E5B6; -fx-text-fill: #333333"/>
+                <HBox spacing="5.0" alignment="CENTER" style = "-fx-background-color: #E0E5B6; -fx-text-fill: #333333">
+                    <Button mnemonicParsing="false" fx:id="addNoteButton" onAction="#addNote">
+                        <graphic>
+                            <FontIcon iconLiteral="fa-plus" />
+                        </graphic>
+                        <styleClass>
+                            <String fx:value="button-icon" />
+                            <String fx:value="flat" />
+                        </styleClass>
+                    </Button>
+                    <Button mnemonicParsing="false" fx:id="removeNoteButton" onAction="#removeNote">
+                        <graphic>
+                            <FontIcon iconLiteral="fa-minus" />
+                        </graphic>
+                        <styleClass>
+                            <String fx:value="button-icon" />
+                            <String fx:value="flat" />
+                        </styleClass>
+                    </Button>
+                    <Button mnemonicParsing="false" fx:id="refreshNotesButton" onAction="#refreshNotes">
+                        <graphic>
+                            <FontIcon iconLiteral="fa-rotate-right" />
+                        </graphic>
+                        <styleClass>
+                            <String fx:value="button-icon" />
+                            <String fx:value="flat" />
+                        </styleClass>
+                    </Button>
+                </HBox>
+            </VBox>
+
+            <VBox>
+                <TextField fx:id="noteTitle" promptText="Note title" VBox.vgrow="ALWAYS" style = "-fx-background-color: #e2e4d0; -fx-text-fill: #211f1f" maxHeight="20.0" minHeight="20.0"/>
+                <TextArea fx:id="noteDisplay" wrapText="true" VBox.vgrow="ALWAYS" style = "-fx-background-color: #CCD5AE; -fx-text-fill: #333333"/>
+            </VBox>
+
+
+            <ScrollPane fx:id="markdownPreview" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333;" fitToHeight="true" fitToWidth="true" HBox.hgrow="ALWAYS" prefWidth="350.0">
+                <VBox fx:id="markdownContent" VBox.vgrow="ALWAYS" style="-fx-padding: 10px; -fx-background-color: #E0E5B6; -fx-text-fill: #333333;">
+                    <!-- Rendered Markdown Content Will Be Added Dynamically -->
+                </VBox>
+            </ScrollPane>
+        </HBox>
+
+    </center>
+
+
+</BorderPane>

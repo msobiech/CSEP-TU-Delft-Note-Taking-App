@@ -44,6 +44,11 @@ public class Quote {
 		// for object mappers
 	}
 
+	/**
+	 * Contructor for the quote
+	 * @param person the author
+	 * @param quote the content of the quote
+	 */
 	public Quote(Person person, String quote) {
 		this.person = person;
 		this.quote = quote;

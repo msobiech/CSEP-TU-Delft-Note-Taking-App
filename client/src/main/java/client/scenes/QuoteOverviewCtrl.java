@@ -54,15 +54,31 @@ public class QuoteOverviewCtrl implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        colFirstName.setMinWidth(100);
+        colLastName.setMinWidth(100);
+        colQuote.setMinWidth(300);
+
+        colFirstName.setMaxWidth(200);
+        colLastName.setMaxWidth(200);
+        colQuote.setMaxWidth(Double.MAX_VALUE);
+
         colFirstName.setCellValueFactory(q -> new SimpleStringProperty(q.getValue().person.firstName));
         colLastName.setCellValueFactory(q -> new SimpleStringProperty(q.getValue().person.lastName));
         colQuote.setCellValueFactory(q -> new SimpleStringProperty(q.getValue().quote));
     }
 
+    /**
+     * Switch to the addQuote scene
+     */
     public void addQuote() {
         mainCtrl.showAdd();
     }
 
+    /**
+     * Refresh the quotes
+     */
     public void refresh() {
         var quotes = server.getQuotes();
         data = FXCollections.observableList(quotes);

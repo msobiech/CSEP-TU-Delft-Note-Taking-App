@@ -14,9 +14,33 @@
 		<version.mockito>5.8.0</version.mockito>
 		<version.jersey>3.1.9</version.jersey>
 		<version.jfx>23.0.1</version.jfx>
+		<lib.ikonli.version>12.3.1</lib.ikonli.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.kordamp.ikonli</groupId>
+			<artifactId>ikonli-fontawesome-pack</artifactId>
+			<version>12.3.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-all</artifactId>
+			<version>0.64.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.kordamp.bootstrapfx</groupId>
+			<artifactId>bootstrapfx-core</artifactId>
+			<version>0.4.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.kordamp.ikonli</groupId>
+			<artifactId>ikonli-javafx</artifactId>
+			<version>${lib.ikonli.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>csep</groupId>
 			<artifactId>commons</artifactId>
