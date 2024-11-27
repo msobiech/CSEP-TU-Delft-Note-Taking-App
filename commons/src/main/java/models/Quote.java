@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package commons;
+package models;
 
 import static org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE;
 
@@ -21,34 +21,37 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 
 @Entity
-public class Person {
+public class Quote {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	public long id;
 
-	public String firstName;
-	public String lastName;
+	@OneToOne(cascade = CascadeType.PERSIST)
+	public Person person;
+	public String quote;
 
 	@SuppressWarnings("unused")
-	private Person() {
-		// for object mapper
+	private Quote() {
+		// for object mappers
 	}
 
 	/**
-	 * Constructor for the person Entity
-	 * @param firstName first name of the person
-	 * @param lastName last name of the person
+	 * Contructor for the quote
+	 * @param person the author
+	 * @param quote the content of the quote
 	 */
-	public Person(String firstName, String lastName) {
-		this.firstName = firstName;
-		this.lastName = lastName;
+	public Quote(Person person, String quote) {
+		this.person = person;
+		this.quote = quote;
 	}
 
 	@Override

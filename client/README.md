@@ -3,7 +3,7 @@ Assuming that you have [Maven](https://maven.apache.org/install.html) installed,
 
 	mvn javafx:run
 
-If you receive errors about the `commons` artifact not being available, make sure to run `mvn clean install` before.
+If you receive errors about the `models` artifact not being available, make sure to run `mvn clean install` before.
 
 Running the template project from within your IDE (Eclipse/IntelliJ) requires setting up OpenJFX.
 

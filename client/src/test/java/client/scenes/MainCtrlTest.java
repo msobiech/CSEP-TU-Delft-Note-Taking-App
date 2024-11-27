@@ -15,6 +15,7 @@
  */
 package client.scenes;
 
+import client.controllers.MainCtrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

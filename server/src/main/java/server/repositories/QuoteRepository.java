@@ -13,18 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package server;
+package server.repositories;
 
-import java.util.Random;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import models.Quote;
 
-@Configuration
-public class Config {
-
-    @Bean
-    public Random getRandom() {
-        return new Random();
-    }
-}
+public interface QuoteRepository extends JpaRepository<Quote, Long> {}

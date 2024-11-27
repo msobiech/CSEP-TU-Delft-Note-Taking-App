@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package server.api;
+package server.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +26,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.FluentQuery.FetchableFluentQuery;
 
-import commons.Quote;
-import server.database.QuoteRepository;
+import models.Quote;
+import server.repositories.QuoteRepository;
 
 public class TestQuoteRepository implements QuoteRepository {
 
