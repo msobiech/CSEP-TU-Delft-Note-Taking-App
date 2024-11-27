@@ -48,8 +48,8 @@ public class Main extends Application {
 			return;
 		}
 
-		var overview = FXML.load(NoteOverviewCtrl.class, "client", "scenes", "NoteOverview.fxml");
-		var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
+		var overview = FXML.load(NoteOverviewCtrl.class, "client", "views", "NoteOverview.fxml");
+		var add = FXML.load(AddQuoteCtrl.class, "client", "views", "AddQuote.fxml");
 
 		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
 		mainCtrl.initialize(primaryStage, overview, add);
