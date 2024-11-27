@@ -14,9 +14,9 @@ public class NoteTest {
 
     @BeforeEach
     void setup() {
-        firstNote = new Note("First note");
-        secondNote= new Note("Second note");
-        thirdNote = new Note("First note");
+        firstNote = new Note("1", "First note");
+        secondNote= new Note("2", "Second note");
+        thirdNote = new Note("1", "First note");
     }
 
     @Test

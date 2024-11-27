@@ -13,6 +13,7 @@ public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     public long id;
+    public String title;
     public String content;
 
     /**
@@ -20,7 +21,8 @@ public class Note {
      */
     public Note() {}
 
-    public Note(String content) {
+    public Note(String title, String content) {
+        this.title = title;
         this.content = content;
     }
 
@@ -32,18 +34,19 @@ public class Note {
 
         Note note = (Note) o;
 
-        return new EqualsBuilder().append(id, note.id).append(content, note.content).isEquals();
+        return new EqualsBuilder().append(id, note.id).append(title, note.title).append(content, note.content).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(id).append(content).toHashCode();
+        return new HashCodeBuilder(17, 37).append(id).append(title).append(content).toHashCode();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .append("id", id)
+                .append("title", title)
                 .append("content", content)
                 .toString();
     }
