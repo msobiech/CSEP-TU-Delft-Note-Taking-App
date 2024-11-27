@@ -1,4 +1,4 @@
-package client.scenes;
+package client.controllers;
 
 public class PrimaryCtrl {
 }

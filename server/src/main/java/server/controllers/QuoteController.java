@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package server.api;
+package server.controllers;
 
 import java.util.List;
 import java.util.Random;
@@ -26,8 +26,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import commons.Quote;
-import server.database.QuoteRepository;
+import models.Quote;
+import server.repositories.QuoteRepository;
 
 @RestController
 @RequestMapping("/api/quotes")

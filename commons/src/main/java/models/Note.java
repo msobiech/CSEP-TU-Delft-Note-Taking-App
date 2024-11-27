@@ -1,4 +1,4 @@
-package commons;
+package models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

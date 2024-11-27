@@ -1,10 +1,10 @@
-package server.api;
+package server.controllers;
 
-import commons.Note;
+import models.Note;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import server.database.NoteRepository;
+import server.repositories.NoteRepository;
 
 import java.util.List;
 

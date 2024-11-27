@@ -1,4 +1,4 @@
-package client.scenes;
+package client.controllers;
 
 import java.net.URL;
 import java.util.List;
