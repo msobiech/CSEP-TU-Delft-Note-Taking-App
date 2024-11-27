@@ -16,7 +16,7 @@ Agenda  Items :
 -  Approval of last minutes - Did everyone read the minutes from the previous meeting? (1 min)
 -  Announcements  by  the  TA  (5  min)
 -  Presentation of the current app to TA (4 min)
--  Talking  Points :  ( Inform /  brainstorm /  decision  making /  discuss )
+-  Talking  Points :  ( Inform /  brainstorm /  decision-making /  discuss )
     - [Discuss] Using the Model - View - Controller Design Pattern (MVC)  (5  min)
     - [Discuss] Buddy Testing System / Pair Programming (Testing the application in general) (5 min)
     - [Brainstorm ] Finishing Code of Conduct (5 min)
