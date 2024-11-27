@@ -33,36 +33,36 @@ Notes:
 - Check-in: 
   - Back end completed by Aurelian. 
   - Maks completed initial frontend for the app. 
-  - Tijn did self studies and his part of Code of Conduct
-  - Floris did self studies 
-  - Luca added all issues for user stories to git and self studies 
-  - Lapo did the checkstyle proposal and his self study 
+  - Tijn did self studies and his part of Code of Conduct.
+  - Floris did self studies.
+  - Luca added all issues for user stories to git and self studies.
+  - Lapo did the checkstyle proposal and his self study.
 - MVC 
-  - Proposal to refactor the names of some packages inherited from the already written boilerplate code 
-    - All teammates voted in favour for this 
-    - took less time than anticipated
+  - Proposal to refactor the names of some packages inherited from the already written boilerplate code.
+    - All teammates voted in favour for this.
+    - took less time than anticipated.
 - Buddy testing system
-  - Proposal to start coding in pairs 
-  - Work together on issues TO FINISH
-  - work as a pair to test and write code 
-  - use app to know it works
+  - Proposal to start coding in pairs.
+  - Work together on issues but each person merges the issue they were assigned on their own.
+  - work as a pair to test and write code. 
+  - use app to know it works.
 - Work
-  - link backend to frontend
-  - make tests to test something not to increase line count
-  - Make sure your code is well documented and legible to make it easier for other teammates to contribute
+  - link backend to frontend.
+  - make tests to test something not to increase line count.
+  - Make sure your code is well documented and legible to make it easier for other teammates to contribute.
 - Code of conduct 
-  - Review of the pre-brainstormed Code of Conduct document
-  - Everybody added to the brainstorming of the COC 
-  - Tijn will compile it 
+  - Review of the pre-brainstormed Code of Conduct document.
+  - Everybody added to the brainstorming of the COC.
+  - Tijn will compile it.
 - [AP]
     - Buddy groups 
-      - Luca and Lapo (Issues #13 and #18 )
+      - Luca and Lapo (Issues #13 and #18).
       - Floris and Aurelian (Issues #12 and #11 )
-      - Tijn and Maks (Issues #10 and #14  )
+      - Tijn and Maks (Issues #10 and #14).
 - Feedback 
-  - Avoid talking about agenda points in depth before the meeting
-  - Simple questions preferrable
-  - Again better time management but much better than last time
-  - Exact agenda wasn't followed, next time maybe follow it a bit better
+  - Avoid talking about agenda points in depth before the meeting.
+  - Simple questions preferable.
+  - Again better time management needed but this time was much better than last time
+  - Exact agenda wasn't followed, next time maybe follow it a bit better.
   - Discussion on work distribution was confusing and could've been more streamlined.
 - Meeting closed 15:28 but no announcements by TA so we are good.
