@@ -23,7 +23,7 @@ import java.net.URISyntaxException;
 import client.controllers.NoteOverviewCtrl;
 import com.google.inject.Injector;
 
-import client.controllers.AddQuoteCtrl;
+import client.controllers.AddNoteCtrl;
 import client.controllers.MainCtrl;
 import client.utils.ServerUtils;
 import javafx.application.Application;
@@ -49,7 +49,7 @@ public class Main extends Application {
 		}
 
 		var overview = FXML.load(NoteOverviewCtrl.class, "client", "views", "NoteOverview.fxml");
-		var add = FXML.load(AddQuoteCtrl.class, "client", "views", "AddQuote.fxml");
+		var add = FXML.load(AddNoteCtrl.class, "client", "views", "AddNote.fxml");
 
 		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
 		mainCtrl.initialize(primaryStage, overview, add);
