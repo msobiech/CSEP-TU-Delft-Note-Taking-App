@@ -1,13 +1,12 @@
 package client.controllers;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import com.google.inject.Inject;
 
 import client.utils.ServerUtils;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import client.utils.ServerUtils;
@@ -56,6 +55,11 @@ public class NoteOverviewCtrl implements Initializable {
 
     private final Parser markdownParser = Parser.builder().extensions(List.of(TablesExtension.create())).build();
     private final HtmlRenderer htmlRenderer = HtmlRenderer.builder().extensions(List.of(TablesExtension.create())).build();
+    private Timer debounceTimer = new Timer();
+
+    private int changeCount = 0;
+    private final int THRESHOLD = 5;
+    private final int DELAY = 1000;
 
     private Long curNoteId = null;
 
@@ -75,21 +79,55 @@ public class NoteOverviewCtrl implements Initializable {
                 var id = newNote.getKey();
                 var content = server.getNoteContentByID(id);
                 updateNoteDisplay(content);
+                try {
+                    renderMarkdown(content);
+                    changeCount = 0;
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
                 curNoteId = newNote.getKey();
             }
         });
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
-            delay(1000, () -> {
+            changeCount++; // Count the amount of changes
+            debounce(() -> {
                 try {
                     renderMarkdown(newValue);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-            });
+                changeCount = 0; // Reset change count if the scheduled task has been executed
+            }, DELAY);
+            if (changeCount >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
+                try {
+                    renderMarkdown(newValue);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                changeCount = 0; // Reset change count
+                debounceTimer.cancel(); // Cancel any pending debounced update
+            }
         });
 
     }
 
+
+    /**
+     * This method allows you to schedule a task that will be executed in the given delay
+     * @param task to schedule
+     * @param delayMillis delay which we wait
+     * Nice explanation of the concept <a href="https://www.geeksforgeeks.org/debouncing-in-javascript/">...</a>
+     */
+    private void debounce(Runnable task, int delayMillis) {
+        debounceTimer.cancel(); // If the previously scheduled task is still there it means that the inactiity wasn't long enough and we can cancel.
+        debounceTimer = new Timer(); // Setup new timer
+        debounceTimer.schedule(new TimerTask() { // Schedule new task TimerTask will schedule the task on your timer and execute in a given time
+            @Override
+            public void run() {
+                Platform.runLater(task); // Run the task on a platform thread
+            }
+        }, delayMillis);
+    }
     /**
      * This method delays the changes made by the user by 1000
      * milliseconds before showing them on the markdown preview
