@@ -34,6 +34,16 @@ public class NoteController {
         return ResponseEntity.ok(repo.findById(id).orElse(null));
     }
 
+    @PutMapping("/setContent/{id}")
+    public ResponseEntity<Note> setContentById(@PathVariable("id") long id, @RequestBody String content) {
+        if (id < 0 || !repo.existsById(id)) {
+            return ResponseEntity.badRequest().build();
+        }
+        Note foundNote = repo.findById(id).get();
+        foundNote.content = content;
+        return ResponseEntity.ok(repo.save(foundNote));
+    }
+
     @PostMapping
     public ResponseEntity<Note> add(@RequestBody Note note) {
         if (isNullOrEmpty(note.content)) {
@@ -41,6 +51,11 @@ public class NoteController {
         }
         Note saved = repo.save(note);
         return ResponseEntity.ok(saved);
+    }
+
+    @GetMapping("/titles")
+    public List<Object[]> getTitles() {
+        return repo.findIdAndTitle();
     }
 
     private static boolean isNullOrEmpty(String s) {
