@@ -29,7 +29,7 @@ public class MainCtrl {
     private NoteOverviewCtrl overviewCtrl;
     private Scene overview;
 
-    private AddQuoteCtrl addCtrl;
+    private AddNoteCtrl addCtrl;
     private Scene add;
 
     /**
@@ -37,10 +37,10 @@ public class MainCtrl {
      * @param primaryStage the stage that will be used to display the app's fronted
      * @param overview the pair of controller for NoteOverview and JavaFX class Parent that links the corresponding UI with its controller
      * @param add the pair of controller for NoteAddition and JavaFX class Parent that links the corresponding UI with its controller
-     *            (Currently not functional, uses old quote addition)
+     *            (Currently not functional)
      */
     public void initialize(Stage primaryStage, Pair<NoteOverviewCtrl, Parent> overview,
-            Pair<AddQuoteCtrl, Parent> add) {
+            Pair<AddNoteCtrl, Parent> add) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
@@ -64,12 +64,11 @@ public class MainCtrl {
     }
 
     /**
-     * Method to show the scene for note addition (Currently not functional, uses old Quote add)
+     * Method to show the scene for note addition
      */
     public void showAdd() {
-        primaryStage.setTitle("Quotes: Adding Quote");
-        primaryStage.setScene(add);
-        primaryStage.setResizable(false);
-        //add.setOnKeyPressed(e -> addCtrl.keyPressed(e));
+        //primaryStage.setTitle("Notes: Adding Note");
+        //primaryStage.setScene(add);
+        //primaryStage.setResizable(false);
     }
 }

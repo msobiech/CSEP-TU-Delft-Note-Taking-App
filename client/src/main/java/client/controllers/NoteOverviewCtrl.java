@@ -97,10 +97,8 @@ public class NoteOverviewCtrl implements Initializable {
      * Method that refreshes the notes. (Currently not connected to the server)
      */
     public void refreshNotes() {
-        var quotes = server.getQuotes();
         System.out.println("Refreshed the note list");
         notes = FXCollections.observableArrayList();
-        notes.add("Note 1");
         notesList.setItems(notes);
     }
 

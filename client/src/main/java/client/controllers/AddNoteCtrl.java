@@ -13,10 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package server.repositories;
+package client.controllers;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.google.inject.Inject;
 
-import models.Quote;
+import client.utils.ServerUtils;
+import javafx.fxml.FXML;
+import javafx.scene.control.TextField;
 
-public interface QuoteRepository extends JpaRepository<Quote, Long> {}
+public class AddNoteCtrl {
+
+    private final ServerUtils server;
+    private final MainCtrl mainCtrl;
+
+    @FXML
+    private TextField firstName;
+
+    @FXML
+    private TextField lastName;
+
+    @FXML
+    private TextField note;
+
+    @Inject
+    public AddNoteCtrl(ServerUtils server, MainCtrl mainCtrl) {
+        this.mainCtrl = mainCtrl;
+        this.server = server;
+
+    }
+
+
+}
