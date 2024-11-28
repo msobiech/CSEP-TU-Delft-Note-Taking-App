@@ -16,10 +16,12 @@
 package client.utils;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import static jakarta.ws.rs.core.MediaType.TEXT_PLAIN;
 
 import java.net.ConnectException;
 import java.util.List;
 
+import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
 import models.Note;
 
@@ -48,6 +50,19 @@ public class ServerUtils {
 		return note.content;
 	}
 
+	/**
+	 * Method to update content of a Note with given id
+	 * @param id of a note to update
+	 * @param content to update with
+	 * @return the updated note
+	 */
+	public Note updateNoteContentByID(long id, String content) {
+		return  ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("notes/setContent/{id}")
+				.resolveTemplate("id", id)
+				.request(APPLICATION_JSON)
+				.put(Entity.entity(content, TEXT_PLAIN), Note.class);
+	}
 	/**
 	 * Method to fetch notes that are present on the server with their Ids
 	 * @return List of Pairs of noteID and its title

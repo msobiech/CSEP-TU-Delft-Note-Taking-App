@@ -1,13 +1,12 @@
 package client.controllers;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 import com.google.inject.Inject;
 
 import client.utils.ServerUtils;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import client.utils.ServerUtils;
@@ -56,6 +55,12 @@ public class NoteOverviewCtrl implements Initializable {
 
     private final Parser markdownParser = Parser.builder().extensions(List.of(TablesExtension.create())).build();
     private final HtmlRenderer htmlRenderer = HtmlRenderer.builder().extensions(List.of(TablesExtension.create())).build();
+    private Timer debounceTimer = new Timer();
+
+    private int changeCount = 0;
+    private final int THRESHOLD = 5;
+    private final int DELAY = 1000;
+    private Runnable lastTask = null;
 
     private Long curNoteId = null;
 
@@ -63,33 +68,81 @@ public class NoteOverviewCtrl implements Initializable {
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl) {
         this.server = server;
         this.mainCtrl = mainCtrl;
+
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newNote) -> {
+        noteDisplay.setEditable(false);
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
             if (newNote != null) {
+                noteDisplay.setEditable(true);
+                if(lastTask != null) {
+                    debounceTimer.cancel();
+                    lastTask.run();
+                    lastTask = null;
+                }
                 var newTitle = newNote.getValue();
                 updateNoteTitle(newTitle);
                 var id = newNote.getKey();
                 var content = server.getNoteContentByID(id);
                 updateNoteDisplay(content);
-                curNoteId = newNote.getKey();
-            }
-        });
-        noteDisplay.textProperty().addListener((_, _, newValue) -> {
-            delay(1000, () -> {
                 try {
-                    renderMarkdown(newValue);
+                    renderMarkdown(content);
+                    changeCount = 0;
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-            });
+                curNoteId = newNote.getKey();
+            } else{
+                noteDisplay.setEditable(false);
+            }
+        });
+        noteDisplay.textProperty().addListener((_, _, newValue) -> {
+            changeCount++; // Count the amount of changes
+            debounce(() -> {
+                try {
+                    renderMarkdown(newValue);
+                    server.updateNoteContentByID(curNoteId,newValue);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                changeCount = 0; // Reset change count if the scheduled task has been executed
+            }, DELAY);
+            if (changeCount >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
+                try {
+                    renderMarkdown(newValue);
+                    server.updateNoteContentByID(curNoteId,newValue);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                changeCount = 0; // Reset change count
+                debounceTimer.cancel(); // Cancel any pending debounced update
+            }
         });
 
     }
 
+
+    /**
+     * This method allows you to schedule a task that will be executed in the given delay
+     * @param task to schedule
+     * @param delayMillis delay which we wait
+     * Nice explanation of the concept <a href="https://www.geeksforgeeks.org/debouncing-in-javascript/">...</a>
+     */
+    private void debounce(Runnable task, int delayMillis) {
+        debounceTimer.cancel(); // If the previously scheduled task is still there it means that the inactivity wasn't long enough and we can cancel.
+        debounceTimer = new Timer(); // Setup new timer
+
+        lastTask = task;
+
+        debounceTimer.schedule(new TimerTask() { // Schedule new task TimerTask will schedule the task on your timer and execute in a given time
+            @Override
+            public void run() {
+                Platform.runLater(task); // Run the task on a platform thread
+            }
+        }, delayMillis);
+    }
     /**
      * This method delays the changes made by the user by 1000
      * milliseconds before showing them on the markdown preview
