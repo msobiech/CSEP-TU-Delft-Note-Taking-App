@@ -34,7 +34,7 @@ public class NoteController {
         return ResponseEntity.ok(repo.findById(id).orElse(null));
     }
 
-    @PostMapping("/setContent/{id}")
+    @PutMapping("/setContent/{id}")
     public ResponseEntity<Note> setContentById(@PathVariable("id") long id, @RequestBody String content) {
         if (id < 0 || !repo.existsById(id)) {
             return ResponseEntity.badRequest().build();

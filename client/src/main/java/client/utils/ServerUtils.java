@@ -54,7 +54,7 @@ public class ServerUtils {
 	 */
 	public List<Object[]> getNoteTitles(){
 		return ClientBuilder.newClient(new ClientConfig())
-				.target(SERVER).path("/notes/titles")
+				.target(SERVER).path("notes/titles")
 				.request(APPLICATION_JSON)
 				.get(new GenericType<List<Object[]>>() {});
 	}
