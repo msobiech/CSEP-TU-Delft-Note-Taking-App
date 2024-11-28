@@ -68,13 +68,15 @@ public class NoteOverviewCtrl implements Initializable {
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl) {
         this.server = server;
         this.mainCtrl = mainCtrl;
+
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
+        noteDisplay.setEditable(false);
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
             if (newNote != null) {
+                noteDisplay.setEditable(true);
                 if(lastTask != null) {
                     debounceTimer.cancel();
                     lastTask.run();
@@ -92,6 +94,9 @@ public class NoteOverviewCtrl implements Initializable {
                     throw new RuntimeException(e);
                 }
                 curNoteId = newNote.getKey();
+            }
+            else{
+                noteDisplay.setEditable(false);
             }
         });
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
