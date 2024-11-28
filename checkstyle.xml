@@ -35,7 +35,7 @@ e.g: public void whateverMethod(){
             <property name="severity" value="warning"/>
             <property name="scope" value="public"/>
             <property name="minLineCount" value="0"/>
-            <property name="allowedAnnotations" value="Main,Override,Inject,Bean"/>
+            <property name="allowedAnnotations" value="Main,Override,Inject,Bean,GetMapping,PostMapping"/>
             <property name="ignoreMethodNamesRegex" value="^main.*"/>
             <property name="tokens" value="METHOD_DEF, CTOR_DEF, COMPACT_CTOR_DEF"/>
         </module>
