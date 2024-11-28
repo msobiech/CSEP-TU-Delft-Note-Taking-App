@@ -18,8 +18,10 @@ package client.utils;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.net.ConnectException;
+import java.util.List;
 
 import jakarta.ws.rs.core.GenericType;
+import javafx.util.Pair;
 import models.Note;
 
 import org.glassfish.jersey.client.ClientConfig;
@@ -47,6 +49,17 @@ public class ServerUtils {
 	}
 
 	/**
+	 * Method to fetch notes that are present on the server with their Ids
+	 * @return List of Pairs of noteID and its title
+	 */
+	public List<Pair<Long, String>> getNoteTitles(){
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("/{id}/titles")
+				.request(APPLICATION_JSON)
+				.get(new GenericType<List<Pair<Long, String>>>() {});
+	}
+
+	/**
 	 * Checks the availability of the server
 	 * @return true or false depending on the availability
 	 */
@@ -63,4 +76,5 @@ public class ServerUtils {
 		}
 		return true;
 	}
+
 }

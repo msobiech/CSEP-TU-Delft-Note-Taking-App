@@ -120,6 +120,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void refreshNotes() {
         System.out.println("Refreshed the note list");
+        //var notes = server.getNoteTitles();
         notes = FXCollections.observableArrayList();
         notesList.setItems(notes);
     }
