@@ -131,7 +131,7 @@ public class NoteOverviewCtrl implements Initializable {
      * Nice explanation of the concept <a href="https://www.geeksforgeeks.org/debouncing-in-javascript/">...</a>
      */
     private void debounce(Runnable task, int delayMillis) {
-        debounceTimer.cancel(); // If the previously scheduled task is still there it means that the inactiity wasn't long enough and we can cancel.
+        debounceTimer.cancel(); // If the previously scheduled task is still there it means that the inactivity wasn't long enough and we can cancel.
         debounceTimer = new Timer(); // Setup new timer
 
         lastTask = task;
