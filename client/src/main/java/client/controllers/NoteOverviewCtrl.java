@@ -127,18 +127,22 @@ public class NoteOverviewCtrl implements Initializable {
         var notesFromServer = server.getNoteTitles();
         List<Pair<Long, String>> notesAsPairs = new ArrayList<>();
         for(var row: notesFromServer){
-            Long id = ((Integer) row[0]).longValue();
+            Long id = ((Integer)row[0]).longValue();
             String title = (String)row[1];
             notesAsPairs.add(new Pair<>(id, title));
         }
         notes = FXCollections.observableArrayList(notesAsPairs);
         notesList.setItems(notes);
-        notesList.setCellFactory(param -> new ListCell<Pair<Long, String>>() {
+        //Since the list is of the pairs, and they are not really observable objects (They do not implement Observable)
+        //We have to change the list to only display the note title (The code is strongly from the internet)
+        notesList.setCellFactory(_ -> new ListCell<>() { //The cell factory is responsible for rendering the data contained
+            // within each TableCell for a single table column.
             @Override
-            protected void updateItem(Pair<Long, String> item, boolean empty) {
-                super.updateItem(item, empty);
+            protected void updateItem(Pair<Long, String> item, boolean empty) { //updateItem is called whenever a cell needs to be updated
+                super.updateItem(item, empty); //supposedly its necessary from what I understand the updateItem
+                // needs to call its parents class in order to do all the basic checks
                 if (item == null || empty) {
-                    setText(null);
+                    setText(null); //If the item is empty then set the text to null (Shouldn't happen I think)
                 } else {
                     setText(item.getValue());  // Display only the title (second value of the pair)
                 }
