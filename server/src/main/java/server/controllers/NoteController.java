@@ -1,6 +1,7 @@
 package server.controllers;
 
 import models.Note;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +33,16 @@ public class NoteController {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(repo.findById(id).orElse(null));
+    }
+
+    @PostMapping("/setContent/{id}")
+    public ResponseEntity<Note> setContentById(@PathVariable("id") long id, @RequestBody String content) {
+        if (id < 0 || !repo.existsById(id)) {
+            return ResponseEntity.badRequest().build();
+        }
+        Note foundNote = repo.findById(id).get();
+        foundNote.content = content;
+        return ResponseEntity.ok(repo.save(foundNote));
     }
 
     @PostMapping
