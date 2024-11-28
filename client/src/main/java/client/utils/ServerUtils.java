@@ -21,7 +21,6 @@ import java.net.ConnectException;
 import java.util.List;
 
 import jakarta.ws.rs.core.GenericType;
-import javafx.util.Pair;
 import models.Note;
 
 import org.glassfish.jersey.client.ClientConfig;
@@ -41,8 +40,9 @@ public class ServerUtils {
 	 * @return the fetched content
 	 */
 	public String getNoteContentByID(long id) {
-		var note = ClientBuilder.newClient(new ClientConfig()) //
-				.target(SERVER).path("/{id}") //
+		var note = ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("notes/{id}")
+				.resolveTemplate("id", id)
 				.request(APPLICATION_JSON) //
 				.get(new GenericType<Note>() {});
 		return note.content;
@@ -52,11 +52,11 @@ public class ServerUtils {
 	 * Method to fetch notes that are present on the server with their Ids
 	 * @return List of Pairs of noteID and its title
 	 */
-	public List<Pair<Long, String>> getNoteTitles(){
+	public List<Object[]> getNoteTitles(){
 		return ClientBuilder.newClient(new ClientConfig())
-				.target(SERVER).path("/{id}/titles")
+				.target(SERVER).path("/notes/titles")
 				.request(APPLICATION_JSON)
-				.get(new GenericType<List<Pair<Long, String>>>() {});
+				.get(new GenericType<List<Object[]>>() {});
 	}
 
 	/**

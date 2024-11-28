@@ -1,6 +1,7 @@
 package client.controllers;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -68,8 +69,11 @@ public class NoteOverviewCtrl implements Initializable {
 
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newNote) -> {
             if (newNote != null) {
-                updateNoteTitle(newNote.getValue());
-                updateNoteDisplay(server.getNoteContentByID(newNote.getKey()));
+                var newTitle = newNote.getValue();
+                updateNoteTitle(newTitle);
+                var id = newNote.getKey();
+                var content = server.getNoteContentByID(id);
+                updateNoteDisplay(content);
                 curNoteId = newNote.getKey();
             }
         });
@@ -120,9 +124,26 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void refreshNotes() {
         System.out.println("Refreshed the note list");
-        //var notes = server.getNoteTitles();
-        notes = FXCollections.observableArrayList();
+        var notesFromServer = server.getNoteTitles();
+        List<Pair<Long, String>> notesAsPairs = new ArrayList<>();
+        for(var row: notesFromServer){
+            Long id = ((Integer) row[0]).longValue();
+            String title = (String)row[1];
+            notesAsPairs.add(new Pair<>(id, title));
+        }
+        notes = FXCollections.observableArrayList(notesAsPairs);
         notesList.setItems(notes);
+        notesList.setCellFactory(param -> new ListCell<Pair<Long, String>>() {
+            @Override
+            protected void updateItem(Pair<Long, String> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(null);
+                } else {
+                    setText(item.getValue());  // Display only the title (second value of the pair)
+                }
+            }
+        });
     }
 
     /**

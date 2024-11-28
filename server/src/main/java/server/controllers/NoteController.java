@@ -53,6 +53,11 @@ public class NoteController {
         return ResponseEntity.ok(saved);
     }
 
+    @GetMapping("/titles")
+    public List<Object[]> getTitles() {
+        return repo.findIdAndTitle();
+    }
+
     private static boolean isNullOrEmpty(String s) {
         return s == null || s.isEmpty();
     }
