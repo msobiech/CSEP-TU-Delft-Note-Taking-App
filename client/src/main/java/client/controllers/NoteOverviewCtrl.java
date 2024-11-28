@@ -94,8 +94,7 @@ public class NoteOverviewCtrl implements Initializable {
                     throw new RuntimeException(e);
                 }
                 curNoteId = newNote.getKey();
-            }
-            else{
+            } else{
                 noteDisplay.setEditable(false);
             }
         });
