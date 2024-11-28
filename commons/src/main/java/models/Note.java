@@ -21,6 +21,11 @@ public class Note {
      */
     public Note() {}
 
+    /**
+     * Alternate constructor for not object mapping
+     * @param title title of the note
+     * @param content content of the note
+     */
     public Note(String title, String content) {
         this.title = title;
         this.content = content;

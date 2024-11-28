@@ -10,6 +10,7 @@ import client.utils.ServerUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -67,19 +68,49 @@ public class NoteOverviewCtrl implements Initializable {
                 updateNoteDisplay(newNote);
             }
         });
-        noteDisplay.textProperty().addListener((_, _, newValue) -> renderMarkdown(newValue));
+        noteDisplay.textProperty().addListener((_, _, newValue) -> {
+            delay(1000, () -> {
+                try {
+                    renderMarkdown(newValue);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        });
+
     }
 
-    private void renderMarkdown(String markdownText) {
+    /**
+     * This method delays the changes made by the user by 1000
+     * milliseconds before showing them on the markdown preview
+     * @param milli the amount of milliseconds
+     * @param continues what to perform after the delay.
+     */
+    public static void delay(int milli, Runnable continues) {
+        Task<Void> sleeper = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                try {
+                    Thread.sleep(milli);
+                } catch (InterruptedException e) {
+                }
+                return null;
+            }
+        };
+        sleeper.setOnSucceeded(event -> continues.run());
+        new Thread(sleeper).start();
+    }
+
+    private void renderMarkdown(String markdownText) throws InterruptedException {
         String htmlContent = "<style>" +
-                "body { font-family: Tahoma, Arial, sans-serif; font-weight: lighter;}" +
-                "blockquote { margin: 20px 0; padding: 10px 20px;" +
-                "border-left: 5px solid #ccc; background-color: #f9f9f9; font-style: italic; color: #555; }" +
-                "table { width: 50%; border-collapse: collapse;}" +
-                "table, th, td { border: 1px solid #333; }" +
-                "th, td { padding: 8px; text-align: left; }" +
-                "th { background-color: #f2f2f2; }" +
-                "</style>" + htmlRenderer.render(markdownParser.parse(markdownText));
+            "body { font-family: Tahoma, Arial, sans-serif; font-weight: lighter;}" +
+            "blockquote { margin: 20px 0; padding: 10px 20px;" +
+            "border-left: 5px solid #ccc; background-color: #f9f9f9; font-style: italic; color: #555; }" +
+            "table { width: 50%; border-collapse: collapse;}" +
+            "table, th, td { border: 1px solid #333; }" +
+            "th, td { padding: 8px; text-align: left; }" +
+            "th { background-color: #f2f2f2; }" +
+            "</style>" + htmlRenderer.render(markdownParser.parse(markdownText));
         WebView webView = new WebView();
         webView.getEngine().loadContent(htmlContent);
         webView.setPrefHeight(markdownPreview.getHeight());
