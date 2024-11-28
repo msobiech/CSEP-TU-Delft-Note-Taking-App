@@ -60,6 +60,7 @@ public class NoteOverviewCtrl implements Initializable {
     private int changeCount = 0;
     private final int THRESHOLD = 5;
     private final int DELAY = 1000;
+    private Runnable lastTask = null;
 
     private Long curNoteId = null;
 
@@ -72,8 +73,13 @@ public class NoteOverviewCtrl implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newNote) -> {
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
             if (newNote != null) {
+                if(lastTask != null) {
+                    debounceTimer.cancel();
+                    lastTask.run();
+                    lastTask = null;
+                }
                 var newTitle = newNote.getValue();
                 updateNoteTitle(newTitle);
                 var id = newNote.getKey();
@@ -93,6 +99,7 @@ public class NoteOverviewCtrl implements Initializable {
             debounce(() -> {
                 try {
                     renderMarkdown(newValue);
+                    server.updateNoteContentByID(curNoteId,newValue);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -101,6 +108,7 @@ public class NoteOverviewCtrl implements Initializable {
             if (changeCount >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
                 try {
                     renderMarkdown(newValue);
+                    server.updateNoteContentByID(curNoteId,newValue);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -121,6 +129,9 @@ public class NoteOverviewCtrl implements Initializable {
     private void debounce(Runnable task, int delayMillis) {
         debounceTimer.cancel(); // If the previously scheduled task is still there it means that the inactiity wasn't long enough and we can cancel.
         debounceTimer = new Timer(); // Setup new timer
+
+        lastTask = task;
+
         debounceTimer.schedule(new TimerTask() { // Schedule new task TimerTask will schedule the task on your timer and execute in a given time
             @Override
             public void run() {
