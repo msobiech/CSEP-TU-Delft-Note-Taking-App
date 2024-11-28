@@ -19,6 +19,9 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.net.ConnectException;
 
+import jakarta.ws.rs.core.GenericType;
+import models.Note;
+
 import org.glassfish.jersey.client.ClientConfig;
 
 
@@ -29,6 +32,19 @@ import jakarta.ws.rs.client.ClientBuilder;
 public class ServerUtils {
 
 	private static final String SERVER = "http://localhost:8080/";
+
+	/**
+	 * Fetches the content of the note with given id
+	 * @param id the id of the note to fetch
+	 * @return the fetched content
+	 */
+	public String getNoteContentByID(long id) {
+		var note = ClientBuilder.newClient(new ClientConfig()) //
+				.target(SERVER).path("/{id}") //
+				.request(APPLICATION_JSON) //
+				.get(new GenericType<Note>() {});
+		return note.content;
+	}
 
 	/**
 	 * Checks the availability of the server
