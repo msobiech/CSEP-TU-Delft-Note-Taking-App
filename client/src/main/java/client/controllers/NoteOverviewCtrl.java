@@ -74,7 +74,13 @@ public class NoteOverviewCtrl implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         noteDisplay.setEditable(false);
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
+        noteDisplay.setTextFormatter(new TextFormatter<>(change -> {
+            if (change.getControlNewText().length() > 1<<10) {
+                return null;
+            }
+            return change;
+        }));
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newNote) -> {
             if (newNote != null) {
                 noteDisplay.setEditable(true);
                 if(lastTask != null) {

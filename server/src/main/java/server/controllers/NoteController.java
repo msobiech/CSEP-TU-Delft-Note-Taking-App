@@ -46,7 +46,7 @@ public class NoteController {
 
     @PostMapping
     public ResponseEntity<Note> add(@RequestBody Note note) {
-        if (false) {
+        if (isNullOrEmpty(note.content)) {
             return ResponseEntity.badRequest().build();
         }
         Note saved = repo.save(note);
