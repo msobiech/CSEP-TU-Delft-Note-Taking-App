@@ -34,23 +34,13 @@ public class NoteController {
         return ResponseEntity.ok(repo.findById(id).orElse(null));
     }
 
-    @PatchMapping("/{id}/content")
-    public ResponseEntity<Note> setContent(@PathVariable("id") long id, @RequestBody String content) {
+    @PutMapping("/setContent/{id}")
+    public ResponseEntity<Note> setContentById(@PathVariable("id") long id, @RequestBody String content) {
         if (id < 0 || !repo.existsById(id)) {
             return ResponseEntity.badRequest().build();
         }
         Note foundNote = repo.findById(id).get();
         foundNote.content = content;
-        return ResponseEntity.ok(repo.save(foundNote));
-    }
-
-    @PatchMapping("/{id}/title")
-    public ResponseEntity<Note> setTitle(@PathVariable("id") long id, @RequestBody String title) {
-        if (id < 0 || !repo.existsById(id)) {
-            return ResponseEntity.badRequest().build();
-        }
-        Note foundNote = repo.findById(id).get();
-        foundNote.title = title;
         return ResponseEntity.ok(repo.save(foundNote));
     }
 
