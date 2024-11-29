@@ -45,7 +45,7 @@ public class NoteOverviewCtrl implements Initializable {
     private ScrollPane markdownPreview;
 
     @FXML
-    private VBox markdownContent;
+    private WebView markdownContent;
 
     @FXML
     private Button addNoteButton, removeNoteButton, refreshNotesButton;
@@ -174,12 +174,9 @@ public class NoteOverviewCtrl implements Initializable {
             "th, td { padding: 8px; text-align: left; }" +
             "th { background-color: #f2f2f2; }" +
             "</style>" + htmlRenderer.render(markdownParser.parse(markdownText));
-        WebView webView = new WebView();
-        webView.getEngine().loadContent(htmlContent);
-        webView.setPrefHeight(markdownPreview.getHeight());
-        webView.setPrefWidth(markdownPreview.getWidth());
-        markdownContent.getChildren().clear();
-        markdownContent.getChildren().add(webView);
+        markdownContent.getEngine().loadContent(htmlContent);
+        markdownContent.setPrefHeight(markdownPreview.getHeight());
+        markdownContent.setPrefWidth(markdownPreview.getWidth());
     }
 
 

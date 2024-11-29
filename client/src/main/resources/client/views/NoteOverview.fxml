@@ -14,6 +14,7 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <?import java.lang.String?>
+<?import javafx.scene.web.WebView?>
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.NoteOverviewCtrl">
     <top>
         <TextField fx:id = "searchBar" promptText="Search your note..." HBox.hgrow="ALWAYS" style="-fx-background-color: #FEFAE0; -fx-text-fill: #333333; -fx-padding: 5px;"/>
@@ -61,9 +62,9 @@
 
 
             <ScrollPane fx:id="markdownPreview" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333;" fitToHeight="true" fitToWidth="true" HBox.hgrow="ALWAYS" prefWidth="350.0">
-                <VBox fx:id="markdownContent" VBox.vgrow="ALWAYS" style="-fx-padding: 10px; -fx-background-color: #E0E5B6; -fx-text-fill: #333333;">
+                <WebView fx:id="markdownContent" VBox.vgrow="ALWAYS" style="-fx-padding: 10px; -fx-background-color: #E0E5B6; -fx-text-fill: #333333;">
                     <!-- Rendered Markdown Content Will Be Added Dynamically -->
-                </VBox>
+                </WebView>
             </ScrollPane>
         </HBox>
 
