@@ -166,7 +166,9 @@ public class NoteOverviewCtrl implements Initializable {
 
     private void renderMarkdown(String markdownText) throws InterruptedException {
         String htmlContent = "<style>" +
-            "body { font-family: Tahoma, Arial, sans-serif; font-weight: lighter;}" +
+            "body { color-scheme: light;" +
+            "font-family: -apple-system,BlinkMacSystemFont,\"Segoe UI\",\"Noto Sans\",Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\";" +
+            "font-size: 16px; line-height: 1.5; word-wrap: break-word; }" +
             "blockquote { margin: 20px 0; padding: 10px 20px;" +
             "border-left: 5px solid #ccc; background-color: #f9f9f9; font-style: italic; color: #555; }" +
             "table { width: 50%; border-collapse: collapse;}" +
