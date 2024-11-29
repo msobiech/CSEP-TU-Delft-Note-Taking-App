@@ -61,7 +61,7 @@ public class ServerUtils {
 				.target(SERVER).path("notes/{id}/content")
 				.resolveTemplate("id", id)
 				.request(APPLICATION_JSON)
-				.put(Entity.entity(content, TEXT_PLAIN), Note.class);
+				.method("PATCH", Entity.entity(content, TEXT_PLAIN), Note.class);
 	}
 
 	/**
@@ -75,7 +75,7 @@ public class ServerUtils {
 			.target(SERVER).path("notes/{id}/title")
 			.resolveTemplate("id", id)
 			.request(APPLICATION_JSON)
-			.put(Entity.entity(title, TEXT_PLAIN), Note.class);
+			.method("PATCH", Entity.entity(title, TEXT_PLAIN), Note.class);
 	}
 	/**
 	 * Method to fetch notes that are present on the server with their Ids
