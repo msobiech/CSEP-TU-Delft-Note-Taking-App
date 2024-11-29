@@ -58,10 +58,24 @@ public class ServerUtils {
 	 */
 	public Note updateNoteContentByID(long id, String content) {
 		return  ClientBuilder.newClient(new ClientConfig())
-				.target(SERVER).path("notes/setContent/{id}")
+				.target(SERVER).path("notes/{id}/content")
 				.resolveTemplate("id", id)
 				.request(APPLICATION_JSON)
 				.put(Entity.entity(content, TEXT_PLAIN), Note.class);
+	}
+
+	/**
+	 * Method to update title of a Note with given id
+	 * @param id of a note to update
+	 * @param title to update with
+	 * @return the updated note
+	 */
+	public Note updateNoteTitleByID(long id, String title) {
+		return  ClientBuilder.newClient(new ClientConfig())
+			.target(SERVER).path("notes/{id}/title")
+			.resolveTemplate("id", id)
+			.request(APPLICATION_JSON)
+			.put(Entity.entity(title, TEXT_PLAIN), Note.class);
 	}
 	/**
 	 * Method to fetch notes that are present on the server with their Ids
