@@ -45,7 +45,7 @@ public class NoteOverviewCtrl implements Initializable {
     private ScrollPane markdownPreview;
 
     @FXML
-    private VBox markdownContent;
+    private WebView markdownContent;
 
     @FXML
     private Button addNoteButton, removeNoteButton, refreshNotesButton;
@@ -166,20 +166,19 @@ public class NoteOverviewCtrl implements Initializable {
 
     private void renderMarkdown(String markdownText) throws InterruptedException {
         String htmlContent = "<style>" +
-            "body { font-family: Tahoma, Arial, sans-serif; font-weight: lighter;}" +
-            "blockquote { margin: 20px 0; padding: 10px 20px;" +
-            "border-left: 5px solid #ccc; background-color: #f9f9f9; font-style: italic; color: #555; }" +
-            "table { width: 50%; border-collapse: collapse;}" +
-            "table, th, td { border: 1px solid #333; }" +
-            "th, td { padding: 8px; text-align: left; }" +
-            "th { background-color: #f2f2f2; }" +
-            "</style>" + htmlRenderer.render(markdownParser.parse(markdownText));
-        WebView webView = new WebView();
-        webView.getEngine().loadContent(htmlContent);
-        webView.setPrefHeight(markdownPreview.getHeight());
-        webView.setPrefWidth(markdownPreview.getWidth());
-        markdownContent.getChildren().clear();
-        markdownContent.getChildren().add(webView);
+                "body { color-scheme: light;" +
+                "font-family: -apple-system,BlinkMacSystemFont,\"Segoe UI\",\"Noto Sans\",Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\";" +
+                "font-size: 16px; line-height: 1.5; word-wrap: break-word; }" +
+                "blockquote { margin: 20px 0; padding: 10px 20px;" +
+                "border-left: 5px solid #ccc; background-color: #f9f9f9; font-style: italic; color: #555; }" +
+                "table { width: 50%; border-collapse: collapse;}" +
+                "table, th, td { border: 1px solid #333; }" +
+                "th, td { padding: 8px; text-align: left; }" +
+                "th { background-color: #f2f2f2; }" +
+                "</style>" + htmlRenderer.render(markdownParser.parse(markdownText));
+        markdownContent.getEngine().loadContent(htmlContent);
+        markdownContent.setPrefHeight(markdownPreview.getHeight());
+        markdownContent.setPrefWidth(markdownPreview.getWidth());
     }
 
 
