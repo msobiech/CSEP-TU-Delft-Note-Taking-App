@@ -27,6 +27,7 @@ import client.controllers.AddNoteCtrl;
 import client.controllers.MainCtrl;
 import client.utils.ServerUtils;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -53,5 +54,18 @@ public class Main extends Application {
 
 		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
 		mainCtrl.initialize(primaryStage, overview, add);
+
+		primaryStage.setOnCloseRequest(_ -> {
+			Platform.exit();
+			System.exit(0); // Force stop (IDK nothing worked for ending the process when closing the app)
+		});
 	}
+
+	@Override
+	public void stop() throws Exception {
+		super.stop();
+	}
+
+
+
 }
