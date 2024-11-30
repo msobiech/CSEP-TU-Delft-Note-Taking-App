@@ -68,7 +68,6 @@ public class NoteOverviewCtrl implements Initializable {
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl) {
         this.server = server;
         this.mainCtrl = mainCtrl;
-
     }
 
     @Override
@@ -91,7 +90,7 @@ public class NoteOverviewCtrl implements Initializable {
                     renderMarkdown(content);
                     changeCount = 0;
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    mainCtrl.showError(e.toString());
                 }
                 curNoteId = newNote.getKey();
             } else{
@@ -105,7 +104,7 @@ public class NoteOverviewCtrl implements Initializable {
                     renderMarkdown(newValue);
                     server.updateNoteContentByID(curNoteId,newValue);
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    mainCtrl.showError(e.toString());
                 }
                 changeCount = 0; // Reset change count if the scheduled task has been executed
             }, DELAY);
@@ -114,7 +113,7 @@ public class NoteOverviewCtrl implements Initializable {
                     renderMarkdown(newValue);
                     server.updateNoteContentByID(curNoteId,newValue);
                 } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    mainCtrl.showError(e.toString());
                 }
                 changeCount = 0; // Reset change count
                 debounceTimer.cancel(); // Cancel any pending debounced update
@@ -180,6 +179,7 @@ public class NoteOverviewCtrl implements Initializable {
         markdownContent.setPrefHeight(markdownPreview.getHeight());
         markdownContent.setPrefWidth(markdownPreview.getWidth());
     }
+
 
 
     /**

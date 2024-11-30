@@ -25,6 +25,7 @@ import org.kordamp.bootstrapfx.BootstrapFX;
 public class MainCtrl {
 
     private Stage primaryStage;
+    private Stage popUp;
 
     private NoteOverviewCtrl overviewCtrl;
     private Scene overview;
@@ -32,21 +33,29 @@ public class MainCtrl {
     private AddNoteCtrl addCtrl;
     private Scene add;
 
+    private ErrorPopUpCtrl errorCtrl;
+    private Scene errorScene;
+
     /**
      * Initialization of the main Stage
      * @param primaryStage the stage that will be used to display the app's fronted
      * @param overview the pair of controller for NoteOverview and JavaFX class Parent that links the corresponding UI with its controller
      * @param add the pair of controller for NoteAddition and JavaFX class Parent that links the corresponding UI with its controller
      *            (Currently not functional)
+     * @param error the pair of controller for the handling of error message popups and JavaFX calss Parent that links the corresponding UI
+     *              with its controller.
      */
     public void initialize(Stage primaryStage, Pair<NoteOverviewCtrl, Parent> overview,
-            Pair<AddNoteCtrl, Parent> add) {
+            Pair<AddNoteCtrl, Parent> add, Pair<ErrorPopUpCtrl, Parent> error) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
 
         this.addCtrl = add.getKey();
         this.add = new Scene(add.getValue());
+
+        this.errorCtrl = error.getKey();
+        this.errorScene = new Scene(error.getValue());
 
         showOverview();
         primaryStage.show();
@@ -61,6 +70,7 @@ public class MainCtrl {
         overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         primaryStage.setResizable(true);
         overviewCtrl.refreshNotes();
+
     }
 
     /**
@@ -70,5 +80,26 @@ public class MainCtrl {
         //primaryStage.setTitle("Notes: Adding Note");
         //primaryStage.setScene(add);
         //primaryStage.setResizable(false);
+    }
+
+    /**
+     * Thhis method shows the error pupUp
+     * @param error String representing the error message text
+     */
+    public void showError(String error){
+        this.popUp = new Stage();
+        popUp.setScene(errorScene);
+        popUp.setTitle("Notes: Error");
+        popUp.setResizable(false);
+        errorCtrl.setErrorLabel(error);
+        popUp.show();
+
+    }
+
+    /**
+     * This method hides the error window
+     */
+    public void hideError(){
+        popUp.hide();
     }
 }
