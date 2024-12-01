@@ -59,7 +59,7 @@ public class NoteController {
     }
 
 
-    @PutMapping("/{id}")
+    @PutMapping("/setTitle/{id}")
     public ResponseEntity<Note> updateTitle(@PathVariable("id") long id, @RequestBody Note updatedNote) {
         if (id <= 0 || !repo.existsById(id)) {
             return ResponseEntity.badRequest().build();

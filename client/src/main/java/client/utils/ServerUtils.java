@@ -106,7 +106,7 @@ public class ServerUtils {
 		// Perform the PUT request
 		return ClientBuilder.newClient(new ClientConfig())
 				.target(SERVER)
-				.path("notes/{id}")
+				.path("notes/setTitle/{id}")
 				.resolveTemplate("id", id)
 				.request(APPLICATION_JSON)
 				.put(Entity.entity(payload, APPLICATION_JSON), Note.class);
