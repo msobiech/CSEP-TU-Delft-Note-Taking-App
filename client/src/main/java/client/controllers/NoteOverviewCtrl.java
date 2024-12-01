@@ -1,8 +1,12 @@
 package client.controllers;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -133,6 +137,11 @@ public class NoteOverviewCtrl implements Initializable {
                 debounceTimer.cancel(); // Cancel any pending debounced update
             }
         });
+        removeNoteButton.setDisable(true);
+
+        notesList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            removeNoteButton.setDisable(newValue == null);
+        });
 
     }
 
@@ -262,9 +271,49 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     /**
-     * Method to remove notes(Currently not functional)
+     * Method to remove notes form UI
      */
-    public void removeNote(){
+    @FXML
+    private void deleteButtonAction() {
+        var selectedNote = notesList.getSelectionModel().getSelectedItem();
+        if (selectedNote != null) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirm deletion");
+            alert.setHeaderText("Are you sure you want to delete this note?");
+            alert.setContentText("You are trying to delete note: " + selectedNote.getValue() + "." +
+                    "\nDeleting a note is irreversible!");
+
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                removeNote(selectedNote);
+                notesList.getItems().remove(selectedNote);
+            } else {
+                System.out.println("Deletion canceled.");
+            }
+        }
+    }
+
+    /**
+     * Method to remove notes from server
+     */
+    public void removeNote(Pair<Long, String> note) {
         System.out.println("Removing a note");
+        try {
+            String url = "http://localhost:8080/notes/" + note.getKey();
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .DELETE()
+                    .build();
+            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+            if (response.statusCode() == 204) {
+                System.out.println("Note deleted successfully.");
+            } else {
+                System.err.println("Failed to delete note: " + response.statusCode());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

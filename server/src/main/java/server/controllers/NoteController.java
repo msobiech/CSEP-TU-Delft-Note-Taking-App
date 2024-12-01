@@ -79,6 +79,17 @@ public class NoteController {
 
         return ResponseEntity.ok(savedNote);
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") long id) {
+        if (!repo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        else {
+            repo.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+    }
+
 
     /**
      * Checks if a given string is null or empty.
