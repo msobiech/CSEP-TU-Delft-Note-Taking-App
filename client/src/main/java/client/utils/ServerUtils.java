@@ -20,6 +20,7 @@ import static jakarta.ws.rs.core.MediaType.TEXT_PLAIN;
 
 import java.net.ConnectException;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
@@ -47,7 +48,7 @@ public class ServerUtils {
 				.resolveTemplate("id", id)
 				.request(APPLICATION_JSON) //
 				.get(new GenericType<Note>() {});
-		return note.content;
+		return note.getContent();
 	}
 
 	/**
@@ -92,4 +93,22 @@ public class ServerUtils {
 		return true;
 	}
 
+	/**
+	 * Method to update the title of a Note with a given id
+	 * @param id the id of the note to update
+	 * @param newTitle the new title to set
+	 * @return the updated Note object
+	 */
+	public Note updateNoteTitleByID(long id, String newTitle) {
+		// Construct a map to send as JSON payload
+		Map<String, String> payload = Map.of("title", newTitle);
+
+		// Perform the PUT request
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER)
+				.path("notes/setTitle/{id}")
+				.resolveTemplate("id", id)
+				.request(APPLICATION_JSON)
+				.put(Entity.entity(payload, APPLICATION_JSON), Note.class);
+	}
 }

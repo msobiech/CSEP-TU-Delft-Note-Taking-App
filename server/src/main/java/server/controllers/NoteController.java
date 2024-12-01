@@ -40,13 +40,13 @@ public class NoteController {
             return ResponseEntity.badRequest().build();
         }
         Note foundNote = repo.findById(id).get();
-        foundNote.content = content;
+        foundNote.setContent(content);
         return ResponseEntity.ok(repo.save(foundNote));
     }
 
     @PostMapping
     public ResponseEntity<Note> add(@RequestBody Note note) {
-        if (isNullOrEmpty(note.content)) {
+        if (isNullOrEmpty(note.getContent())) {
             return ResponseEntity.badRequest().build();
         }
         Note saved = repo.save(note);
@@ -58,6 +58,33 @@ public class NoteController {
         return repo.findIdAndTitle();
     }
 
+
+    @PutMapping("/setTitle/{id}")
+    public ResponseEntity<Note> updateTitle(@PathVariable("id") long id, @RequestBody Note updatedNote) {
+        if (id <= 0 || !repo.existsById(id)) {
+            return ResponseEntity.badRequest().build();
+        }
+        // Retrieve the existing note
+        Note existingNote = repo.findById(id).orElse(null);
+        if (existingNote == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Update the title and save
+        if (isNullOrEmpty(updatedNote.getTitle())) {
+            return ResponseEntity.badRequest().build();
+        }
+        existingNote.setTitle(updatedNote.getTitle());
+        Note savedNote = repo.save(existingNote);
+
+        return ResponseEntity.ok(savedNote);
+    }
+
+    /**
+     * Checks if a given string is null or empty.
+     * @param s the string to check
+     * @return true if the string is null or empty, false otherwise
+     */
     private static boolean isNullOrEmpty(String s) {
         return s == null || s.isEmpty();
     }

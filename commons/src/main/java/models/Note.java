@@ -9,11 +9,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    public long id;
-    public String title;
+    private long id;
+    private String title;
 
     @Column(length=1<<20)
-    public String content;
+    private String content;
 
     /**
      * Empty constructor for Object Mapping
@@ -29,6 +29,47 @@ public class Note {
         this.title = title;
         this.content = content;
     }
+
+    /**
+     * Gets the title of the object.
+     * @return the title as a String.
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * Sets the title of the object.
+     * @param title the title to set.
+     */
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    /**
+     * Gets the content of the object.
+     * @return the content as a String.
+     */
+    public String getContent() {
+        return content;
+    }
+
+    /**
+     * Sets the content of the object.
+     * @param content the content to set.
+     */
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    /**
+     * Gets the unique identifier (ID) of the object.
+     * @return the ID as a long.
+     */
+    public long getId() {
+        return id;
+    }
+
 
     @Override
     public boolean equals(Object o) {
