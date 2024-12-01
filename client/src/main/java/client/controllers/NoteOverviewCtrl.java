@@ -13,13 +13,11 @@ import client.utils.ServerUtils;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import client.utils.ServerUtils;
 
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
 import javafx.scene.web.WebView;
 
 import com.vladsch.flexmark.parser.Parser;
@@ -76,8 +74,20 @@ public class NoteOverviewCtrl implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        noteTitle.textProperty().addListener((_, _, newValue) -> {
+            if (curNoteId == null || newValue.trim().isEmpty()) {
+                return; // Ignore updates when no note is selected or title is empty
+            }
+            try {
+                server.updateNoteTitleByID(curNoteId, newValue.trim());
+                refreshNotes(); // Update the list titles after a successful update
+            } catch (Exception e) {
+                Platform.runLater(() -> mainCtrl.showError("Failed to update title: " + e.getMessage()));
+            }
+        });
+
         noteDisplay.setEditable(false);
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newNote) -> {
             if (newNote != null) {
                 noteDisplay.setEditable(true);
                 if(lastTask != null) {
