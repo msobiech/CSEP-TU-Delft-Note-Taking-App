@@ -1,9 +1,6 @@
 package models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -14,6 +11,8 @@ public class Note {
     @GeneratedValue(strategy = GenerationType.AUTO)
     public long id;
     public String title;
+
+    @Column(length=1<<20)
     public String content;
 
     /**

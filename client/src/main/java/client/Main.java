@@ -28,6 +28,7 @@ import client.controllers.MainCtrl;
 import client.controllers.ErrorPopUpCtrl;
 import client.utils.ServerUtils;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -60,4 +61,12 @@ public class Main extends Application {
 			System.exit(0); // Force stop (IDK nothing worked for ending the process when closing the app)
 		});
 	}
+
+	@Override
+	public void stop() throws Exception {
+		super.stop();
+	}
+
+
+
 }
