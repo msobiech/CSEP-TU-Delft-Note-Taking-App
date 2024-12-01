@@ -55,5 +55,9 @@ public class Main extends Application {
 
 		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
 		mainCtrl.initialize(primaryStage, overview, add, error);
+                primaryStage.setOnCloseRequest(_ -> {
+			Platform.exit();
+			System.exit(0); // Force stop (IDK nothing worked for ending the process when closing the app)
+		});
 	}
 }
