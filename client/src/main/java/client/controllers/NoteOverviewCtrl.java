@@ -296,6 +296,7 @@ public class NoteOverviewCtrl implements Initializable {
 
     /**
      * Method to remove notes from server
+     * @param note to remove
      */
     public void removeNote(Pair<Long, String> note) {
         System.out.println("Removing a note");
@@ -313,7 +314,7 @@ public class NoteOverviewCtrl implements Initializable {
                 System.err.println("Failed to delete note: " + response.statusCode());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Exception encountered.");
         }
     }
 }
