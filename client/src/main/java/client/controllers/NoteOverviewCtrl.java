@@ -1,12 +1,9 @@
 package client.controllers;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -116,8 +113,14 @@ public class NoteOverviewCtrl implements Initializable {
             }
         });
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
+            if (curNoteId == null) {
+                return; // Ignore updates when no note is selected or title is empty
+            }
             changeCount++; // Count the amount of changes
             debounce(() -> {
+                if (curNoteId == null) {
+                    return; // Ignore updates when no note is selected or title is empty
+                }
                 try {
                     renderMarkdown(newValue);
                     server.updateNoteContentByID(curNoteId,newValue);
@@ -274,7 +277,7 @@ public class NoteOverviewCtrl implements Initializable {
      * Method to remove notes form UI
      */
     @FXML
-    private void deleteButtonAction() {
+    private void removeNote() throws InterruptedException {
         var selectedNote = notesList.getSelectionModel().getSelectedItem();
         if (selectedNote != null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -286,7 +289,14 @@ public class NoteOverviewCtrl implements Initializable {
             Optional<ButtonType> result = alert.showAndWait();
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                removeNote(selectedNote);
+                curNoteId = curNoteId - 1;
+                if(notes.size() == 1){
+                    renderMarkdown("");
+                    updateNoteDisplay("");
+                    updateNoteTitle("");
+                    curNoteId = null;
+                }
+                server.deleteNoteByID(selectedNote.getKey());
                 notesList.getItems().remove(selectedNote);
             } else {
                 System.out.println("Deletion canceled.");
@@ -294,27 +304,5 @@ public class NoteOverviewCtrl implements Initializable {
         }
     }
 
-    /**
-     * Method to remove notes from server
-     * @param note to remove
-     */
-    public void removeNote(Pair<Long, String> note) {
-        System.out.println("Removing a note");
-        try {
-            String url = "http://localhost:8080/notes/" + note.getKey();
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .DELETE()
-                    .build();
-            HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
-            if (response.statusCode() == 204) {
-                System.out.println("Note deleted successfully.");
-            } else {
-                System.err.println("Failed to delete note: " + response.statusCode());
-            }
-        } catch (Exception e) {
-            System.out.println("Exception encountered.");
-        }
-    }
+
 }

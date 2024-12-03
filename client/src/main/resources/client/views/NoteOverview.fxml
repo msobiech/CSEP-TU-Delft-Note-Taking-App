@@ -34,7 +34,7 @@
                             <String fx:value="flat" />
                         </styleClass>
                     </Button>
-                    <Button mnemonicParsing="false" fx:id="removeNoteButton" onAction="#deleteButtonAction">
+                    <Button mnemonicParsing="false" fx:id="removeNoteButton" onAction="#removeNote">
                         <graphic>
                             <FontIcon iconLiteral="fa-minus" />
                         </graphic>
