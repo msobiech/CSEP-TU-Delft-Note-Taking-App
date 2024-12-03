@@ -38,10 +38,11 @@ public class NoteController {
     public ResponseEntity<Note> setContentById(@PathVariable("id") long id, @RequestBody String content) {
         if (id < 0 || !repo.existsById(id)) {
             return ResponseEntity.badRequest().build();
+        } else {
+            Note foundNote = repo.findById(id).get();
+            foundNote.setContent(content);
+            return ResponseEntity.ok(repo.save(foundNote));
         }
-        Note foundNote = repo.findById(id).get();
-        foundNote.setContent(content);
-        return ResponseEntity.ok(repo.save(foundNote));
     }
 
     @PostMapping
@@ -79,6 +80,16 @@ public class NoteController {
 
         return ResponseEntity.ok(savedNote);
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable("id") long id) {
+        if (!repo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        } else {
+            repo.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+    }
+
 
     /**
      * Checks if a given string is null or empty.

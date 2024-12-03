@@ -3,6 +3,7 @@ package client.controllers;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -128,7 +129,13 @@ public class NoteOverviewCtrl implements Initializable {
         });
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
             changeCountContent++; // Count the amount of changes
+            if (curNoteId == null) {
+                return; // Ignore updates when no note is selected or title is empty
+            }
             debounce(() -> {
+                if (curNoteId == null) {
+                    return; // Ignore updates when no note is selected or title is empty
+                }
                 try {
                     renderMarkdown(newValue);
                     server.updateNoteContentByID(curNoteId,newValue);
@@ -147,6 +154,11 @@ public class NoteOverviewCtrl implements Initializable {
                 changeCountContent = 0; // Reset change count
                 debounceTimer.cancel(); // Cancel any pending debounced update
             }
+        });
+        removeNoteButton.setDisable(true);
+
+        notesList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            removeNoteButton.setDisable(newValue == null);
         });
 
     }
@@ -257,9 +269,35 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     /**
-     * Method to remove notes(Currently not functional)
+     * Method to remove notes form UI
      */
-    public void removeNote(){
-        System.out.println("Removing a note");
+    @FXML
+    private void removeNote() throws InterruptedException {
+        var selectedNote = notesList.getSelectionModel().getSelectedItem();
+        if (selectedNote != null) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirm deletion");
+            alert.setHeaderText("Are you sure you want to delete this note?");
+            alert.setContentText("You are trying to delete note: " + selectedNote.getValue() + "." +
+                    "\nDeleting a note is irreversible!");
+
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                curNoteId = curNoteId - 1;
+                if(notes.size() == 1){
+                    renderMarkdown("");
+                    updateNoteDisplay("");
+                    updateNoteTitle("");
+                    curNoteId = null;
+                }
+                server.deleteNoteByID(selectedNote.getKey());
+                notesList.getItems().remove(selectedNote);
+            } else {
+                System.out.println("Deletion canceled.");
+            }
+        }
     }
+
+
 }
