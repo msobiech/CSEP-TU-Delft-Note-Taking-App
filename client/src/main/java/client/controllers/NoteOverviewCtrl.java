@@ -15,7 +15,6 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -80,11 +79,26 @@ public class NoteOverviewCtrl implements Initializable {
             if (curNoteId == null || newValue.trim().isEmpty()) {
                 return; // Ignore updates when no note is selected or title is empty
             }
-            try {
-                server.updateNoteTitleByID(curNoteId, newValue.trim());
-                refreshNotes(); // Update the list titles after a successful update
-            } catch (Exception e) {
-                Platform.runLater(() -> mainCtrl.showError("Failed to update title: " + e.getMessage()));
+            changeCountTitle++;
+            debounce(() -> {
+                try {
+                    server.updateNoteTitleByID(curNoteId, newValue.trim());
+                    refreshNotes(); // Update the list titles after a successful update
+                    changeCountTitle = 0;
+                } catch (Exception e) {
+                    mainCtrl.showError("Failed to update title: " + e.getMessage());
+                }
+            },DELAY);
+            if (changeCountTitle >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
+                try {
+                    server.updateNoteTitleByID(curNoteId, newValue.trim());
+                    refreshNotes(); // Update the list titles after a successful update
+                    changeCountTitle = 0;
+                } catch (Exception e) {
+                    mainCtrl.showError("Failed to update title: " + e.getMessage());
+                }
+                changeCountContent = 0; // Reset change count
+                debounceTimer.cancel(); // Cancel any pending debounced update
             }
         });
 
@@ -92,6 +106,7 @@ public class NoteOverviewCtrl implements Initializable {
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newNote) -> {
             if (newNote != null) {
                 noteDisplay.setEditable(true);
+                noteTitle.setEditable(true);
                 if(lastTask != null) {
                     debounceTimer.cancel();
                     lastTask.run();
@@ -113,6 +128,7 @@ public class NoteOverviewCtrl implements Initializable {
             }
         });
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
+            changeCountContent++; // Count the amount of changes
             if (curNoteId == null) {
                 return; // Ignore updates when no note is selected or title is empty
             }
@@ -126,6 +142,7 @@ public class NoteOverviewCtrl implements Initializable {
                 } catch (InterruptedException e) {
                     mainCtrl.showError(e.toString());
                 }
+                changeCountContent = 0; // Reset change count if the scheduled task has been executed
             }, DELAY);
             if (changeCountContent >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
                 try {
@@ -134,6 +151,7 @@ public class NoteOverviewCtrl implements Initializable {
                 } catch (InterruptedException e) {
                     mainCtrl.showError(e.toString());
                 }
+                changeCountContent = 0; // Reset change count
                 debounceTimer.cancel(); // Cancel any pending debounced update
             }
         });
@@ -164,26 +182,6 @@ public class NoteOverviewCtrl implements Initializable {
                 Platform.runLater(task); // Run the task on a platform thread
             }
         }, delayMillis);
-    }
-    /**
-     * This method delays the changes made by the user by 1000
-     * milliseconds before showing them on the markdown preview
-     * @param milli the amount of milliseconds
-     * @param continues what to perform after the delay.
-     */
-    public static void delay(int milli, Runnable continues) {
-        Task<Void> sleeper = new Task<>() {
-            @Override
-            protected Void call() throws Exception {
-                try {
-                    Thread.sleep(milli);
-                } catch (InterruptedException e) {
-                }
-                return null;
-            }
-        };
-        sleeper.setOnSucceeded(event -> continues.run());
-        new Thread(sleeper).start();
     }
 
     private void renderMarkdown(String markdownText) throws InterruptedException {
