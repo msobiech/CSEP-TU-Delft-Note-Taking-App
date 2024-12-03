@@ -19,6 +19,10 @@ import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static jakarta.ws.rs.core.MediaType.TEXT_PLAIN;
 
 import java.net.ConnectException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -110,5 +114,28 @@ public class ServerUtils {
 				.resolveTemplate("id", id)
 				.request(APPLICATION_JSON)
 				.put(Entity.entity(payload, APPLICATION_JSON), Note.class);
+	}
+	/**
+	 * Method to remove notes from server
+	 * @param id of note to remove
+	 */
+	public void deleteNoteByID(long id) {
+		System.out.println("Removing a note");
+		try {
+			String url = SERVER + "notes/" + id;
+			HttpClient client = HttpClient.newHttpClient();
+			HttpRequest request = HttpRequest.newBuilder()
+					.uri(URI.create(url))
+					.DELETE()
+					.build();
+			HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+			if (response.statusCode() == 204) {
+				System.out.println("Note deleted successfully.");
+			} else {
+				System.err.println("Failed to delete note: " + response.statusCode());
+			}
+		} catch (Exception e) {
+			System.out.println("Exception encountered.");
+		}
 	}
 }
