@@ -60,7 +60,8 @@ public class NoteOverviewCtrl implements Initializable {
     private final HtmlRenderer htmlRenderer = HtmlRenderer.builder().extensions(List.of(TablesExtension.create())).build();
     private Timer debounceTimer = new Timer();
 
-    private int changeCount = 0;
+    private int changeCountContent = 0;
+    private int changeCountTitle = 0;
     private final int THRESHOLD = 5;
     private final int DELAY = 1000;
     private Runnable lastTask = null;
@@ -103,7 +104,6 @@ public class NoteOverviewCtrl implements Initializable {
                 updateNoteDisplay(content);
                 try {
                     renderMarkdown(content);
-                    changeCount = 0;
                 } catch (InterruptedException e) {
                     mainCtrl.showError(e.toString());
                 }
@@ -116,7 +116,6 @@ public class NoteOverviewCtrl implements Initializable {
             if (curNoteId == null) {
                 return; // Ignore updates when no note is selected or title is empty
             }
-            changeCount++; // Count the amount of changes
             debounce(() -> {
                 if (curNoteId == null) {
                     return; // Ignore updates when no note is selected or title is empty
@@ -127,16 +126,14 @@ public class NoteOverviewCtrl implements Initializable {
                 } catch (InterruptedException e) {
                     mainCtrl.showError(e.toString());
                 }
-                changeCount = 0; // Reset change count if the scheduled task has been executed
             }, DELAY);
-            if (changeCount >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
+            if (changeCountContent >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
                 try {
                     renderMarkdown(newValue);
                     server.updateNoteContentByID(curNoteId,newValue);
                 } catch (InterruptedException e) {
                     mainCtrl.showError(e.toString());
                 }
-                changeCount = 0; // Reset change count
                 debounceTimer.cancel(); // Cancel any pending debounced update
             }
         });
