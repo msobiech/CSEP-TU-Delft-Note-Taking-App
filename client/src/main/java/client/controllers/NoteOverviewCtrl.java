@@ -65,6 +65,7 @@ public class NoteOverviewCtrl implements Initializable {
     private Runnable lastTask = null;
 
     private Long curNoteId = null;
+    private Integer curNoteIndex = null;
 
     @Inject
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl) {
@@ -82,7 +83,8 @@ public class NoteOverviewCtrl implements Initializable {
             debounce(() -> {
                 try {
                     server.updateNoteTitleByID(curNoteId, newValue.trim());
-                    refreshNotes(); // Update the list titles after a successful update
+                    notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
+                    //refreshNotes(); // Update the list titles after a successful update
                     changeCountTitle = 0;
                 } catch (Exception e) {
                     mainCtrl.showError("Failed to update title: " + e.getMessage());
@@ -91,7 +93,8 @@ public class NoteOverviewCtrl implements Initializable {
             if (changeCountTitle >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
                 try {
                     server.updateNoteTitleByID(curNoteId, newValue.trim());
-                    refreshNotes(); // Update the list titles after a successful update
+                    notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
+                    //refreshNotes(); // Update the list titles after a successful update
                     changeCountTitle = 0;
                 } catch (Exception e) {
                     mainCtrl.showError("Failed to update title: " + e.getMessage());
@@ -104,6 +107,7 @@ public class NoteOverviewCtrl implements Initializable {
         noteDisplay.setEditable(false);
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newNote) -> {
             if (newNote != null) {
+
                 noteDisplay.setEditable(true);
                 noteTitle.setEditable(true);
                 if(lastTask != null) {
@@ -122,28 +126,24 @@ public class NoteOverviewCtrl implements Initializable {
                     mainCtrl.showError(e.toString());
                 }
                 curNoteId = newNote.getKey();
+                curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
             } else{
                 noteDisplay.setEditable(false);
             }
         });
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
             changeCountContent++; // Count the amount of changes
+            try {
+                renderMarkdown(newValue);
+            } catch (InterruptedException e) {
+                mainCtrl.showError(e.toString());
+            }
             debounce(() -> {
-                try {
-                    renderMarkdown(newValue);
-                    server.updateNoteContentByID(curNoteId,newValue);
-                } catch (InterruptedException e) {
-                    mainCtrl.showError(e.toString());
-                }
+                server.updateNoteContentByID(curNoteId,newValue);
                 changeCountContent = 0; // Reset change count if the scheduled task has been executed
             }, DELAY);
             if (changeCountContent >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
-                try {
-                    renderMarkdown(newValue);
-                    server.updateNoteContentByID(curNoteId,newValue);
-                } catch (InterruptedException e) {
-                    mainCtrl.showError(e.toString());
-                }
+                server.updateNoteContentByID(curNoteId,newValue);
                 changeCountContent = 0; // Reset change count
                 debounceTimer.cancel(); // Cancel any pending debounced update
             }
