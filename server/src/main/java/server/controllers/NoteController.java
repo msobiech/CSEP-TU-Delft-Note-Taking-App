@@ -80,6 +80,12 @@ public class NoteController {
         return ResponseEntity.ok(savedNote);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Note>> searchByTitle(@RequestParam("keyword") String keyword) {
+        List<Note> notes = repo.findByTitleContainingIgnoreCase(keyword);
+        return ResponseEntity.ok(notes);
+    }
+
     /**
      * Checks if a given string is null or empty.
      * @param s the string to check

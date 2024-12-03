@@ -10,4 +10,7 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
 
     @Query("SELECT n.id, n.title FROM Note n")
     List<Object[]> findIdAndTitle();
+
+    @Query("SELECT n FROM Note n WHERE LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Note> findByTitleContainingIgnoreCase(String keyword);
 }
