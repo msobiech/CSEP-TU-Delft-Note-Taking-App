@@ -99,7 +99,6 @@ public class NoteOverviewCtrl implements Initializable {
                     Note updatedNote = new Note();
                     updatedNote.setTitle(newValue);
                     server.updateNoteByID(curNoteId, updatedNote);
-                    notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
                     changeCountTitle = 0;
                 } catch (Exception e) {
                     System.out.println("Failed to update title: " + e.getMessage());
@@ -110,7 +109,6 @@ public class NoteOverviewCtrl implements Initializable {
                     Note updatedNote = new Note();
                     updatedNote.setTitle(newValue);
                     server.updateNoteByID(curNoteId, updatedNote);
-                    notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
                     changeCountTitle = 0;
                 } catch (Exception e) {
                     System.out.println("Failed to update title: " + e.getMessage());
