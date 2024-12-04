@@ -20,12 +20,9 @@ import static com.google.inject.Guice.createInjector;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import client.controllers.NoteOverviewCtrl;
+import client.controllers.*;
 import com.google.inject.Injector;
 
-import client.controllers.AddNoteCtrl;
-import client.controllers.MainCtrl;
-import client.controllers.ErrorPopUpCtrl;
 import client.utils.ServerUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -53,9 +50,11 @@ public class Main extends Application {
 		var overview = FXML.load(NoteOverviewCtrl.class, "client", "views", "NoteOverview.fxml");
 		var add = FXML.load(AddNoteCtrl.class, "client", "views", "AddNote.fxml");
 		var error = FXML.load(ErrorPopUpCtrl.class, "client", "views", "ErrorPopUp.fxml");
+		var serverURL = FXML.load(ServerSelectionCtrl.class, "client", "views", "ServerSelection.fxml");
+
 
 		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
-		mainCtrl.initialize(primaryStage, overview, add, error);
+		mainCtrl.initialize(primaryStage, overview, add, error, serverURL);
                 primaryStage.setOnCloseRequest(_ -> {
 			Platform.exit();
 			System.exit(0); // Force stop (IDK nothing worked for ending the process when closing the app)
