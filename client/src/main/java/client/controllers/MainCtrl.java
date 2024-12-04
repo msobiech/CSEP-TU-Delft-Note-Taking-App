@@ -36,17 +36,23 @@ public class MainCtrl {
     private ErrorPopUpCtrl errorCtrl;
     private Scene errorScene;
 
+    private ServerSelectionCtrl serverCtrl;
+    private Scene serverScene;
+
     /**
      * Initialization of the main Stage
      * @param primaryStage the stage that will be used to display the app's fronted
      * @param overview the pair of controller for NoteOverview and JavaFX class Parent that links the corresponding UI with its controller
      * @param add the pair of controller for NoteAddition and JavaFX class Parent that links the corresponding UI with its controller
      *            (Currently not functional)
-     * @param error the pair of controller for the handling of error message popups and JavaFX calss Parent that links the corresponding UI
+     * @param error the pair of controller for the handling of error message popups and JavaFX class Parent that links the corresponding UI
      *              with its controller.
+     * @param serverURL the pair of controller for the handling of Server selection
+     *                  popups and JavaFX class Parent that links the corresponding UI
+     *                  with its controller.
      */
     public void initialize(Stage primaryStage, Pair<NoteOverviewCtrl, Parent> overview,
-            Pair<AddNoteCtrl, Parent> add, Pair<ErrorPopUpCtrl, Parent> error) {
+            Pair<AddNoteCtrl, Parent> add, Pair<ErrorPopUpCtrl, Parent> error, Pair<ServerSelectionCtrl, Parent> serverURL) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
@@ -57,6 +63,10 @@ public class MainCtrl {
         this.errorCtrl = error.getKey();
         this.errorScene = new Scene(error.getValue());
 
+        this.serverCtrl = serverURL.getKey();
+        this.serverScene = new Scene(serverURL.getValue());
+
+        //showServerSelection();
         showOverview();
         primaryStage.show();
     }
@@ -102,4 +112,27 @@ public class MainCtrl {
     public void hideError(){
         popUp.hide();
     }
+
+    /**
+     * This method shows the server selection popUp
+     */
+    public void showServerSelection(){
+        this.popUp = new Stage();
+        popUp.setScene(serverScene);
+        popUp.setTitle("Notes: Server Selection");
+        popUp.setResizable(false);
+        popUp.show();
+    }
+
+    /**
+     * this method hides the popup and shows the notes start page
+     */
+    public void hideServerSelection(){
+        popUp.hide();
+        showOverview();
+        primaryStage.show();
+    }
+
+
+
 }
