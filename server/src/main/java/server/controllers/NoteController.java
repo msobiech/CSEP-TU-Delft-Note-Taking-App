@@ -2,96 +2,67 @@ package server.controllers;
 
 import models.Note;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import server.repositories.NoteRepository;
+import server.services.NoteService;
 
 import java.util.List;
 
-// CREATE READ UPDATE DELETE
-//  POST   GET  PUT   DELETE
-
-@Controller
-@ResponseBody
+/**
+ *
+ * @RestController is the same as @Controller + @ResponseBody
+ *
+ */
+@RestController
 @RequestMapping("/notes")
 public class NoteController {
-    private final NoteRepository repo;
+    private final NoteService noteService;
 
-    public NoteController(NoteRepository repo) {
-        this.repo = repo;
+    public NoteController(NoteService noteService) {
+        this.noteService = noteService;
     }
 
-    @GetMapping(path = {"", "/"})
+    @GetMapping("/get")
     public List<Note> getAll() {
-        return repo.findAll();
+        return noteService.getAllNotes();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<Note> getById(@PathVariable("id") long id) {
-        if (id < 0 || !repo.existsById(id)) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok(repo.findById(id).orElse(null));
+        return noteService.getNoteById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
     }
 
-    @PutMapping("/setContent/{id}")
-    public ResponseEntity<Note> setContentById(@PathVariable("id") long id, @RequestBody String content) {
-        if (id < 0 || !repo.existsById(id)) {
-            return ResponseEntity.badRequest().build();
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Note> updateNote(@PathVariable("id") long id, @RequestBody Note note) {
+        try {
+            Note updatedNote = noteService.updateNote(id, note);
+            return ResponseEntity.ok(updatedNote);
+        } catch (IllegalAccessException e) {
+            return ResponseEntity.notFound().build(); // if the note does not exist, return 404 Not Found
         }
-        Note foundNote = repo.findById(id).get();
-        foundNote.setContent(content);
-        return ResponseEntity.ok(repo.save(foundNote));
     }
 
-    @PostMapping
-    public ResponseEntity<Note> add(@RequestBody Note note) {
-        if (isNullOrEmpty(note.getContent())) {
+    @PostMapping("/add")
+    public ResponseEntity<Note> addNote(@RequestBody Note note) {
+        try {
+            Note savedNote = noteService.saveNote(note);
+            return ResponseEntity.ok(savedNote);
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build(); // catch unexpected errors and return 500 Internal Server Error
         }
-        Note saved = repo.save(note);
-        return ResponseEntity.ok(saved);
     }
 
     @GetMapping("/titles")
     public List<Object[]> getTitles() {
-        return repo.findIdAndTitle();
-    }
-
-
-    @PutMapping("/setTitle/{id}")
-    public ResponseEntity<Note> updateTitle(@PathVariable("id") long id, @RequestBody Note updatedNote) {
-        if (id <= 0 || !repo.existsById(id)) {
-            return ResponseEntity.badRequest().build();
-        }
-        // Retrieve the existing note
-        Note existingNote = repo.findById(id).orElse(null);
-        if (existingNote == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Update the title and save
-        if (isNullOrEmpty(updatedNote.getTitle())) {
-            return ResponseEntity.badRequest().build();
-        }
-        existingNote.setTitle(updatedNote.getTitle());
-        Note savedNote = repo.save(existingNote);
-
-        return ResponseEntity.ok(savedNote);
+        return noteService.getNotesIdAndTitle();
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Note>> searchByTitle(@RequestParam("keyword") String keyword) {
-        List<Note> notes = repo.findByTitleContainingIgnoreCase(keyword);
+    public ResponseEntity<List<Note>> searchNote(@RequestParam("keyword") String keyword) {
+        List<Note> notes = noteService.searchNotes(keyword);
         return ResponseEntity.ok(notes);
-    }
-
-    /**
-     * Checks if a given string is null or empty.
-     * @param s the string to check
-     * @return true if the string is null or empty, false otherwise
-     */
-    private static boolean isNullOrEmpty(String s) {
-        return s == null || s.isEmpty();
     }
 }

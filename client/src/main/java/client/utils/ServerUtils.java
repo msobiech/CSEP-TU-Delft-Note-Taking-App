@@ -24,6 +24,7 @@ import java.util.Map;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.MediaType;
 import models.Note;
 
 import org.glassfish.jersey.client.ClientConfig;
