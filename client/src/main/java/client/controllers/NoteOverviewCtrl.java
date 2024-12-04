@@ -66,6 +66,7 @@ public class NoteOverviewCtrl implements Initializable {
     private Runnable lastTask = null;
 
     private Long curNoteId = null;
+    private Integer curNoteIndex = null;
 
     @Inject
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl) {
@@ -83,19 +84,21 @@ public class NoteOverviewCtrl implements Initializable {
             debounce(() -> {
                 try {
                     server.updateNoteTitleByID(curNoteId, newValue.trim());
-                    refreshNotes(); // Update the list titles after a successful update
+                    notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
+                    //refreshNotes(); // Update the list titles after a successful update
                     changeCountTitle = 0;
                 } catch (Exception e) {
-                    mainCtrl.showError("Failed to update title: " + e.getMessage());
+                    System.out.println("Failed to update title: " + e.getMessage());
                 }
             },DELAY);
             if (changeCountTitle >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
                 try {
                     server.updateNoteTitleByID(curNoteId, newValue.trim());
-                    refreshNotes(); // Update the list titles after a successful update
+                    notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
+                    //refreshNotes(); // Update the list titles after a successful update
                     changeCountTitle = 0;
                 } catch (Exception e) {
-                    mainCtrl.showError("Failed to update title: " + e.getMessage());
+                    System.out.println("Failed to update title: " + e.getMessage());
                 }
                 changeCountContent = 0; // Reset change count
                 debounceTimer.cancel(); // Cancel any pending debounced update
@@ -104,6 +107,7 @@ public class NoteOverviewCtrl implements Initializable {
 
         noteDisplay.setEditable(false);
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newNote) -> {
+
             if (newNote != null) {
                 noteDisplay.setEditable(true);
                 noteTitle.setEditable(true);
@@ -115,6 +119,7 @@ public class NoteOverviewCtrl implements Initializable {
                 var newTitle = newNote.getValue();
                 updateNoteTitle(newTitle);
                 var id = newNote.getKey();
+                System.out.println("Note ID: " + id);
                 var content = server.getNoteContentByID(id);
                 updateNoteDisplay(content);
                 try {
@@ -123,33 +128,31 @@ public class NoteOverviewCtrl implements Initializable {
                     mainCtrl.showError(e.toString());
                 }
                 curNoteId = newNote.getKey();
+                curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
             } else{
                 noteDisplay.setEditable(false);
             }
         });
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
             changeCountContent++; // Count the amount of changes
-            if (curNoteId == null) {
-                return; // Ignore updates when no note is selected or title is empty
+            try {
+                renderMarkdown(newValue);
+            } catch (InterruptedException e) {
+                mainCtrl.showError(e.toString());
             }
             debounce(() -> {
-                if (curNoteId == null) {
-                    return; // Ignore updates when no note is selected or title is empty
-                }
-                try {
-                    renderMarkdown(newValue);
+                try{
                     server.updateNoteContentByID(curNoteId,newValue);
-                } catch (InterruptedException e) {
-                    mainCtrl.showError(e.toString());
+                } catch(Exception e){
+                    System.out.println("Failed to update content: " + e.getMessage());
                 }
                 changeCountContent = 0; // Reset change count if the scheduled task has been executed
             }, DELAY);
             if (changeCountContent >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
-                try {
-                    renderMarkdown(newValue);
+                try{
                     server.updateNoteContentByID(curNoteId,newValue);
-                } catch (InterruptedException e) {
-                    mainCtrl.showError(e.toString());
+                } catch(Exception e){
+                    System.out.println("Failed to update content: " + e.getMessage());
                 }
                 changeCountContent = 0; // Reset change count
                 debounceTimer.cancel(); // Cancel any pending debounced update
@@ -157,7 +160,7 @@ public class NoteOverviewCtrl implements Initializable {
         });
         removeNoteButton.setDisable(true);
 
-        notesList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             removeNoteButton.setDisable(newValue == null);
         });
 
@@ -284,15 +287,16 @@ public class NoteOverviewCtrl implements Initializable {
             Optional<ButtonType> result = alert.showAndWait();
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                curNoteId = curNoteId - 1;
                 if(notes.size() == 1){
                     renderMarkdown("");
                     updateNoteDisplay("");
                     updateNoteTitle("");
-                    curNoteId = null;
+
                 }
                 server.deleteNoteByID(selectedNote.getKey());
                 notesList.getItems().remove(selectedNote);
+                curNoteId = notesList.getSelectionModel().getSelectedItem().getKey();
+                curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
             } else {
                 System.out.println("Deletion canceled.");
             }
