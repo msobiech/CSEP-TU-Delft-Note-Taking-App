@@ -46,7 +46,7 @@ public class ServerUtils {
 	 */
 	public String getNoteContentByID(long id) {
 		var note = ClientBuilder.newClient(new ClientConfig())
-				.target(SERVER).path("notes/{id}")
+				.target(SERVER).path("notes/get/{id}")
 				.resolveTemplate("id", id)
 				.request(APPLICATION_JSON) //
 				.get(new GenericType<Note>() {});
