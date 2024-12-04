@@ -21,4 +21,6 @@ public interface NoteService {
     Note updateNote(long id, Note note) throws IllegalAccessException;
 
     List<Note> searchNotes(String keyword);
+
+    void deleteNote(long id) throws IllegalAccessException;
 }
