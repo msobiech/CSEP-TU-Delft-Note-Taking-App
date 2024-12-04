@@ -34,20 +34,34 @@ public class NoteController {
         return ResponseEntity.ok(repo.findById(id).orElse(null));
     }
 
-    @PutMapping("/setContent/{id}")
-    public ResponseEntity<Note> setContentById(@PathVariable("id") long id, @RequestBody String content) {
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Note> updateNote(@PathVariable("id") long id, @RequestBody Note updatedNote) {
         if (id < 0 || !repo.existsById(id)) {
             return ResponseEntity.badRequest().build();
-        } else {
-            Note foundNote = repo.findById(id).get();
-            foundNote.setContent(content);
-            return ResponseEntity.ok(repo.save(foundNote));
         }
+        Note existingNote = repo.findById(id).orElse(null);
+        if (existingNote == null) {
+            return ResponseEntity.notFound().build();
+        }
+        // Handle title updates
+        if (updatedNote.getTitle() != null) {
+            existingNote.setTitle(updatedNote.getTitle());
+            if (updatedNote.getTitle().isEmpty()) {
+                // Would be nice to add a method to generate a unique name (e.g. Untitled Note 1, 2 etc)
+                existingNote.setTitle("Untitled Note");
+            }
+        }
+        if (updatedNote.getContent() != null) {
+            existingNote.setContent(updatedNote.getContent());
+        }
+        // Save the updated note
+        Note savedNote = repo.save(existingNote);
+        return ResponseEntity.ok(savedNote);
     }
 
     @PostMapping("/add")
     public ResponseEntity<Note> add(@RequestBody Note note) {
-        if (isNullOrEmpty(note.getContent())) {
+        if (isNullOrEmpty(note.getTitle()) || note.getContent() == null) {
             return ResponseEntity.badRequest().build();
         }
         Note saved = repo.save(note);
@@ -60,26 +74,6 @@ public class NoteController {
     }
 
 
-    @PutMapping("/setTitle/{id}")
-    public ResponseEntity<Note> updateTitle(@PathVariable("id") long id, @RequestBody Note updatedNote) {
-        if (id <= 0 || !repo.existsById(id)) {
-            return ResponseEntity.badRequest().build();
-        }
-        // Retrieve the existing note
-        Note existingNote = repo.findById(id).orElse(null);
-        if (existingNote == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        // Update the title and save
-        if (isNullOrEmpty(updatedNote.getTitle())) {
-            return ResponseEntity.badRequest().build();
-        }
-        existingNote.setTitle(updatedNote.getTitle());
-        Note savedNote = repo.save(existingNote);
-
-        return ResponseEntity.ok(savedNote);
-    }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") long id) {
         if (!repo.existsById(id)) {
