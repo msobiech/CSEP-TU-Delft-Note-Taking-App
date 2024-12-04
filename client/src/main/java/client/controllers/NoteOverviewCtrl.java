@@ -24,6 +24,7 @@ import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import javafx.util.Pair;
+import models.Note;
 
 
 public class NoteOverviewCtrl implements Initializable {
@@ -83,9 +84,10 @@ public class NoteOverviewCtrl implements Initializable {
             changeCountTitle++;
             debounce(() -> {
                 try {
-                    server.updateNoteTitleByID(curNoteId, newValue.trim());
+                    Note updatedNote = new Note();
+                    updatedNote.setTitle(newValue);
+                    server.updateNoteByID(curNoteId, updatedNote);
                     notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
-                    //refreshNotes(); // Update the list titles after a successful update
                     changeCountTitle = 0;
                 } catch (Exception e) {
                     System.out.println("Failed to update title: " + e.getMessage());
@@ -93,9 +95,10 @@ public class NoteOverviewCtrl implements Initializable {
             },DELAY);
             if (changeCountTitle >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
                 try {
-                    server.updateNoteTitleByID(curNoteId, newValue.trim());
+                    Note updatedNote = new Note();
+                    updatedNote.setTitle(newValue);
+                    server.updateNoteByID(curNoteId, updatedNote);
                     notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
-                    //refreshNotes(); // Update the list titles after a successful update
                     changeCountTitle = 0;
                 } catch (Exception e) {
                     System.out.println("Failed to update title: " + e.getMessage());
@@ -107,7 +110,6 @@ public class NoteOverviewCtrl implements Initializable {
 
         noteDisplay.setEditable(false);
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newNote) -> {
-
             if (newNote != null) {
                 noteDisplay.setEditable(true);
                 noteTitle.setEditable(true);
@@ -141,21 +143,29 @@ public class NoteOverviewCtrl implements Initializable {
                 mainCtrl.showError(e.toString());
             }
             debounce(() -> {
-                try{
-                    server.updateNoteContentByID(curNoteId,newValue);
-                } catch(Exception e){
-                    System.out.println("Failed to update content: " + e.getMessage());
+                if (curNoteId != null) {
+                    try {
+                        Note updatedNote = new Note();
+                        updatedNote.setContent(newValue);
+                        server.updateNoteByID(curNoteId, updatedNote);
+                        changeCountContent = 0;
+                    } catch (Exception e) {
+                        System.out.println("Failed to update content: " + e.getMessage());
+                    }
                 }
-                changeCountContent = 0; // Reset change count if the scheduled task has been executed
             }, DELAY);
             if (changeCountContent >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
-                try{
-                    server.updateNoteContentByID(curNoteId,newValue);
-                } catch(Exception e){
-                    System.out.println("Failed to update content: " + e.getMessage());
+                if (curNoteId != null) {
+                    try {
+                        Note updatedNote = new Note();
+                        updatedNote.setContent(newValue);
+                        server.updateNoteByID(curNoteId, updatedNote);
+                        changeCountContent = 0;
+                        debounceTimer.cancel(); // Cancel any pending debounced update
+                    } catch (Exception e) {
+                        System.out.println("Failed to update content: " + e.getMessage());
+                    }
                 }
-                changeCountContent = 0; // Reset change count
-                debounceTimer.cancel(); // Cancel any pending debounced update
             }
         });
         removeNoteButton.setDisable(true);
@@ -287,16 +297,23 @@ public class NoteOverviewCtrl implements Initializable {
             Optional<ButtonType> result = alert.showAndWait();
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                if(notes.size() == 1){
-                    renderMarkdown("");
-                    updateNoteDisplay("");
-                    updateNoteTitle("");
-
+                try {
+                    server.deleteNoteByID(selectedNote.getKey());
+                    notesList.getItems().remove(selectedNote);
+                    // Handle the case when the list is empty
+                    if (notesList.getItems().isEmpty()) {
+                        curNoteId = null;
+                        curNoteIndex = null;
+                        updateNoteTitle(""); // Clear title field
+                        updateNoteDisplay(""); // Clear content field
+                    } else {
+                        // Select the first note in the list
+                        notesList.getSelectionModel().select(0);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error while deleting note: " + e.getMessage());
                 }
-                server.deleteNoteByID(selectedNote.getKey());
-                notesList.getItems().remove(selectedNote);
-                curNoteId = notesList.getSelectionModel().getSelectedItem().getKey();
-                curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
+
             } else {
                 System.out.println("Deletion canceled.");
             }

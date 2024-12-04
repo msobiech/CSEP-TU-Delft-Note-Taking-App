@@ -16,7 +16,6 @@
 package client.utils;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
-import static jakarta.ws.rs.core.MediaType.TEXT_PLAIN;
 
 import java.net.ConnectException;
 import java.net.URI;
@@ -24,7 +23,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
-import java.util.Map;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
@@ -56,18 +54,24 @@ public class ServerUtils {
 	}
 
 	/**
-	 * Method to update content of a Note with given id
-	 * @param id of a note to update
-	 * @param content to update with
-	 * @return the updated note
+	 * Method to update a note with given id using the unified PUT endpoint.
+	 * Updates only the fields provided in the Note object.
+	 * @param id the id of the note to update
+	 * @param updatedNote the Note object containing updated fields
+	 * @return the updated Note object
 	 */
-	public Note updateNoteContentByID(long id, String content) {
-		return  ClientBuilder.newClient(new ClientConfig())
-				.target(SERVER).path("notes/setContent/{id}")
+	public Note updateNoteByID(long id, Note updatedNote) {
+		if (updatedNote == null) {
+			throw new IllegalArgumentException("Updated note cannot be null");
+		}
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER)
+				.path("notes/update/{id}")
 				.resolveTemplate("id", id)
 				.request(APPLICATION_JSON)
-				.put(Entity.entity(content, TEXT_PLAIN), Note.class);
+				.put(Entity.entity(updatedNote, APPLICATION_JSON), Note.class);
 	}
+
 	/**
 	 * Method to fetch notes that are present on the server with their Ids
 	 * @return List of Pairs of noteID and its title
@@ -97,24 +101,6 @@ public class ServerUtils {
 		return true;
 	}
 
-	/**
-	 * Method to update the title of a Note with a given id
-	 * @param id the id of the note to update
-	 * @param newTitle the new title to set
-	 * @return the updated Note object
-	 */
-	public Note updateNoteTitleByID(long id, String newTitle) {
-		// Construct a map to send as JSON payload
-		Map<String, String> payload = Map.of("title", newTitle);
-
-		// Perform the PUT request
-		return ClientBuilder.newClient(new ClientConfig())
-				.target(SERVER)
-				.path("notes/setTitle/{id}")
-				.resolveTemplate("id", id)
-				.request(APPLICATION_JSON)
-				.put(Entity.entity(payload, APPLICATION_JSON), Note.class);
-	}
 	/**
 	 * Method to remove notes from server
 	 * @param id of note to remove
