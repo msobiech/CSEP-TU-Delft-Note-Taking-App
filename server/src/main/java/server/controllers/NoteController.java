@@ -2,95 +2,67 @@ package server.controllers;
 
 import models.Note;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import server.repositories.NoteRepository;
+import server.services.NoteService;
 
 import java.util.List;
 
-// CREATE READ UPDATE DELETE
-//  POST   GET  PUT   DELETE
-
-@Controller
-@ResponseBody
+/**
+ *
+ * @RestController is the same as @Controller + @ResponseBody
+ *
+ */
+@RestController
 @RequestMapping("/notes")
 public class NoteController {
-    private final NoteRepository repo;
+    private final NoteService noteService;
 
-    public NoteController(NoteRepository repo) {
-        this.repo = repo;
+    public NoteController(NoteService noteService) {
+        this.noteService = noteService;
     }
 
-    @GetMapping(path = {"", "/"})
+    @GetMapping("/get")
     public List<Note> getAll() {
-        return repo.findAll();
+        return noteService.getAllNotes();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<Note> getById(@PathVariable("id") long id) {
-        if (id < 0 || !repo.existsById(id)) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok(repo.findById(id).orElse(null));
+        return noteService.getNoteById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Note> updateNote(@PathVariable("id") long id, @RequestBody Note updatedNote) {
-        if (id < 0 || !repo.existsById(id)) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<Note> updateNote(@PathVariable("id") long id, @RequestBody Note note) {
+        try {
+            Note updatedNote = noteService.updateNote(id, note);
+            return ResponseEntity.ok(updatedNote);
+        } catch (IllegalAccessException e) {
+            return ResponseEntity.notFound().build(); // if the note does not exist, return 404 Not Found
         }
-        Note existingNote = repo.findById(id).orElse(null);
-        if (existingNote == null) {
-            return ResponseEntity.notFound().build();
-        }
-        // Handle title updates
-        if (updatedNote.getTitle() != null) {
-            existingNote.setTitle(updatedNote.getTitle());
-            if (updatedNote.getTitle().isEmpty()) {
-                // Would be nice to add a method to generate a unique name (e.g. Untitled Note 1, 2 etc)
-                existingNote.setTitle("Untitled Note");
-            }
-        }
-        if (updatedNote.getContent() != null) {
-            existingNote.setContent(updatedNote.getContent());
-        }
-        // Save the updated note
-        Note savedNote = repo.save(existingNote);
-        return ResponseEntity.ok(savedNote);
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Note> add(@RequestBody Note note) {
-        if (isNullOrEmpty(note.getTitle()) || note.getContent() == null) {
+    public ResponseEntity<Note> addNote(@RequestBody Note note) {
+        try {
+            Note savedNote = noteService.saveNote(note);
+            return ResponseEntity.ok(savedNote);
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build(); // catch unexpected errors and return 500 Internal Server Error
         }
-        Note saved = repo.save(note);
-        return ResponseEntity.ok(saved);
     }
 
     @GetMapping("/titles")
     public List<Object[]> getTitles() {
-        return repo.findIdAndTitle();
+        return noteService.getNotesIdAndTitle();
     }
 
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") long id) {
-        if (!repo.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        } else {
-            repo.deleteById(id);
-            return ResponseEntity.noContent().build();
-        }
-    }
-
-
-    /**
-     * Checks if a given string is null or empty.
-     * @param s the string to check
-     * @return true if the string is null or empty, false otherwise
-     */
-    private static boolean isNullOrEmpty(String s) {
-        return s == null || s.isEmpty();
+    @GetMapping("/search")
+    public ResponseEntity<List<Note>> searchNote(@RequestParam("keyword") String keyword) {
+        List<Note> notes = noteService.searchNotes(keyword);
+        return ResponseEntity.ok(notes);
     }
 }
