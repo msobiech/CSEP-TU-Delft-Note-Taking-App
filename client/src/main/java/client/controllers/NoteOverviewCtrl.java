@@ -133,8 +133,7 @@ public class NoteOverviewCtrl implements Initializable {
                 var newTitle = newNote.getValue();
                 if(oldNote!=null && !Objects.equals(oldNote.getKey(), newNote.getKey())) {
                     updateNoteTitle(newTitle);
-                }
-                else if(oldNote==null){
+                } else if(oldNote==null){
                     updateNoteTitle(newTitle);
                 }
                 var id = newNote.getKey();
@@ -206,7 +205,7 @@ public class NoteOverviewCtrl implements Initializable {
             }
         }, delayMillis);
     }
-    
+
 
     private void renderMarkdown(String markdownText) throws InterruptedException {
 
