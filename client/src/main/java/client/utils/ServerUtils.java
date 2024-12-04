@@ -39,7 +39,7 @@ import jakarta.ws.rs.client.ClientBuilder;
 
 public class ServerUtils {
 
-	private static String SERVER = "http://localhost:8080";
+	private static final String SERVER = "http://localhost:8080/";
 
 	/**
 	 * Fetches the content of the note with given id
@@ -139,7 +139,10 @@ public class ServerUtils {
 		}
 	}
 
-	public void SetServerURL(String serverURL){
-		SERVER = serverURL;
+	public Note addNote() {
+		return  ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("notes/add")
+				.request(APPLICATION_JSON)
+				.post(Entity.entity(new Note("Untitled note", " "),APPLICATION_JSON), Note.class);
 	}
 }
