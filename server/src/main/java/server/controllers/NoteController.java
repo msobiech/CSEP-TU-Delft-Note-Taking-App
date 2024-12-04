@@ -55,6 +55,18 @@ public class NoteController {
         }
     }
 
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteNote(@PathVariable("id") long id) {
+        try {
+            if (!noteService.noteExists(id)) {
+                return ResponseEntity.notFound().build();
+            }
+            noteService.deleteNote(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalAccessException e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
     @GetMapping("/titles")
     public List<Object[]> getTitles() {
         return noteService.getNotesIdAndTitle();

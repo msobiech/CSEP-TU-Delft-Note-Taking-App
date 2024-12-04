@@ -53,6 +53,13 @@ public class NoteServiceImpl implements NoteService {
         return repo.save(fetchedNote);
     }
 
+    public void deleteNote(long id) throws IllegalAccessException {
+        if (!noteExists(id)) {
+            throw new IllegalAccessException("Note with id " + id + " does not exist.");
+        }
+        repo.deleteById(id);
+    }
+
     public List<Note> searchNotes(String keyword) {
         if (StringUtils.isNullOrEmpty(keyword)) {
             return List.of();
