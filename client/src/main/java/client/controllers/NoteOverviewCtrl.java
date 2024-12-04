@@ -224,7 +224,6 @@ public class NoteOverviewCtrl implements Initializable {
         //Used markdown style is from here https://github.com/sindresorhus/github-markdown-css
         try {
             cssFile = Files.readString(Path.of(getClass().getResource("markdownStyle.css").toURI()));
-            System.out.println(cssFile);
             htmlContent = "<style>" + cssFile + "</style><article class=\"markdown-body\">";
         } catch (IOException | URISyntaxException e) {
             htmlContent = "<style> body { color-scheme: light;" +
