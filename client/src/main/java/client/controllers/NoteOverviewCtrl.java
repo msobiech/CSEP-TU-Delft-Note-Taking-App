@@ -288,7 +288,8 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void addNote(){
         System.out.println("Adding a new note");
-        mainCtrl.showAdd();
+        server.addNote();
+        refreshNotes();
     }
 
     /**
