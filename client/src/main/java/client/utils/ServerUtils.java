@@ -16,11 +16,13 @@
 package client.utils;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
-import static jakarta.ws.rs.core.MediaType.TEXT_PLAIN;
 
 import java.net.ConnectException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
-import java.util.Map;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
@@ -35,7 +37,7 @@ import jakarta.ws.rs.client.ClientBuilder;
 
 public class ServerUtils {
 
-	private static final String SERVER = "http://localhost:8080/";
+	private static String SERVER = "http://localhost:8080/";
 
 	/**
 	 * Fetches the content of the note with given id
@@ -52,18 +54,24 @@ public class ServerUtils {
 	}
 
 	/**
-	 * Method to update content of a Note with given id
-	 * @param id of a note to update
-	 * @param content to update with
-	 * @return the updated note
+	 * Method to update a note with given id using the unified PUT endpoint.
+	 * Updates only the fields provided in the Note object.
+	 * @param id the id of the note to update
+	 * @param updatedNote the Note object containing updated fields
+	 * @return the updated Note object
 	 */
-	public Note updateNoteContentByID(long id, String content) {
-		return  ClientBuilder.newClient(new ClientConfig())
-				.target(SERVER).path("notes/setContent/{id}")
+	public Note updateNoteByID(long id, Note updatedNote) {
+		if (updatedNote == null) {
+			throw new IllegalArgumentException("Updated note cannot be null");
+		}
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER)
+				.path("notes/update/{id}")
 				.resolveTemplate("id", id)
 				.request(APPLICATION_JSON)
-				.put(Entity.entity(content, TEXT_PLAIN), Note.class);
+				.put(Entity.entity(updatedNote, APPLICATION_JSON), Note.class);
 	}
+
 	/**
 	 * Method to fetch notes that are present on the server with their Ids
 	 * @return List of Pairs of noteID and its title
@@ -94,21 +102,37 @@ public class ServerUtils {
 	}
 
 	/**
-	 * Method to update the title of a Note with a given id
-	 * @param id the id of the note to update
-	 * @param newTitle the new title to set
-	 * @return the updated Note object
+	 * Method to remove notes from server
+	 * @param id of note to remove
 	 */
-	public Note updateNoteTitleByID(long id, String newTitle) {
-		// Construct a map to send as JSON payload
-		Map<String, String> payload = Map.of("title", newTitle);
+	public void deleteNoteByID(long id) {
+		System.out.println("Removing a note");
+		try {
+			String url = SERVER + "notes/" + id;
+			HttpClient client = HttpClient.newHttpClient();
+			HttpRequest request = HttpRequest.newBuilder()
+					.uri(URI.create(url))
+					.DELETE()
+					.build();
+			HttpResponse<Void> response = client.send(request, HttpResponse.BodyHandlers.discarding());
+			if (response.statusCode() == 204) {
+				System.out.println("Note deleted successfully.");
+			} else {
+				System.err.println("Failed to delete note: " + response.statusCode());
+			}
+		} catch (Exception e) {
+			System.out.println("Exception encountered.");
+		}
+	}
 
-		// Perform the PUT request
-		return ClientBuilder.newClient(new ClientConfig())
-				.target(SERVER)
-				.path("notes/setTitle/{id}")
-				.resolveTemplate("id", id)
+	public Note addNote() {
+		return  ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("notes/add")
 				.request(APPLICATION_JSON)
-				.put(Entity.entity(payload, APPLICATION_JSON), Note.class);
+				.post(Entity.entity(new Note("Untitled note", " "),APPLICATION_JSON), Note.class);
+	}
+
+	public void SetServerURL(String serverURL){
+		SERVER = serverURL;
 	}
 }

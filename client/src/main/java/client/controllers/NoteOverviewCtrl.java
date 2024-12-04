@@ -3,6 +3,7 @@ package client.controllers;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -23,6 +24,7 @@ import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import javafx.util.Pair;
+import models.Note;
 
 
 public class NoteOverviewCtrl implements Initializable {
@@ -64,7 +66,10 @@ public class NoteOverviewCtrl implements Initializable {
     private final int DELAY = 1000;
     private Runnable lastTask = null;
 
+    private boolean ignoreNext = false;
+
     private Long curNoteId = null;
+    private Integer curNoteIndex = null;
 
     @Inject
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl) {
@@ -75,26 +80,38 @@ public class NoteOverviewCtrl implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         noteTitle.textProperty().addListener((_, _, newValue) -> {
-            if (curNoteId == null || newValue.trim().isEmpty()) {
+            if (curNoteIndex == null || curNoteId == null || newValue.trim().isEmpty()) {
                 return; // Ignore updates when no note is selected or title is empty
             }
             changeCountTitle++;
+            //System.out.println("Change has occured at " + curNoteIndex);
+            try{
+                Platform.runLater(() -> {
+                    notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
+                });
+            } catch(Exception e){
+                System.out.println(e.getMessage());
+            }
+
+
             debounce(() -> {
                 try {
-                    server.updateNoteTitleByID(curNoteId, newValue.trim());
-                    refreshNotes(); // Update the list titles after a successful update
+                    Note updatedNote = new Note();
+                    updatedNote.setTitle(newValue);
+                    server.updateNoteByID(curNoteId, updatedNote);
                     changeCountTitle = 0;
                 } catch (Exception e) {
-                    mainCtrl.showError("Failed to update title: " + e.getMessage());
+                    System.out.println("Failed to update title: " + e.getMessage());
                 }
             },DELAY);
             if (changeCountTitle >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
                 try {
-                    server.updateNoteTitleByID(curNoteId, newValue.trim());
-                    refreshNotes(); // Update the list titles after a successful update
+                    Note updatedNote = new Note();
+                    updatedNote.setTitle(newValue);
+                    server.updateNoteByID(curNoteId, updatedNote);
                     changeCountTitle = 0;
                 } catch (Exception e) {
-                    mainCtrl.showError("Failed to update title: " + e.getMessage());
+                    System.out.println("Failed to update title: " + e.getMessage());
                 }
                 changeCountContent = 0; // Reset change count
                 debounceTimer.cancel(); // Cancel any pending debounced update
@@ -102,8 +119,10 @@ public class NoteOverviewCtrl implements Initializable {
         });
 
         noteDisplay.setEditable(false);
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newNote) -> {
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
+
             if (newNote != null) {
+
                 noteDisplay.setEditable(true);
                 noteTitle.setEditable(true);
                 if(lastTask != null) {
@@ -111,9 +130,18 @@ public class NoteOverviewCtrl implements Initializable {
                     lastTask.run();
                     lastTask = null;
                 }
+                curNoteId = newNote.getKey();
+                curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
                 var newTitle = newNote.getValue();
-                updateNoteTitle(newTitle);
+                if(oldNote!=null && !Objects.equals(oldNote.getKey(), newNote.getKey())) {
+                    updateNoteTitle(newTitle);
+                } else if(oldNote==null){
+                    updateNoteTitle(newTitle);
+                }
                 var id = newNote.getKey();
+
+
+
                 var content = server.getNoteContentByID(id);
                 updateNoteDisplay(content);
                 try {
@@ -121,32 +149,48 @@ public class NoteOverviewCtrl implements Initializable {
                 } catch (InterruptedException e) {
                     mainCtrl.showError(e.toString());
                 }
-                curNoteId = newNote.getKey();
+
             } else{
                 noteDisplay.setEditable(false);
             }
         });
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
             changeCountContent++; // Count the amount of changes
+            try {
+                renderMarkdown(newValue);
+            } catch (InterruptedException e) {
+                mainCtrl.showError(e.toString());
+            }
             debounce(() -> {
-                try {
-                    renderMarkdown(newValue);
-                    server.updateNoteContentByID(curNoteId,newValue);
-                } catch (InterruptedException e) {
-                    mainCtrl.showError(e.toString());
+                if (curNoteId != null) {
+                    try {
+                        Note updatedNote = new Note();
+                        updatedNote.setContent(newValue);
+                        server.updateNoteByID(curNoteId, updatedNote);
+                        changeCountContent = 0;
+                    } catch (Exception e) {
+                        System.out.println("Failed to update content: " + e.getMessage());
+                    }
                 }
-                changeCountContent = 0; // Reset change count if the scheduled task has been executed
             }, DELAY);
             if (changeCountContent >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
-                try {
-                    renderMarkdown(newValue);
-                    server.updateNoteContentByID(curNoteId,newValue);
-                } catch (InterruptedException e) {
-                    mainCtrl.showError(e.toString());
+                if (curNoteId != null) {
+                    try {
+                        Note updatedNote = new Note();
+                        updatedNote.setContent(newValue);
+                        server.updateNoteByID(curNoteId, updatedNote);
+                        changeCountContent = 0;
+                        debounceTimer.cancel(); // Cancel any pending debounced update
+                    } catch (Exception e) {
+                        System.out.println("Failed to update content: " + e.getMessage());
+                    }
                 }
-                changeCountContent = 0; // Reset change count
-                debounceTimer.cancel(); // Cancel any pending debounced update
             }
+        });
+        removeNoteButton.setDisable(true);
+
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
+            removeNoteButton.setDisable(newValue == null);
         });
 
     }
@@ -171,6 +215,7 @@ public class NoteOverviewCtrl implements Initializable {
             }
         }, delayMillis);
     }
+
 
     private void renderMarkdown(String markdownText) throws InterruptedException {
 
@@ -253,13 +298,49 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void addNote(){
         System.out.println("Adding a new note");
-        mainCtrl.showAdd();
+        server.addNote();
+        refreshNotes();
+        //mainCtrl.showAdd();
     }
 
     /**
-     * Method to remove notes(Currently not functional)
+     * Method to remove notes form UI
      */
-    public void removeNote(){
-        System.out.println("Removing a note");
+    @FXML
+    private void removeNote() throws InterruptedException {
+        var selectedNote = notesList.getSelectionModel().getSelectedItem();
+        if (selectedNote != null) {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirm deletion");
+            alert.setHeaderText("Are you sure you want to delete this note?");
+            alert.setContentText("You are trying to delete note: " + selectedNote.getValue() + "." +
+                    "\nDeleting a note is irreversible!");
+
+            Optional<ButtonType> result = alert.showAndWait();
+
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                try {
+                    server.deleteNoteByID(selectedNote.getKey());
+                    notesList.getItems().remove(selectedNote);
+                    // Handle the case when the list is empty
+                    if (notesList.getItems().isEmpty()) {
+                        curNoteId = null;
+                        curNoteIndex = null;
+                        updateNoteTitle(""); // Clear title field
+                        updateNoteDisplay(""); // Clear content field
+                    } else {
+                        // Select the first note in the list
+                        notesList.getSelectionModel().select(0);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error while deleting note: " + e.getMessage());
+                }
+
+            } else {
+                System.out.println("Deletion canceled.");
+            }
+        }
     }
+
+
 }
