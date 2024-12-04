@@ -1,6 +1,7 @@
 package server.services;
 
 import models.Note;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import server.repositories.NoteRepository;
 import server.utils.StringUtils;
@@ -12,6 +13,7 @@ import java.util.Optional;
 public class NoteServiceImpl implements NoteService {
     private final NoteRepository repo;
 
+    @Autowired
     public NoteServiceImpl(NoteRepository repo) {
         this.repo = repo;
     }
@@ -48,8 +50,16 @@ public class NoteServiceImpl implements NoteService {
             throw new IllegalAccessException("Note with id " + id + " does not exist.");
         }
         Note fetchedNote = repo.findById(id).orElseThrow();
-        fetchedNote.setTitle(note.getTitle());
-        fetchedNote.setContent(note.getContent());
+        if (note.getTitle() != null) {
+            if (note.getTitle().isEmpty()) {
+                fetchedNote.setTitle("Untitled Note");
+            } else {
+                fetchedNote.setTitle(note.getTitle());
+            }
+        }
+        if (note.getContent() != null) {
+            fetchedNote.setContent(note.getContent());
+        }
         return repo.save(fetchedNote);
     }
 

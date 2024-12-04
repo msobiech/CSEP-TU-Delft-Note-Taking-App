@@ -1,6 +1,7 @@
 package server.controllers;
 
 import models.Note;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.services.NoteService;
@@ -17,6 +18,7 @@ import java.util.List;
 public class NoteController {
     private final NoteService noteService;
 
+    @Autowired
     public NoteController(NoteService noteService) {
         this.noteService = noteService;
     }
