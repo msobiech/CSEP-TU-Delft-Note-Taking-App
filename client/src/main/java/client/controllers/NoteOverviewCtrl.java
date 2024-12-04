@@ -143,8 +143,7 @@ public class NoteOverviewCtrl implements Initializable {
             debounce(() -> {
                 try{
                     server.updateNoteContentByID(curNoteId,newValue);
-                }
-                catch(Exception e){
+                } catch(Exception e){
                     System.out.println("Failed to update content: " + e.getMessage());
                 }
                 changeCountContent = 0; // Reset change count if the scheduled task has been executed
@@ -152,8 +151,7 @@ public class NoteOverviewCtrl implements Initializable {
             if (changeCountContent >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
                 try{
                     server.updateNoteContentByID(curNoteId,newValue);
-                }
-                catch(Exception e){
+                } catch(Exception e){
                     System.out.println("Failed to update content: " + e.getMessage());
                 }
                 changeCountContent = 0; // Reset change count
