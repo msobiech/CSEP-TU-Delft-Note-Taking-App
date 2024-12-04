@@ -138,4 +138,11 @@ public class ServerUtils {
 			System.out.println("Exception encountered.");
 		}
 	}
+
+	public Note addNote() {
+		return  ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("notes/add")
+				.request(APPLICATION_JSON)
+				.post(Entity.entity(new Note("Untitled note", " "),APPLICATION_JSON), Note.class);
+	}
 }
