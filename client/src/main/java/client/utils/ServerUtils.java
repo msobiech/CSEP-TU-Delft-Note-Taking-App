@@ -108,7 +108,7 @@ public class ServerUtils {
 	public void deleteNoteByID(long id) {
 		System.out.println("Removing a note");
 		try {
-			String url = SERVER + "notes/" + id;
+			String url = SERVER + "notes/delete/" + id;
 			HttpClient client = HttpClient.newHttpClient();
 			HttpRequest request = HttpRequest.newBuilder()
 					.uri(URI.create(url))
