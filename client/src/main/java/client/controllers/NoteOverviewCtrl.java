@@ -65,6 +65,8 @@ public class NoteOverviewCtrl implements Initializable {
     private final int DELAY = 1000;
     private Runnable lastTask = null;
 
+    private boolean ignoreNext = false;
+
     private Long curNoteId = null;
     private Integer curNoteIndex = null;
 
@@ -77,14 +79,24 @@ public class NoteOverviewCtrl implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         noteTitle.textProperty().addListener((_, _, newValue) -> {
-            if (curNoteId == null || newValue.trim().isEmpty()) {
+            if (curNoteIndex == null || curNoteId == null || newValue.trim().isEmpty()) {
                 return; // Ignore updates when no note is selected or title is empty
             }
             changeCountTitle++;
+            //System.out.println("Change has occured at " + curNoteIndex);
+            try{
+                Platform.runLater(() -> {
+                    notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
+                });
+            } catch(Exception e){
+                System.out.println(e.getMessage());
+            }
+
+
             debounce(() -> {
                 try {
                     server.updateNoteTitleByID(curNoteId, newValue.trim());
-                    notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
+
                     //refreshNotes(); // Update the list titles after a successful update
                     changeCountTitle = 0;
                 } catch (Exception e) {
@@ -94,7 +106,6 @@ public class NoteOverviewCtrl implements Initializable {
             if (changeCountTitle >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
                 try {
                     server.updateNoteTitleByID(curNoteId, newValue.trim());
-                    notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
                     //refreshNotes(); // Update the list titles after a successful update
                     changeCountTitle = 0;
                 } catch (Exception e) {
@@ -106,9 +117,10 @@ public class NoteOverviewCtrl implements Initializable {
         });
 
         noteDisplay.setEditable(false);
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newNote) -> {
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
 
             if (newNote != null) {
+
                 noteDisplay.setEditable(true);
                 noteTitle.setEditable(true);
                 if(lastTask != null) {
@@ -116,10 +128,18 @@ public class NoteOverviewCtrl implements Initializable {
                     lastTask.run();
                     lastTask = null;
                 }
+                curNoteId = newNote.getKey();
+                curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
                 var newTitle = newNote.getValue();
-                updateNoteTitle(newTitle);
+                if(oldNote!=null && !Objects.equals(oldNote.getKey(), newNote.getKey())) {
+                    updateNoteTitle(newTitle);
+                } else if(oldNote==null){
+                    updateNoteTitle(newTitle);
+                }
                 var id = newNote.getKey();
-                System.out.println("Note ID: " + id);
+
+
+
                 var content = server.getNoteContentByID(id);
                 updateNoteDisplay(content);
                 try {
@@ -127,8 +147,7 @@ public class NoteOverviewCtrl implements Initializable {
                 } catch (InterruptedException e) {
                     mainCtrl.showError(e.toString());
                 }
-                curNoteId = newNote.getKey();
-                curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
+
             } else{
                 noteDisplay.setEditable(false);
             }
@@ -186,6 +205,7 @@ public class NoteOverviewCtrl implements Initializable {
             }
         }, delayMillis);
     }
+
 
     private void renderMarkdown(String markdownText) throws InterruptedException {
 
