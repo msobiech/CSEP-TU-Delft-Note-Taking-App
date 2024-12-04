@@ -45,7 +45,7 @@ public class NoteController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<Note> add(@RequestBody Note note) {
         if (isNullOrEmpty(note.getContent())) {
             return ResponseEntity.badRequest().build();
