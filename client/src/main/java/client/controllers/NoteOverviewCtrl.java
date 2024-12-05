@@ -82,7 +82,11 @@ public class NoteOverviewCtrl implements Initializable {
                 return; // Ignore updates when no note is selected
             }
             changeCountTitle++;
-            notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
+            try{
+                notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
+            } catch(Exception e){
+                System.out.println(e.getMessage());
+            }
             debounce(() -> {
                 try {
                     Note updatedNote = new Note();
