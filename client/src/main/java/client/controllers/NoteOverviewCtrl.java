@@ -109,6 +109,15 @@ public class NoteOverviewCtrl implements Initializable {
         });
         noteTitle.focusedProperty().addListener((_, _, newValue) -> {
             if (!newValue) { // Focus lost
+                if (curNoteId != null && noteTitle.getText() != null) {
+                    try {
+                        Note updatedNote = new Note();
+                        updatedNote.setTitle(noteTitle.getText().trim());
+                        server.updateNoteByID(curNoteId, updatedNote);  // Save the current title immediately
+                    } catch (Exception e) {
+                        System.out.println("Failed to update title on focus loss: " + e.getMessage());
+                    }
+                }
                 refreshNotes();
             }
         });
