@@ -107,6 +107,11 @@ public class NoteOverviewCtrl implements Initializable {
                 debounceTimer.cancel(); // Cancel any pending debounced update
             }
         });
+        noteTitle.focusedProperty().addListener((_, _, newValue) -> {
+            if (!newValue) { // Focus lost
+                refreshNotes();
+            }
+        });
 
         noteDisplay.setEditable(false);
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
