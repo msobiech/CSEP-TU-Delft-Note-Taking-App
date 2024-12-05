@@ -258,10 +258,13 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     /**
-     * Method that refreshes the notes. (Currently not connected to the server)
+     * Method that refreshes the notes.
      */
     public void refreshNotes() {
         System.out.println("Refreshed the note list");
+        Pair<Long, String> selectedNote = notesList.getSelectionModel().getSelectedItem();
+        Long selectedNoteId = (selectedNote != null) ? selectedNote.getKey() : null;
+
         var notesFromServer = server.getNoteTitles();
         List<Pair<Long, String>> notesAsPairs = new ArrayList<>();
         for(var row: notesFromServer){
@@ -286,6 +289,15 @@ public class NoteOverviewCtrl implements Initializable {
                 }
             }
         });
+        // Re-select the previously selected note (if it exists)
+        if (selectedNoteId != null) {
+            for (int i = 0; i < notes.size(); i++) {
+                if (notes.get(i).getKey().equals(selectedNoteId)) {
+                    notesList.getSelectionModel().select(i); // Select the note by index
+                    break;
+                }
+            }
+        }
     }
 
     /**

@@ -6,8 +6,7 @@ import org.springframework.stereotype.Service;
 import server.repositories.NoteRepository;
 import server.utils.StringUtils;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class NoteServiceImpl implements NoteService {
@@ -47,18 +46,59 @@ public class NoteServiceImpl implements NoteService {
             throw new IllegalAccessException("Note with id " + id + " does not exist.");
         }
         Note fetchedNote = repo.findById(id).orElseThrow();
-        if (note.getTitle() != null) {
-            if (note.getTitle().isEmpty()) {
-                fetchedNote.setTitle("Untitled Note");
-            } else {
-                fetchedNote.setTitle(note.getTitle());
-            }
-        }
         if (note.getContent() != null) {
-            fetchedNote.setContent(note.getContent());
+            fetchedNote.setContent(note.getContent());  // Update content if changed
+        }
+        if (note.getTitle() != null) {
+            fetchedNote.setTitle(note.getTitle());      // Update title if changed
+        }
+//        if (fetchedNote.getTitle().isEmpty()
+//                && fetchedNote.getContent().isEmpty()) {
+//            repo.deleteById(id);                        // Delete note it title and content are empty
+//            return null;
+//        }
+        if (fetchedNote.getTitle().isEmpty()) {
+            fetchedNote.setTitle(generateUniqueTitle());// Generate unique title if only title is empty
         }
         return repo.save(fetchedNote);
     }
+
+    /**
+     * Generates a unique title following the pattern "Untitled Note X".
+     * If there are gaps in the sequence, it assigns the first available gap.
+     * If no gaps exist, it assigns the next number after the largest suffix.
+     * @return a unique title.
+     */
+    private String generateUniqueTitle() {
+        // Get all Untitled Note titles
+        List<String> titles = repo.findAll().stream()
+                                            .map(Note::getTitle)
+                                            .filter(title -> title.startsWith("Untitled Note "))
+                                            .toList();
+        // Get the numbers of the Untitled notes
+        List<Integer> numbers = titles.stream()
+                                    .map(title -> {
+                                        String[] split = title.split(" ");
+                                        try {
+                                            return Integer.parseInt(split[2]);
+                                        } catch (Exception e) {
+                                            return -1; // Ignore titles that don't match the format
+                                        }
+                                    })
+                                    .filter(n -> n > 0)
+                                    .sorted()
+                                    .toList();
+        // Find the next available number in the sequence
+        int nextNumber = 1;
+        for (Integer number : numbers) {
+            if (number != nextNumber) {
+                break; // Found a gap
+            }
+            nextNumber++;
+        }
+        return "Untitled Note " + nextNumber;
+    }
+
 
     public void deleteNote(long id) throws IllegalAccessException {
         if (!noteExists(id)) {
