@@ -80,26 +80,16 @@ public class NoteOverviewCtrl implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         noteTitle.textProperty().addListener((_, _, newValue) -> {
-            if (curNoteIndex == null || curNoteId == null || newValue.trim().isEmpty()) {
-                return; // Ignore updates when no note is selected or title is empty
+            if (curNoteIndex == null || curNoteId == null) {
+                return; // Ignore updates when no note is selected
             }
             changeCountTitle++;
-            //System.out.println("Change has occured at " + curNoteIndex);
-            try{
-                Platform.runLater(() -> {
-                    notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
-                });
-            } catch(Exception e){
-                System.out.println(e.getMessage());
-            }
-
-
+            notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
             debounce(() -> {
                 try {
                     Note updatedNote = new Note();
                     updatedNote.setTitle(newValue);
                     server.updateNoteByID(curNoteId, updatedNote);
-                    changeCountTitle = 0;
                 } catch (Exception e) {
                     System.out.println("Failed to update title: " + e.getMessage());
                 }

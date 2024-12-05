@@ -31,9 +31,6 @@ public class NoteServiceImpl implements NoteService {
     }
 
     public Note saveNote(Note note) {
-        if (StringUtils.isNullOrEmpty(note.getContent())) {
-            throw new IllegalArgumentException("Note content cannot be null or empty");
-        }
         return repo.save(note);
     }
 

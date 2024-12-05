@@ -129,7 +129,7 @@ public class ServerUtils {
 		return  ClientBuilder.newClient(new ClientConfig())
 				.target(SERVER).path("notes/add")
 				.request(APPLICATION_JSON)
-				.post(Entity.entity(new Note("Untitled note", " "),APPLICATION_JSON), Note.class);
+				.post(Entity.entity(new Note("Untitled Note", null),APPLICATION_JSON), Note.class);
 	}
 
 	public void SetServerURL(String serverURL){
