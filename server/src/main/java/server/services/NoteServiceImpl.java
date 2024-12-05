@@ -52,11 +52,6 @@ public class NoteServiceImpl implements NoteService {
         if (note.getTitle() != null) {
             fetchedNote.setTitle(note.getTitle());      // Update title if changed
         }
-//        if (fetchedNote.getTitle().isEmpty()
-//                && fetchedNote.getContent().isEmpty()) {
-//            repo.deleteById(id);                        // Delete note it title and content are empty
-//            return null;
-//        }
         if (fetchedNote.getTitle().isEmpty()) {
             fetchedNote.setTitle(generateUniqueTitle());// Generate unique title if only title is empty
         }
