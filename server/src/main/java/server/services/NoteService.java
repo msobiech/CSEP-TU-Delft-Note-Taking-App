@@ -23,4 +23,6 @@ public interface NoteService {
     List<Note> searchNotes(String keyword);
 
     void deleteNote(long id) throws IllegalAccessException;
+
+    String generateUniqueTitle();
 }

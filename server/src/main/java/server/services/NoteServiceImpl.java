@@ -64,7 +64,7 @@ public class NoteServiceImpl implements NoteService {
      * If no gaps exist, it assigns the next number after the largest suffix.
      * @return a unique title.
      */
-    private String generateUniqueTitle() {
+    public String generateUniqueTitle() {
         // Get all Untitled Note titles
         List<String> titles = repo.findAll().stream()
                                             .map(Note::getTitle)
