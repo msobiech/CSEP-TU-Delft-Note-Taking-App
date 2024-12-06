@@ -48,6 +48,7 @@ public class NoteController {
     @PostMapping("/add")
     public ResponseEntity<Note> addNote(@RequestBody Note note) {
         try {
+            note.setTitle(noteService.generateUniqueTitle());
             Note savedNote = noteService.saveNote(note);
             return ResponseEntity.ok(savedNote);
         } catch (IllegalArgumentException e) {

@@ -66,8 +66,6 @@ public class NoteOverviewCtrl implements Initializable {
     private final int DELAY = 1000;
     private Runnable lastTask = null;
 
-    private boolean ignoreNext = false;
-
     private Long curNoteId = null;
     private Integer curNoteIndex = null;
 
@@ -80,26 +78,20 @@ public class NoteOverviewCtrl implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         noteTitle.textProperty().addListener((_, _, newValue) -> {
-            if (curNoteIndex == null || curNoteId == null || newValue.trim().isEmpty()) {
-                return; // Ignore updates when no note is selected or title is empty
+            if (curNoteIndex == null || curNoteId == null) {
+                return; // Ignore updates when no note is selected
             }
             changeCountTitle++;
-            //System.out.println("Change has occured at " + curNoteIndex);
             try{
-                Platform.runLater(() -> {
-                    notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
-                });
+                notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
             } catch(Exception e){
                 System.out.println(e.getMessage());
             }
-
-
             debounce(() -> {
                 try {
                     Note updatedNote = new Note();
                     updatedNote.setTitle(newValue);
                     server.updateNoteByID(curNoteId, updatedNote);
-                    changeCountTitle = 0;
                 } catch (Exception e) {
                     System.out.println("Failed to update title: " + e.getMessage());
                 }
@@ -117,7 +109,18 @@ public class NoteOverviewCtrl implements Initializable {
                 debounceTimer.cancel(); // Cancel any pending debounced update
             }
         });
-
+        noteTitle.focusedProperty().addListener((_, _, newValue) -> {
+            if (!newValue) { // Focus lost on title
+                handleTitleOnFocusLost();
+            }
+        });
+        noteDisplay.focusedProperty().addListener((_, _, hasFocus) -> {});
+        // Listener for switching notes (ensures deletion only happens when switching notes)
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
+            if (oldNote != null && !(noteTitle.isFocused() || noteDisplay.isFocused())) { // If switching notes and no fields are focused
+                handleNoteSwitch();
+            }
+        });
         noteDisplay.setEditable(false);
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
 
@@ -195,6 +198,54 @@ public class NoteOverviewCtrl implements Initializable {
 
     }
 
+    private void handleTitleOnFocusLost() {
+        if (curNoteId != null) {
+            try {
+                Note updatedNote = new Note();
+                updatedNote.setTitle(noteTitle.getText());
+                updatedNote.setContent(noteDisplay.getText());
+                server.updateNoteByID(curNoteId, updatedNote);
+            } catch (Exception e) {
+                System.out.println("Failed to update note on focus loss: " + e.getMessage());
+            }
+            refreshNotes();
+        }
+    }
+
+    /**
+     * Handles logic for when the user leaves a note (e.g., switches to a different note).
+     */
+    private void handleNoteSwitch() {
+        // Do nothing if either field still has focus
+        if (noteTitle.isFocused() || noteDisplay.isFocused()) {
+            return;
+        }
+        if (curNoteId != null) {
+            String currentTitle = noteTitle.getText() != null ? noteTitle.getText().trim() : "";
+            String currentContent = noteDisplay.getText() != null ? noteDisplay.getText().trim() : "";
+            if (currentTitle.isEmpty() && currentContent.isEmpty()) {
+                try {
+                    var selectedNote = notesList.getSelectionModel().getSelectedItem();
+                    server.deleteNoteByID(curNoteId);
+                    notesList.getItems().remove(selectedNote);
+                    curNoteId = null;
+                    refreshNotes();
+                } catch (Exception e) {
+                    System.out.println("Failed to delete empty note: " + e.getMessage());
+                }
+            } else {
+                // Save changes to the note
+                try {
+                    Note updatedNote = new Note();
+                    updatedNote.setTitle(noteTitle.getText());
+                    updatedNote.setContent(noteDisplay.getText());
+                    server.updateNoteByID(curNoteId, updatedNote);
+                } catch (Exception e) {
+                    System.out.println("Failed to update note on note switch: " + e.getMessage());
+                }
+            }
+        }
+    }
 
     /**
      * This method allows you to schedule a task that will be executed in the given delay
@@ -263,10 +314,13 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     /**
-     * Method that refreshes the notes. (Currently not connected to the server)
+     * Method that refreshes the notes.
      */
     public void refreshNotes() {
         System.out.println("Refreshed the note list");
+        Pair<Long, String> selectedNote = notesList.getSelectionModel().getSelectedItem();
+        Long selectedNoteId = (selectedNote != null) ? selectedNote.getKey() : null;
+
         var notesFromServer = server.getNoteTitles();
         List<Pair<Long, String>> notesAsPairs = new ArrayList<>();
         for(var row: notesFromServer){
@@ -291,6 +345,17 @@ public class NoteOverviewCtrl implements Initializable {
                 }
             }
         });
+        // Re-select the previously selected note (if it exists)
+        if (selectedNoteId != null) {
+            for (int i = 0; i < notes.size(); i++) {
+                if (notes.get(i).getKey().equals(selectedNoteId)) {
+                    notesList.getSelectionModel().select(i); // Select the note by index
+                    break;
+                }
+            }
+        } else {
+            notesList.getSelectionModel().clearSelection(); // Clear selection if no valid note
+        }
     }
 
     /**
