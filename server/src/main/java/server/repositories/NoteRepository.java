@@ -1,6 +1,5 @@
 package server.repositories;
 
-import models.Collection;
 import models.Note;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
