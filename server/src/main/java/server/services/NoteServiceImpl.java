@@ -66,8 +66,7 @@ public class NoteServiceImpl implements NoteService {
             Optional<Collection> collection = getCollectionById(collectionId);
             if(collection.isPresent()){
                 newCollections.add(collection.get());
-            }
-            else{
+            } else{
                 throw new IllegalAccessException("Collection with id " + collectionId + " does not exist.");
             }
         }
