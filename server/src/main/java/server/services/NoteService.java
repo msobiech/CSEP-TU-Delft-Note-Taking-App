@@ -1,5 +1,6 @@
 package server.services;
 
+import models.Collection;
 import models.Note;
 
 import java.util.List;
@@ -25,4 +26,14 @@ public interface NoteService {
     void deleteNote(long id) throws IllegalAccessException;
 
     String generateUniqueTitle();
+
+    List<Collection> getAllCollections();
+
+    Collection addCollection(Collection collection);
+
+    Optional<Collection> getCollectionById(long id);
+
+    List<Note> getNotesByCollectionId(long id);
+
+    List<Collection> getCollectionsByNoteId(long id);
 }

@@ -1,9 +1,13 @@
 package models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Note {
@@ -14,6 +18,18 @@ public class Note {
 
     @Column(length=1<<20)
     private String content;
+    
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {
+            CascadeType.PERSIST,
+            CascadeType.MERGE
+    })
+    @JoinTable(
+            name = "collection_notes",
+            joinColumns = @JoinColumn(name = "note_id"),
+            inverseJoinColumns = @JoinColumn(name = "collection_id")
+    )
+    private Set<Collection> collections = new HashSet<>();
+
 
     /**
      * Empty constructor for Object Mapping
@@ -29,6 +45,7 @@ public class Note {
         this.title = title;
         this.content = content;
     }
+
 
     /**
      * Gets the title of the object.
@@ -70,6 +87,13 @@ public class Note {
         return id;
     }
 
+    public Set<Collection> getCollections() {
+        return collections;
+    }
+
+    public void setCollections(Set<Collection> collections) {
+        this.collections = collections;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -87,6 +111,8 @@ public class Note {
         return new HashCodeBuilder(17, 37).append(id).append(title).append(content).toHashCode();
     }
 
+
+
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -95,4 +121,6 @@ public class Note {
                 .append("content", content)
                 .toString();
     }
+
+
 }

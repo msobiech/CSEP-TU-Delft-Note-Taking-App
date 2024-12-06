@@ -1,7 +1,9 @@
 package server.controllers;
 
+import models.Collection;
 import models.Note;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.services.NoteService;
@@ -79,5 +81,11 @@ public class NoteController {
     public ResponseEntity<List<Note>> searchNote(@RequestParam("keyword") String keyword) {
         List<Note> notes = noteService.searchNotes(keyword);
         return ResponseEntity.ok(notes);
+    }
+
+    @GetMapping("/get/{id}/collections")
+    public ResponseEntity<List<Collection>> getCollectionsByNoteId(@PathVariable int id) {
+        List<Collection> collections = noteService.getCollectionsByNoteId(id);
+        return new ResponseEntity<>(collections, HttpStatus.OK);
     }
 }
