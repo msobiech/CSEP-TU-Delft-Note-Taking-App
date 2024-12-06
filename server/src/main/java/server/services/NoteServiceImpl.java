@@ -1,5 +1,6 @@
 package server.services;
 
+import javafx.util.Pair;
 import models.Note;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -102,10 +103,12 @@ public class NoteServiceImpl implements NoteService {
         repo.deleteById(id);
     }
 
-    public List<Note> searchNotes(String keyword) {
+    public List<Object[]> searchNotes(String keyword) {
         if (StringUtils.isNullOrEmpty(keyword)) {
             return List.of();
         }
-        return repo.findByTitleOrContentContainingIgnoreCase(keyword);
+        return repo.findByTitleOrContentContainingIgnoreCase(keyword).stream()
+                .map(note -> new Object[] {note.getId(), note.getTitle()})
+                .toList();
     }
 }

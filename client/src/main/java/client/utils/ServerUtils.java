@@ -22,10 +22,12 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
+import javafx.util.Pair;
 import models.Note;
 
 import org.glassfish.jersey.client.ClientConfig;
@@ -134,5 +136,17 @@ public class ServerUtils {
 
 	public void SetServerURL(String serverURL){
 		SERVER = serverURL;
+	}
+
+	public List<Object[]> searchNotes(String keyword){
+		if (keyword == null || keyword.trim().isEmpty()) {
+			throw new IllegalArgumentException("Search query cannot be null or empty");
+		}
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER)
+				.path("/notes/search")
+				.queryParam("keyword", keyword)
+				.request(APPLICATION_JSON)
+				.get(new GenericType<List<Object[]>>() {});
 	}
 }

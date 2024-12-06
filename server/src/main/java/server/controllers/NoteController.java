@@ -1,5 +1,6 @@
 package server.controllers;
 
+import javafx.util.Pair;
 import models.Note;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -76,8 +77,8 @@ public class NoteController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Note>> searchNote(@RequestParam("keyword") String keyword) {
-        List<Note> notes = noteService.searchNotes(keyword);
+    public ResponseEntity<List<Object[]>> searchNote(@RequestParam("keyword") String keyword) {
+        List<Object[]> notes = noteService.searchNotes(keyword);
         return ResponseEntity.ok(notes);
     }
 }
