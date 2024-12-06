@@ -29,6 +29,8 @@ public class Note {
     )
     private Set<Collection> collections = new HashSet<>();
 
+    @Transient
+    private Set<Long> collectionIds = new HashSet<>();
 
     /**
      * Empty constructor for Object Mapping
@@ -45,6 +47,13 @@ public class Note {
         this.content = content;
     }
 
+    public Set<Long> getCollectionIds() {
+        return collectionIds;
+    }
+
+    public void setCollectionIds(Set<Long> collectionIds) {
+        this.collectionIds = collectionIds;
+    }
 
     /**
      * Gets the title of the object.

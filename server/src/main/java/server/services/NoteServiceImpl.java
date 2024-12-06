@@ -61,6 +61,17 @@ public class NoteServiceImpl implements NoteService {
             fetchedNote.setTitle(generateUniqueTitle());// Generate unique title if only title is empty
         }
         fetchedNote.setCollections(note.getCollections());
+        Set<Collection> newCollections = new HashSet<Collection>();
+        for(Long collectionId:note.getCollectionIds()){
+            Optional<Collection> collection = getCollectionById(collectionId);
+            if(collection.isPresent()){
+                newCollections.add(collection.get());
+            }
+            else{
+                throw new IllegalAccessException("Collection with id " + collectionId + " does not exist.");
+            }
+        }
+        fetchedNote.setCollections(newCollections);
         return noteRepo.save(fetchedNote);
     }
 
