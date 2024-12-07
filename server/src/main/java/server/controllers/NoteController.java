@@ -1,6 +1,5 @@
 package server.controllers;
 
-import javafx.util.Pair;
 import models.Note;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
