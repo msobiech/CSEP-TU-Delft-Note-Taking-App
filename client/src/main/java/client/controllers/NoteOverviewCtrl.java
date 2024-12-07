@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import client.utils.DebounceService;
+import client.utils.NoteService;
 import com.google.inject.Inject;
 
 import client.utils.ServerUtils;
@@ -32,6 +34,8 @@ public class NoteOverviewCtrl implements Initializable {
 
     private final ServerUtils server;
     private final MainCtrl mainCtrl;
+    private final NoteService noteService;
+    private final DebounceService debounceService;
 
     @FXML
     private TextField noteTitle;
@@ -71,18 +75,16 @@ public class NoteOverviewCtrl implements Initializable {
     private Integer curNoteIndex = null;
 
     @Inject
-    public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl) {
+    public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl, NoteService noteService, DebounceService debounceService) {
         this.server = server;
         this.mainCtrl = mainCtrl;
+        this.noteService = noteService;
+        this.debounceService = debounceService;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        searchBar.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) { // Check if the Enter key was pressed
-                searchNotes(); // Trigger the searchNotes method
-            }
-        });
+        setupSearch();
         noteTitle.textProperty().addListener((_, _, newValue) -> {
             if (curNoteIndex == null || curNoteId == null) {
                 return; // Ignore updates when no note is selected
@@ -95,18 +97,14 @@ public class NoteOverviewCtrl implements Initializable {
             }
             debounce(() -> {
                 try {
-                    Note updatedNote = new Note();
-                    updatedNote.setTitle(newValue);
-                    server.updateNoteByID(curNoteId, updatedNote);
+                    noteService.updateNoteTitle(newValue, curNoteId);
                 } catch (Exception e) {
                     System.out.println("Failed to update title: " + e.getMessage());
                 }
             },DELAY);
             if (changeCountTitle >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
                 try {
-                    Note updatedNote = new Note();
-                    updatedNote.setTitle(newValue);
-                    server.updateNoteByID(curNoteId, updatedNote);
+                    noteService.updateNoteTitle(newValue, curNoteId);
                     changeCountTitle = 0;
                 } catch (Exception e) {
                     System.out.println("Failed to update title: " + e.getMessage());
@@ -134,11 +132,7 @@ public class NoteOverviewCtrl implements Initializable {
 
                 noteDisplay.setEditable(true);
                 noteTitle.setEditable(true);
-                if(lastTask != null) {
-                    debounceTimer.cancel();
-                    lastTask.run();
-                    lastTask = null;
-                }
+                debounceService.runTask(lastTask);
                 curNoteId = newNote.getKey();
                 curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
                 var newTitle = newNote.getValue();
@@ -170,12 +164,12 @@ public class NoteOverviewCtrl implements Initializable {
             } catch (InterruptedException e) {
                 mainCtrl.showError(e.toString());
             }
+
+
             debounce(() -> {
                 if (curNoteId != null) {
                     try {
-                        Note updatedNote = new Note();
-                        updatedNote.setContent(newValue);
-                        server.updateNoteByID(curNoteId, updatedNote);
+                        noteService.updateNoteContent(newValue, curNoteId);
                         changeCountContent = 0;
                     } catch (Exception e) {
                         System.out.println("Failed to update content: " + e.getMessage());
@@ -185,9 +179,7 @@ public class NoteOverviewCtrl implements Initializable {
             if (changeCountContent >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
                 if (curNoteId != null) {
                     try {
-                        Note updatedNote = new Note();
-                        updatedNote.setContent(newValue);
-                        server.updateNoteByID(curNoteId, updatedNote);
+                        noteService.updateNoteContent(newValue, curNoteId);
                         changeCountContent = 0;
                         debounceTimer.cancel(); // Cancel any pending debounced update
                     } catch (Exception e) {
@@ -202,6 +194,14 @@ public class NoteOverviewCtrl implements Initializable {
             removeNoteButton.setDisable(newValue == null);
         });
 
+    }
+
+    private void setupSearch() {
+        searchBar.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) { // Check if the Enter key was pressed
+                searchNotes(); // Trigger the searchNotes method
+            }
+        });
     }
 
     private void handleTitleOnFocusLost() {
@@ -364,13 +364,12 @@ public class NoteOverviewCtrl implements Initializable {
         }
     }
     /**
-     * Method to add notes (Currently not functional)
+     * Method to add notes
      */
     public void addNote(){
         System.out.println("Adding a new note");
         server.addNote();
         refreshNotes();
-        //mainCtrl.showAdd();
     }
 
     @FXML
