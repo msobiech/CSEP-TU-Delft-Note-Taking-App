@@ -133,12 +133,15 @@ public class NoteServiceImpl implements NoteService {
 
 
     @Override
-    public List<Note> searchNotes(String keyword) {
+    public List<Object[]> searchNotes(String keyword) {
         if (StringUtils.isNullOrEmpty(keyword)) {
             return List.of();
         }
-        return noteRepo.findByTitleOrContentContainingIgnoreCase(keyword);
+        return noteRepo.findByTitleOrContentContainingIgnoreCase(keyword).stream()
+                .map(note -> new Object[] {note.getId(), note.getTitle()})
+                .toList();
     }
+
 
     @Override
     public List<models.Collection> getAllCollections() {
@@ -162,16 +165,7 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public List<Collection> getCollectionsByNoteId(long id){
+    public List<Collection> getCollectionsByNoteId(long id) {
         return collectionRepo.findCollectionsByNotesId(id);
-
-    public List<Object[]> searchNotes(String keyword) {
-        if (StringUtils.isNullOrEmpty(keyword)) {
-            return List.of();
-        }
-        return repo.findByTitleOrContentContainingIgnoreCase(keyword).stream()
-                .map(note -> new Object[] {note.getId(), note.getTitle()})
-                .toList();
-
     }
 }
