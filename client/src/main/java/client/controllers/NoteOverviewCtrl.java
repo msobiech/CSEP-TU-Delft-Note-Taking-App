@@ -18,6 +18,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.web.WebView;
 
 import com.vladsch.flexmark.parser.Parser;
@@ -53,7 +54,7 @@ public class NoteOverviewCtrl implements Initializable {
     @FXML
     private Button addNoteButton, removeNoteButton, refreshNotesButton;
 
-    private ObservableList<Pair<Long, String>> notes; // pair of the note ID and note title
+    private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
 
     private final Parser markdownParser = Parser.builder().extensions(List.of(TablesExtension.create())).build();
@@ -77,6 +78,11 @@ public class NoteOverviewCtrl implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        searchBar.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) { // Check if the Enter key was pressed
+                searchNotes(); // Trigger the searchNotes method
+            }
+        });
         noteTitle.textProperty().addListener((_, _, newValue) -> {
             if (curNoteIndex == null || curNoteId == null) {
                 return; // Ignore updates when no note is selected
@@ -358,7 +364,6 @@ public class NoteOverviewCtrl implements Initializable {
             notesList.getSelectionModel().clearSelection(); // Clear selection if no valid note
         }
     }
-
     /**
      * Method to add notes (Currently not functional)
      */
@@ -367,6 +372,50 @@ public class NoteOverviewCtrl implements Initializable {
         server.addNote();
         refreshNotes();
         //mainCtrl.showAdd();
+    }
+
+    @FXML
+    private void searchNotes() {
+        String query = searchBar.getText();
+        System.out.println(query);
+        Pair<Long, String> selectedNote = notesList.getSelectionModel().getSelectedItem();
+        Long selectedNoteId = (selectedNote != null) ? selectedNote.getKey() : null;
+        List<Pair<Long, String>> notesAsPairs = new ArrayList<>();
+
+        var notesFromServer = server.searchNotes(query);
+        for(var row: notesFromServer){
+            Long id = ((Integer)row[0]).longValue();
+            String title = (String)row[1];
+            notesAsPairs.add(new Pair<>(id, title));
+        }
+        notes = FXCollections.observableArrayList(notesAsPairs);
+        notesList.setItems(notes);
+        //Since the list is of the pairs, and they are not really observable objects (They do not implement Observable)
+        //We have to change the list to only display the note title (The code is strongly from the internet)
+        notesList.setCellFactory(_ -> new ListCell<>() { //The cell factory is responsible for rendering the data contained
+            // within each TableCell for a single table column.
+            @Override
+            protected void updateItem(Pair<Long, String> item, boolean empty) { //updateItem is called whenever a cell needs to be updated
+                super.updateItem(item, empty); //supposedly its necessary from what I understand the updateItem
+                // needs to call its parents class in order to do all the basic checks
+                if (item == null || empty) {
+                    setText(null); //If the item is empty then set the text to null (Shouldn't happen I think)
+                } else {
+                    setText(item.getValue());  // Display only the title (second value of the pair)
+                }
+            }
+        });
+        // Re-select the previously selected note (if it exists)
+        if (selectedNoteId != null) {
+            for (int i = 0; i < notes.size(); i++) {
+                if (notes.get(i).getKey().equals(selectedNoteId)) {
+                    notesList.getSelectionModel().select(i); // Select the note by index
+                    break;
+                }
+            }
+        } else {
+            notesList.getSelectionModel().clearSelection(); // Clear selection if no valid note
+        }
     }
 
     /**

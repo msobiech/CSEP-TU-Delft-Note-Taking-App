@@ -62,7 +62,8 @@ public interface NoteService {
      * @param keyword to match
      * @return list of notes that match the keyword
      */
-    List<Note> searchNotes(String keyword);
+    List<Object[]> searchNotes(String keyword);
+
 
     /**
      * Delete note with given id
