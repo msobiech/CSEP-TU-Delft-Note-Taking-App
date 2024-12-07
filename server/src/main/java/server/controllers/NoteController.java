@@ -76,8 +76,8 @@ public class NoteController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Note>> searchNote(@RequestParam("keyword") String keyword) {
-        List<Note> notes = noteService.searchNotes(keyword);
+    public ResponseEntity<List<Object[]>> searchNote(@RequestParam("keyword") String keyword) {
+        List<Object[]> notes = noteService.searchNotes(keyword);
         return ResponseEntity.ok(notes);
     }
 }

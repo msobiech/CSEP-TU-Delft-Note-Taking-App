@@ -102,10 +102,12 @@ public class NoteServiceImpl implements NoteService {
         repo.deleteById(id);
     }
 
-    public List<Note> searchNotes(String keyword) {
+    public List<Object[]> searchNotes(String keyword) {
         if (StringUtils.isNullOrEmpty(keyword)) {
             return List.of();
         }
-        return repo.findByTitleOrContentContainingIgnoreCase(keyword);
+        return repo.findByTitleOrContentContainingIgnoreCase(keyword).stream()
+                .map(note -> new Object[] {note.getId(), note.getTitle()})
+                .toList();
     }
 }

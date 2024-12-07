@@ -135,4 +135,16 @@ public class ServerUtils {
 	public void SetServerURL(String serverURL){
 		SERVER = serverURL;
 	}
+
+	public List<Object[]> searchNotes(String keyword){
+		if (keyword == null || keyword.trim().isEmpty()) {
+			throw new IllegalArgumentException("Search query cannot be null or empty");
+		}
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER)
+				.path("/notes/search")
+				.queryParam("keyword", keyword)
+				.request(APPLICATION_JSON)
+				.get(new GenericType<List<Object[]>>() {});
+	}
 }
