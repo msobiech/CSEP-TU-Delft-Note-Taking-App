@@ -85,6 +85,17 @@ public class NoteOverviewCtrl implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupSearch();
+        handleNoteTitleChanged();
+        handleNoteSelectionChange();
+        handleNoteContentChange();
+
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
+            removeNoteButton.setDisable(newValue == null);
+        });
+
+    }
+
+    private void handleNoteTitleChanged() {
         noteTitle.textProperty().addListener((_, _, newValue) -> {
             if (curNoteIndex == null || curNoteId == null) {
                 return; // Ignore updates when no note is selected
@@ -113,50 +124,10 @@ public class NoteOverviewCtrl implements Initializable {
                 debounceTimer.cancel(); // Cancel any pending debounced update
             }
         });
-        noteTitle.focusedProperty().addListener((_, _, newValue) -> {
-            if (!newValue) { // Focus lost on title
-                handleTitleOnFocusLost();
-            }
-        });
-        noteDisplay.focusedProperty().addListener((_, _, hasFocus) -> {});
-        // Listener for switching notes (ensures deletion only happens when switching notes)
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
-            if (oldNote != null && !(noteTitle.isFocused() || noteDisplay.isFocused())) { // If switching notes and no fields are focused
-                handleNoteSwitch();
-            }
-        });
-        noteDisplay.setEditable(false);
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
-
-            if (newNote != null) {
-
-                noteDisplay.setEditable(true);
-                noteTitle.setEditable(true);
-                debounceService.runTask(lastTask);
-                curNoteId = newNote.getKey();
-                curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
-                var newTitle = newNote.getValue();
-                if(oldNote!=null && !Objects.equals(oldNote.getKey(), newNote.getKey())) {
-                    updateNoteTitle(newTitle);
-                } else if(oldNote==null){
-                    updateNoteTitle(newTitle);
-                }
-                var id = newNote.getKey();
+    }
 
 
-
-                var content = server.getNoteContentByID(id);
-                updateNoteDisplay(content);
-                try {
-                    renderMarkdown(content);
-                } catch (InterruptedException e) {
-                    mainCtrl.showError(e.toString());
-                }
-
-            } else{
-                noteDisplay.setEditable(false);
-            }
-        });
+    private void handleNoteContentChange() {
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
             changeCountContent++; // Count the amount of changes
             try {
@@ -189,11 +160,55 @@ public class NoteOverviewCtrl implements Initializable {
             }
         });
         removeNoteButton.setDisable(true);
+    }
 
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
-            removeNoteButton.setDisable(newValue == null);
+        private void handleNoteSelectionChange() {
+        noteTitle.focusedProperty().addListener((_, _, newValue) -> {
+            if (!newValue) { // Focus lost on title
+                handleTitleOnFocusLost();
+            }
         });
+        noteDisplay.focusedProperty().addListener((_, _, hasFocus) -> {});
+        // Listener for switching notes (ensures deletion only happens when switching notes)
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
+            if (oldNote != null && !(noteTitle.isFocused() || noteDisplay.isFocused())) { // If switching notes and no fields are focused
+                handleNoteSwitch();
+            }
+        });
+        noteDisplay.setEditable(false);
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
 
+            updateContentAndTitle(oldNote, newNote);
+        });
+    }
+
+    private void updateContentAndTitle(Pair<Long, String> oldNote, Pair<Long, String> newNote) {
+        if (newNote != null) {
+
+            noteDisplay.setEditable(true);
+            noteTitle.setEditable(true);
+            debounceService.runTask(lastTask);
+            curNoteId = newNote.getKey();
+            curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
+            var newTitle = newNote.getValue();
+            if(oldNote !=null && !Objects.equals(oldNote.getKey(), newNote.getKey())) {
+                updateNoteTitle(newTitle);
+            } else if(oldNote ==null){
+                updateNoteTitle(newTitle);
+            }
+            var id = newNote.getKey();
+
+            var content = server.getNoteContentByID(id);
+            updateNoteDisplay(content);
+            try {
+                renderMarkdown(content);
+            } catch (InterruptedException e) {
+                mainCtrl.showError(e.toString());
+            }
+
+        } else{
+            noteDisplay.setEditable(false);
+        }
     }
 
     private void setupSearch() {
