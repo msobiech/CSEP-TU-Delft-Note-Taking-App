@@ -22,8 +22,11 @@ public class ServerSelectionCtrl {
         this.serverTextField = new TextField();
     }
 
+    /**
+     * Method to act on clicking the connected element.
+     */
     public void click() {
-        server.SetServerURL(serverTextField.getText());
+        server.setServerURL(serverTextField.getText());
         mainCtrl.hideServerSelection();
         mainCtrl.showOverview();
     }

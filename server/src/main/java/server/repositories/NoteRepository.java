@@ -26,6 +26,11 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     List<Note> findByTitleOrContentContainingIgnoreCase(String keyword);
 
 
+    /**
+     * Retrieves notes connected to the collection with given id
+     * @param collectionId to search by
+     * @return a list of match {@link Note} objects, or an empty list if no matches are found.
+     */
     List<Note> findNotesByCollectionsId(Long collectionId);
 
 }

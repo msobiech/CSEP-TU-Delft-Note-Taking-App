@@ -37,6 +37,7 @@ import jakarta.ws.rs.client.ClientBuilder;
 
 public class ServerUtils {
 
+
 	private static String SERVER = "http://localhost:8080/";
 
 	/**
@@ -125,6 +126,10 @@ public class ServerUtils {
 		}
 	}
 
+	/**
+	 * Adds note the database
+	 * @return added note
+	 */
 	public Note addNote() {
 		return  ClientBuilder.newClient(new ClientConfig())
 				.target(SERVER).path("notes/add")
@@ -132,7 +137,11 @@ public class ServerUtils {
 				.post(Entity.entity(new Note("Untitled Note", ""),APPLICATION_JSON), Note.class);
 	}
 
-	public void SetServerURL(String serverURL){
+	/**
+	 * Method to set ServerUrl to given parameter
+	 * @param serverURL the url to set to.
+	 */
+	public void setServerURL(String serverURL){
 		SERVER = serverURL;
 	}
 }

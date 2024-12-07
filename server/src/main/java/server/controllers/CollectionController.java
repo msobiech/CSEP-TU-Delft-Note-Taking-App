@@ -15,6 +15,10 @@ import java.util.List;
 public class CollectionController {
     private final NoteService noteService;
 
+    /**
+     * Establishes the noteServise implementation with autowiring
+     * @param noteService to set the service to
+     */
     @Autowired
     public CollectionController(NoteService noteService) {
         this.noteService = noteService;

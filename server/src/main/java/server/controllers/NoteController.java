@@ -20,6 +20,10 @@ import java.util.List;
 public class NoteController {
     private final NoteService noteService;
 
+    /**
+     * Establishes NoteService implementation with Autowiring
+     * @param noteService to establish the service
+     */
     @Autowired
     public NoteController(NoteService noteService) {
         this.noteService = noteService;
@@ -37,6 +41,12 @@ public class NoteController {
                 .orElse(ResponseEntity.badRequest().build());
     }
 
+    /**
+     * Updates note with given id and structure
+     * @param id of note to update
+     * @param note to update to
+     * @return Updated note
+     */
     @PutMapping("/update/{id}")
     public ResponseEntity<Note> updateNote(@PathVariable("id") long id, @RequestBody Note note) {
         try {
@@ -60,6 +70,11 @@ public class NoteController {
         }
     }
 
+    /**
+     * Deletes note with given id
+     * @param id of note to delete
+     * @return (TODO: Change it to return deleted note) Returns nothing
+     */
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteNote(@PathVariable("id") long id) {
         try {

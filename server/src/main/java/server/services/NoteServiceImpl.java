@@ -15,37 +15,48 @@ public class NoteServiceImpl implements NoteService {
     private final NoteRepository noteRepo;
     private final CollectionRepository collectionRepo;
 
+    /**
+     * Establishes repositories used in the service
+     * @param noteRepo the repository with notes
+     * @param collectionRepo the repository with collections
+     */
     @Autowired
     public NoteServiceImpl(NoteRepository noteRepo, CollectionRepository collectionRepo) {
         this.noteRepo = noteRepo;
         this.collectionRepo = collectionRepo;
     }
 
+    @Override
     public List<Note> getAllNotes() {
         return noteRepo.findAll();
     }
 
+    @Override
     public Optional<Note> getNoteById(long id) {
         return id > 0 ? noteRepo.findById(id) : Optional.empty();
     }
 
-
+    @Override
     public boolean noteExists(long id) {
         return id > 0 && noteRepo.existsById(id);
     }
 
+    @Override
     public Note saveNote(Note note) {
         return noteRepo.save(note);
     }
 
+    @Override
     public List<Note> searchNotesByKeyword(String keyword) {
         return noteRepo.findByTitleOrContentContainingIgnoreCase(keyword);
     }
 
+    @Override
     public List<Object[]> getNotesIdAndTitle() {
         return noteRepo.findIdAndTitle();
     }
 
+    @Override
     public Note updateNote(long id, Note note) throws IllegalAccessException {
         if (!noteExists(id)) {
             throw new IllegalAccessException("Note with id " + id + " does not exist.");
@@ -80,6 +91,7 @@ public class NoteServiceImpl implements NoteService {
      * If no gaps exist, it assigns the next number after the largest suffix.
      * @return a unique title.
      */
+    @Override
     public String generateUniqueTitle() {
         // Get all Untitled Note titles
         List<String> titles = noteRepo.findAll().stream()
@@ -111,6 +123,7 @@ public class NoteServiceImpl implements NoteService {
     }
 
 
+    @Override
     public void deleteNote(long id) throws IllegalAccessException {
         if (!noteExists(id)) {
             throw new IllegalAccessException("Note with id " + id + " does not exist.");
@@ -118,6 +131,7 @@ public class NoteServiceImpl implements NoteService {
         noteRepo.deleteById(id);
     }
 
+    @Override
     public List<Note> searchNotes(String keyword) {
         if (StringUtils.isNullOrEmpty(keyword)) {
             return List.of();
@@ -141,6 +155,7 @@ public class NoteServiceImpl implements NoteService {
         return id > 0 ? collectionRepo.findById(id) : Optional.empty();
     }
 
+    @Override
     public List<Note> getNotesByCollectionId(long id){
         return noteRepo.findNotesByCollectionsId(id);
     }
