@@ -70,6 +70,9 @@ public class Note {
         return id;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
 
     @Override
     public boolean equals(Object o) {

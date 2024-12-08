@@ -28,10 +28,12 @@ public class ErrorPopUpCtrl {
      * This method sets the error label to a helpful message
      *
      * @param error the String representing the error message
+     * @return String for the text
      */
-    public void setErrorLabel(String error) {
+    public String setErrorLabel(String error) {
         errorLabel.setText("Oh no! It seems the following error occurred:\n" + error +
             "\nFor common fixes please visit: \nhttps://emmer.dev/blog/common-markdown-mistakes/");
+        return errorLabel.getText();
     }
 
     /**
