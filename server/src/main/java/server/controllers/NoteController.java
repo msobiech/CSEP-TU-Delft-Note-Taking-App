@@ -1,7 +1,9 @@
 package server.controllers;
 
+import models.Collection;
 import models.Note;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import server.services.NoteService;
@@ -18,6 +20,10 @@ import java.util.List;
 public class NoteController {
     private final NoteService noteService;
 
+    /**
+     * Establishes NoteService implementation with Autowiring
+     * @param noteService to establish the service
+     */
     @Autowired
     public NoteController(NoteService noteService) {
         this.noteService = noteService;
@@ -35,6 +41,12 @@ public class NoteController {
                 .orElse(ResponseEntity.badRequest().build());
     }
 
+    /**
+     * Updates note with given id and structure
+     * @param id of note to update
+     * @param note to update to
+     * @return Updated note
+     */
     @PutMapping("/update/{id}")
     public ResponseEntity<Note> updateNote(@PathVariable("id") long id, @RequestBody Note note) {
         try {
@@ -58,6 +70,11 @@ public class NoteController {
         }
     }
 
+    /**
+     * Deletes note with given id
+     * @param id of note to delete
+     * @return (TODO: Change it to return deleted note) Returns nothing
+     */
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteNote(@PathVariable("id") long id) {
         try {
@@ -79,5 +96,11 @@ public class NoteController {
     public ResponseEntity<List<Object[]>> searchNote(@RequestParam("keyword") String keyword) {
         List<Object[]> notes = noteService.searchNotes(keyword);
         return ResponseEntity.ok(notes);
+    }
+
+    @GetMapping("/get/{id}/collections")
+    public ResponseEntity<List<Collection>> getCollectionsByNoteId(@PathVariable int id) {
+        List<Collection> collections = noteService.getCollectionsByNoteId(id);
+        return new ResponseEntity<>(collections, HttpStatus.OK);
     }
 }

@@ -15,7 +15,6 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     @Query("SELECT n.id, n.title FROM Note n")
     List<Object[]> findIdAndTitle();
 
-
     /**
      * Retrieves notes whose titles contain the specified keyword, ignoring case.
      *
@@ -25,5 +24,13 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
     @Query("SELECT n FROM Note n WHERE LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(n.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Note> findByTitleOrContentContainingIgnoreCase(String keyword);
+
+
+    /**
+     * Retrieves notes connected to the collection with given id
+     * @param collectionId to search by
+     * @return a list of match {@link Note} objects, or an empty list if no matches are found.
+     */
+    List<Note> findNotesByCollectionsId(Long collectionId);
 
 }
