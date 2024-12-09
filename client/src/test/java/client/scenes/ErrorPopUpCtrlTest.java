@@ -21,6 +21,7 @@ public class ErrorPopUpCtrlTest{
 
     @BeforeAll
     public static void setUp(){
+        System.setProperty("java.awt.headless", "true");
         Platform.startup(()->{});
     }
 
