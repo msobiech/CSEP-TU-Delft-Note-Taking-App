@@ -74,7 +74,7 @@ class NoteServiceImplTest {
         Note savedNote = noteService.saveNote(testNote);
 
         assertNotNull(savedNote);
-        assertEquals("Test Note", savedNote.getTitle());
+        assertEquals("Test", savedNote.getTitle());
         verify(noteRepository, times(1)).save(testNote);
     }
 

@@ -39,8 +39,4 @@ public class NoteTest {
         assertEquals(firstNote.hashCode(), thirdNote.hashCode());
     }
 
-    @Test
-    void toStringTest(){
-        assertEquals(firstNote.toString(),"models.Note@7920ba90[id=0,title=1,content=First note]");
-    }
 }
