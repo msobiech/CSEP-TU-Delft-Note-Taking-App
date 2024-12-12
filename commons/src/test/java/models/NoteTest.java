@@ -38,4 +38,5 @@ public class NoteTest {
         assertNotEquals(firstNote.hashCode(), secondNote.hashCode());
         assertEquals(firstNote.hashCode(), thirdNote.hashCode());
     }
+
 }
