@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import client.utils.DebounceService;
+import client.utils.NoteService;
 import com.google.inject.Inject;
 
 import client.utils.ServerUtils;
@@ -32,6 +34,8 @@ public class NoteOverviewCtrl implements Initializable {
 
     private final ServerUtils server;
     private final MainCtrl mainCtrl;
+    private final NoteService noteService;
+    private final DebounceService debounceService;
 
     @FXML
     private TextField noteTitle;
@@ -71,18 +75,27 @@ public class NoteOverviewCtrl implements Initializable {
     private Integer curNoteIndex = null;
 
     @Inject
-    public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl) {
+    public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl, NoteService noteService, DebounceService debounceService) {
         this.server = server;
         this.mainCtrl = mainCtrl;
+        this.noteService = noteService;
+        this.debounceService = debounceService;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        searchBar.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) { // Check if the Enter key was pressed
-                searchNotes(); // Trigger the searchNotes method
-            }
+        setupSearch();
+        handleNoteTitleChanged();
+        handleNoteSelectionChange();
+        handleNoteContentChange();
+
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
+            removeNoteButton.setDisable(newValue == null);
         });
+
+    }
+
+    private void handleNoteTitleChanged() {
         noteTitle.textProperty().addListener((_, _, newValue) -> {
             if (curNoteIndex == null || curNoteId == null) {
                 return; // Ignore updates when no note is selected
@@ -95,18 +108,14 @@ public class NoteOverviewCtrl implements Initializable {
             }
             debounce(() -> {
                 try {
-                    Note updatedNote = new Note();
-                    updatedNote.setTitle(newValue);
-                    server.updateNoteByID(curNoteId, updatedNote);
+                    noteService.updateNoteTitle(newValue, curNoteId);
                 } catch (Exception e) {
                     System.out.println("Failed to update title: " + e.getMessage());
                 }
             },DELAY);
             if (changeCountTitle >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
                 try {
-                    Note updatedNote = new Note();
-                    updatedNote.setTitle(newValue);
-                    server.updateNoteByID(curNoteId, updatedNote);
+                    noteService.updateNoteTitle(newValue, curNoteId);
                     changeCountTitle = 0;
                 } catch (Exception e) {
                     System.out.println("Failed to update title: " + e.getMessage());
@@ -115,6 +124,45 @@ public class NoteOverviewCtrl implements Initializable {
                 debounceTimer.cancel(); // Cancel any pending debounced update
             }
         });
+    }
+
+
+    private void handleNoteContentChange() {
+        noteDisplay.textProperty().addListener((_, _, newValue) -> {
+            changeCountContent++; // Count the amount of changes
+            try {
+                renderMarkdown(newValue);
+            } catch (InterruptedException e) {
+                mainCtrl.showError(e.toString());
+            }
+
+
+            debounce(() -> {
+                if (curNoteId != null) {
+                    try {
+                        noteService.updateNoteContent(newValue, curNoteId);
+                        changeCountContent = 0;
+                    } catch (Exception e) {
+                        System.out.println("Failed to update content: " + e.getMessage());
+                    }
+                }
+            }, DELAY);
+            if (changeCountContent >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
+                if (curNoteId != null) {
+                    try {
+                        noteService.updateNoteContent(newValue, curNoteId);
+                        changeCountContent = 0;
+                        debounceTimer.cancel(); // Cancel any pending debounced update
+                    } catch (Exception e) {
+                        System.out.println("Failed to update content: " + e.getMessage());
+                    }
+                }
+            }
+        });
+        removeNoteButton.setDisable(true);
+    }
+
+        private void handleNoteSelectionChange() {
         noteTitle.focusedProperty().addListener((_, _, newValue) -> {
             if (!newValue) { // Focus lost on title
                 handleTitleOnFocusLost();
@@ -130,78 +178,45 @@ public class NoteOverviewCtrl implements Initializable {
         noteDisplay.setEditable(false);
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
 
-            if (newNote != null) {
-
-                noteDisplay.setEditable(true);
-                noteTitle.setEditable(true);
-                if(lastTask != null) {
-                    debounceTimer.cancel();
-                    lastTask.run();
-                    lastTask = null;
-                }
-                curNoteId = newNote.getKey();
-                curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
-                var newTitle = newNote.getValue();
-                if(oldNote!=null && !Objects.equals(oldNote.getKey(), newNote.getKey())) {
-                    updateNoteTitle(newTitle);
-                } else if(oldNote==null){
-                    updateNoteTitle(newTitle);
-                }
-                var id = newNote.getKey();
-
-
-
-                var content = server.getNoteContentByID(id);
-                updateNoteDisplay(content);
-                try {
-                    renderMarkdown(content);
-                } catch (InterruptedException e) {
-                    mainCtrl.showError(e.toString());
-                }
-
-            } else{
-                noteDisplay.setEditable(false);
-            }
+            updateContentAndTitle(oldNote, newNote);
         });
-        noteDisplay.textProperty().addListener((_, _, newValue) -> {
-            changeCountContent++; // Count the amount of changes
+    }
+
+    private void updateContentAndTitle(Pair<Long, String> oldNote, Pair<Long, String> newNote) {
+        if (newNote != null) {
+
+            noteDisplay.setEditable(true);
+            noteTitle.setEditable(true);
+            debounceService.runTask(lastTask);
+            curNoteId = newNote.getKey();
+            curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
+            var newTitle = newNote.getValue();
+            if(oldNote !=null && !Objects.equals(oldNote.getKey(), newNote.getKey())) {
+                updateNoteTitle(newTitle);
+            } else if(oldNote ==null){
+                updateNoteTitle(newTitle);
+            }
+            var id = newNote.getKey();
+
+            var content = server.getNoteContentByID(id);
+            updateNoteDisplay(content);
             try {
-                renderMarkdown(newValue);
+                renderMarkdown(content);
             } catch (InterruptedException e) {
                 mainCtrl.showError(e.toString());
             }
-            debounce(() -> {
-                if (curNoteId != null) {
-                    try {
-                        Note updatedNote = new Note();
-                        updatedNote.setContent(newValue);
-                        server.updateNoteByID(curNoteId, updatedNote);
-                        changeCountContent = 0;
-                    } catch (Exception e) {
-                        System.out.println("Failed to update content: " + e.getMessage());
-                    }
-                }
-            }, DELAY);
-            if (changeCountContent >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
-                if (curNoteId != null) {
-                    try {
-                        Note updatedNote = new Note();
-                        updatedNote.setContent(newValue);
-                        server.updateNoteByID(curNoteId, updatedNote);
-                        changeCountContent = 0;
-                        debounceTimer.cancel(); // Cancel any pending debounced update
-                    } catch (Exception e) {
-                        System.out.println("Failed to update content: " + e.getMessage());
-                    }
-                }
+
+        } else{
+            noteDisplay.setEditable(false);
+        }
+    }
+
+    private void setupSearch() {
+        searchBar.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) { // Check if the Enter key was pressed
+                searchNotes(); // Trigger the searchNotes method
             }
         });
-        removeNoteButton.setDisable(true);
-
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
-            removeNoteButton.setDisable(newValue == null);
-        });
-
     }
 
     private void handleTitleOnFocusLost() {
@@ -365,13 +380,12 @@ public class NoteOverviewCtrl implements Initializable {
         }
     }
     /**
-     * Method to add notes (Currently not functional)
+     * Method to add notes
      */
     public void addNote(){
         System.out.println("Adding a new note");
         server.addNote();
         refreshNotes();
-        //mainCtrl.showAdd();
     }
 
     @FXML
