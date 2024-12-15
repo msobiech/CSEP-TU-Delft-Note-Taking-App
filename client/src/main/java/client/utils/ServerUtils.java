@@ -178,7 +178,7 @@ public class ServerUtils {
 
 	public List<Object[]> searchNotes(String keyword){
 		if (keyword == null || keyword.trim().isEmpty()) {
-			throw new IllegalArgumentException("Search query cannot be null or empty");
+			return getNoteTitles();
 		}
 		return ClientBuilder.newClient(new ClientConfig())
 				.target(SERVER)
