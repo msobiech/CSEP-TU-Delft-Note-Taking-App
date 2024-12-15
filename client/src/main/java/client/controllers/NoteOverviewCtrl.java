@@ -21,6 +21,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.web.WebView;
 
 import com.vladsch.flexmark.parser.Parser;
@@ -99,6 +100,27 @@ public class NoteOverviewCtrl implements Initializable {
             removeNoteButton.setDisable(newValue == null);
         });
 
+        setupKeyboardShortcuts();
+    }
+
+    private void setupKeyboardShortcuts() {
+        addNoteButton.sceneProperty().addListener((_, _, newScene) -> {
+            if (newScene != null) {
+                newScene.getAccelerators().put(
+                        KeyCombination.keyCombination("Ctrl+N"),
+                        this::addNote
+                );
+            }
+        });
+
+        refreshNotesButton.sceneProperty().addListener((_, _, newScene) -> {
+            if (newScene != null) {
+                newScene.getAccelerators().put(
+                        KeyCombination.keyCombination("Ctrl+R"),
+                        this::refreshNotes
+                );
+            }
+        });
     }
 
     private void handleNoteTitleChanged() {
