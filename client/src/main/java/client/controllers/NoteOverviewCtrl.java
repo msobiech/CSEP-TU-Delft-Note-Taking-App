@@ -121,6 +121,15 @@ public class NoteOverviewCtrl implements Initializable {
                 );
             }
         });
+
+        removeNoteButton.sceneProperty().addListener((_, _, newScene) -> {
+                if (newScene != null) {
+                    newScene.getAccelerators().put(
+                            KeyCombination.keyCombination("Ctrl+D"),
+                            this::removeNote
+                    );
+                }
+        });
     }
 
     private void handleNoteTitleChanged() {
@@ -525,7 +534,7 @@ public class NoteOverviewCtrl implements Initializable {
      * Method to remove notes form UI
      */
     @FXML
-    private void removeNote() throws InterruptedException {
+    private void removeNote() {
         var selectedNote = notesList.getSelectionModel().getSelectedItem();
         if (selectedNote != null) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
