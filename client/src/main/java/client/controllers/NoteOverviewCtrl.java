@@ -58,7 +58,7 @@ public class NoteOverviewCtrl implements Initializable {
     private WebView markdownContent;
 
     @FXML
-    private ComboBox<Collection> collectionDropdown;
+    private ComboBox<Pair<Long, String>> collectionDropdown;
 
     @FXML
     private Button addNoteButton, removeNoteButton, refreshNotesButton;
@@ -264,24 +264,32 @@ public class NoteOverviewCtrl implements Initializable {
         });
     }
 
+    /**
+     * setup for 'select collection' menu.
+     * adds 'All' collection, user collections and the edit collection
+     */
     private void setupSelectCollection() {
         List<Collection> collections = server.getAllCollectionsFromServer();       //server.getAllCollections();
 
         Collection allNotesCollection = new Collection();
-        allNotesCollection.setName("All");
         allNotesCollection.setId(-1);
+        allNotesCollection.setName("All");
         allNotesCollection.setNotes(server.getAllNotesFromServer());
+        Pair<Long, String> AllAsPair = new Pair<>(allNotesCollection.getId(), allNotesCollection.getName());
 
-        Collection editOption = new Collection();
-        editOption.setName("Edit Collections...");
-        editOption.setId(-2);
+        List<Pair<Long, String>> listOfCollections = new ArrayList<>();
+        for (Collection collection : collections) {
+            listOfCollections.add(new Pair<>(collection.getId(), collection.getName()));
+        }
+        Long editKey = (long)-2;
+        Pair<Long, String> editOption = new Pair<>(editKey, "Edit Collections...");
 
         collectionDropdown.getItems().clear();
-        collectionDropdown.getItems().add(allNotesCollection);
-        collectionDropdown.getItems().addAll(FXCollections.observableArrayList(collections));
+        collectionDropdown.getItems().add(AllAsPair);
+        collectionDropdown.getItems().addAll(FXCollections.observableArrayList(listOfCollections));
         collectionDropdown.getItems().add(editOption);
 
-        collectionDropdown.setValue(allNotesCollection);
+        collectionDropdown.setValue(AllAsPair);
     }
 
     private void handleTitleOnFocusLost() {
@@ -497,35 +505,44 @@ public class NoteOverviewCtrl implements Initializable {
         }
     }
 
+
+    /**
+     * action button for dropdown menu
+     */
     @FXML
     private void selectCollection() {
         var selectedCollection = collectionDropdown.getSelectionModel().getSelectedItem();
         System.out.println("selected collection: " + selectedCollection);
 
-        if(selectedCollection == null){             // if no collection is chosen
+        if(selectedCollection.getKey() == 0){             // if no collection is chosen
             return;
         }
-        if(selectedCollection.getId() == -2) {      // if "Edit Collections..." is chosen
+        if(selectedCollection.getKey() == -2) {      // if "Edit Collections..." is chosen
             //showEditCollectionsScreen();
             refreshNotes();
         } else {                                    // if a specific collection is chosen
             List<Pair<Long, String>> collectionNotes = new ArrayList<>();
-            for (Note note : selectedCollection.getNotes()) {
-                collectionNotes.add(new Pair<>(note.getId(), note.getTitle()));
-            }
-            notes = FXCollections.observableArrayList(collectionNotes);
+
+            //Collection selectedCollectionAsCol = server.getCollectionByID(selectedCollection.getKey());
+            //Set<Note> notesSet = selectedCollectionAsCol.getNotes();
+
+            //for(Note note: notesSet){
+            //    collectionNotes.add(new Pair<>(note.getId(), note.getTitle()));
+            //}
+
+            //notes = FXCollections.observableArrayList(collectionNotes);
             notesList.setItems(notes);
 
             notesList.setCellFactory(_ -> new ListCell<>() {
-               @Override
-               protected void updateItem(Pair<Long, String> note, boolean empty) {
-                   super.updateItem(note, empty);
-                   if (note == null || empty) {
-                       setText(null);
-                   } else {
-                       setText(note.getValue());
-                   }
-               }
+                @Override
+                protected void updateItem(Pair<Long, String> note, boolean empty) {
+                    super.updateItem(note, empty);
+                    if (note == null || empty) {
+                        setText(null);
+                    } else {
+                        setText(note.getValue());
+                    }
+                }
             });
         }
     }

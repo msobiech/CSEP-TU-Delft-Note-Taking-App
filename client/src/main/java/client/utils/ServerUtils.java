@@ -143,6 +143,8 @@ public class ServerUtils {
 		return collectionNotes;
 	}
 
+
+
 	public List<Collection> getAllCollectionsFromServer() {
 		return ClientBuilder.newClient(new ClientConfig())
 				.target(SERVER).path("/collections")
@@ -156,6 +158,8 @@ public class ServerUtils {
 				.request(APPLICATION_JSON)
 				.get(new GenericType<Set<Note>>() {});
 	}
+
+
 
 	/**
 	 * Adds note the database
