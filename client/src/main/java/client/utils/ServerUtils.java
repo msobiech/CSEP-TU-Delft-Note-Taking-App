@@ -22,12 +22,16 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
+import models.Collection;
 import models.Note;
 
+//import org.checkerframework.checker.units.qual.A;
 import org.glassfish.jersey.client.ClientConfig;
 
 
@@ -124,6 +128,33 @@ public class ServerUtils {
 		} catch (Exception e) {
 			System.out.println("Exception encountered.");
 		}
+	}
+
+	public List<Note> getNotesByCollectionId(long id) {
+		List<Note> collectionNotes = new ArrayList<>();
+		try {
+			collectionNotes = ClientBuilder.newClient(new ClientConfig())
+					.target(SERVER).path("collections/" + id + "/notes")
+					.request(APPLICATION_JSON)
+					.get(new GenericType<List<Note>>() {});
+		} catch (Exception e) {
+			System.err.println("Error fetching notes by collection id: " + id);
+		}
+		return collectionNotes;
+	}
+
+	public List<Collection> getAllCollectionsFromServer() {
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("/collections")
+				.request(APPLICATION_JSON)
+				.get(new GenericType<List<Collection>>() {});
+	}
+
+	public Set<Note> getAllNotesFromServer() {
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("notes/get")
+				.request(APPLICATION_JSON)
+				.get(new GenericType<Set<Note>>() {});
 	}
 
 	/**

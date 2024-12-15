@@ -27,6 +27,7 @@ import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.ext.tables.TablesExtension;
 import javafx.util.Pair;
+import models.Collection;
 import models.Note;
 
 
@@ -54,6 +55,9 @@ public class NoteOverviewCtrl implements Initializable {
 
     @FXML
     private WebView markdownContent;
+
+    @FXML
+    private ComboBox<Collection> collectionDropdown;
 
     @FXML
     private Button addNoteButton, removeNoteButton, refreshNotesButton;
@@ -85,6 +89,8 @@ public class NoteOverviewCtrl implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupSearch();
+        //setupSelectCollection();
+        //handleCollectionSelectionChange();
         handleNoteTitleChanged();
         handleNoteSelectionChange();
         handleNoteContentChange();
@@ -182,6 +188,14 @@ public class NoteOverviewCtrl implements Initializable {
         });
     }
 
+    private void handleCollectionSelectionChange() {
+        collectionDropdown.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
+            if(newValue != null) {
+                selectCollection();
+            }
+        });
+    }
+
     private void updateContentAndTitle(Pair<Long, String> oldNote, Pair<Long, String> newNote) {
         if (newNote != null) {
 
@@ -217,6 +231,26 @@ public class NoteOverviewCtrl implements Initializable {
                 searchNotes(); // Trigger the searchNotes method
             }
         });
+    }
+
+    private void setupSelectCollection() {
+        List<Collection> collections = server.getAllCollectionsFromServer();       //server.getAllCollections();
+
+        Collection allNotesCollection = new Collection();
+        allNotesCollection.setName("All");
+        allNotesCollection.setId(-1);
+        allNotesCollection.setNotes(server.getAllNotesFromServer());
+
+        Collection editOption = new Collection();
+        editOption.setName("Edit Collections...");
+        editOption.setId(-2);
+
+        collectionDropdown.getItems().clear();
+        collectionDropdown.getItems().add(allNotesCollection);
+        collectionDropdown.getItems().addAll(FXCollections.observableArrayList(collections));
+        collectionDropdown.getItems().add(editOption);
+
+        collectionDropdown.setValue(allNotesCollection);
     }
 
     private void handleTitleOnFocusLost() {
@@ -429,6 +463,39 @@ public class NoteOverviewCtrl implements Initializable {
             }
         } else {
             notesList.getSelectionModel().clearSelection(); // Clear selection if no valid note
+        }
+    }
+
+    @FXML
+    private void selectCollection() {
+        var selectedCollection = collectionDropdown.getSelectionModel().getSelectedItem();
+        System.out.println("selected collection: " + selectedCollection);
+
+        if(selectedCollection == null){             // if no collection is chosen
+            return;
+        }
+        if(selectedCollection.getId() == -2) {      // if "Edit Collections..." is chosen
+            //showEditCollectionsScreen();
+            refreshNotes();
+        } else {                                    // if a specific collection is chosen
+            List<Pair<Long, String>> collectionNotes = new ArrayList<>();
+            for (Note note : selectedCollection.getNotes()) {
+                collectionNotes.add(new Pair<>(note.getId(), note.getTitle()));
+            }
+            notes = FXCollections.observableArrayList(collectionNotes);
+            notesList.setItems(notes);
+
+            notesList.setCellFactory(_ -> new ListCell<>() {
+               @Override
+               protected void updateItem(Pair<Long, String> note, boolean empty) {
+                   super.updateItem(note, empty);
+                   if (note == null || empty) {
+                       setText(null);
+                   } else {
+                       setText(note.getValue());
+                   }
+               }
+            });
         }
     }
 
