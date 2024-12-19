@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-
-<?import javafx.scene.layout.BorderPane?>
-
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.web.WebView?>
+
 
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
+
+<?import javafx.scene.control.Button?>
 <?import java.lang.String?>
-<?import javafx.scene.web.WebView?>
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.NoteOverviewCtrl">
-    <top>
-        <TextField fx:id = "searchBar" promptText="Search your note..." HBox.hgrow="ALWAYS" style="-fx-background-color: #FEFAE0; -fx-text-fill: #333333; -fx-padding: 5px;"/>
-    </top>
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.NoteOverviewCtrl">
 
     <center>
         <HBox spacing="5.0">
-            <VBox fx:id="notesContainer" spacing="5.0" style="-fx-padding: 5px;-fx-background-color: #CCD5AE; -fx-text-fill: #333333" prefWidth="300.0">
-                <ListView fx:id="notesList" VBox.vgrow="ALWAYS" style = "-fx-background-color: #E0E5B6; -fx-text-fill: #333333"/>
-                <HBox spacing="5.0" alignment="CENTER" style = "-fx-background-color: #E0E5B6; -fx-text-fill: #333333">
+            <VBox fx:id="notesContainer" prefWidth="300.0" spacing="5.0" style="-fx-padding: 5px;-fx-background-color: #CCD5AE; -fx-text-fill: #333333">
+                <ListView fx:id="notesList" style="-fx-background-color: #E0E5B6; -fx-text-fill: #333333;" VBox.vgrow="ALWAYS" />
+                <HBox alignment="CENTER" spacing="5.0" style="-fx-background-color: #E0E5B6; -fx-text-fill: #333333">
                     <Button mnemonicParsing="false" fx:id="addNoteButton" onAction="#addNote">
                         <graphic>
                             <FontIcon iconLiteral="fa-plus" />
@@ -56,19 +56,38 @@
             </VBox>
 
             <VBox>
-                <TextField fx:id="noteTitle" promptText="Note title" VBox.vgrow="ALWAYS" style = "-fx-background-color: #e2e4d0; -fx-text-fill: #211f1f" maxHeight="20.0" minHeight="20.0"/>
-                <TextArea fx:id="noteDisplay" wrapText="true" VBox.vgrow="ALWAYS" style = "-fx-background-color: #CCD5AE; -fx-text-fill: #333333"/>
+                <TextField fx:id="noteTitle" maxHeight="20.0" minHeight="20.0" promptText="Note title" style="-fx-background-color: #e2e4d0; -fx-text-fill: #211f1f" VBox.vgrow="ALWAYS">
+               <font>
+                  <Font name="Comic Sans MS" size="12.0" />
+               </font></TextField>
+                <TextArea fx:id="noteDisplay" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333" wrapText="true" VBox.vgrow="ALWAYS" />
             </VBox>
 
 
-            <ScrollPane fx:id="markdownPreview" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333;" fitToHeight="true" fitToWidth="true" HBox.hgrow="ALWAYS" prefWidth="350.0">
-                <WebView fx:id="markdownContent" VBox.vgrow="ALWAYS" style="-fx-padding: 10px; -fx-background-color: #E0E5B6; -fx-text-fill: #333333;">
+            <ScrollPane fx:id="markdownPreview" fitToHeight="true" fitToWidth="true" prefWidth="350.0" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333;" HBox.hgrow="ALWAYS">
+                <WebView fx:id="markdownContent" style="-fx-padding: 10px; -fx-background-color: #E0E5B6; -fx-text-fill: #333333;" VBox.vgrow="ALWAYS">
                     <!-- Rendered Markdown Content Will Be Added Dynamically -->
                 </WebView>
             </ScrollPane>
         </HBox>
 
     </center>
+   <top>
+      <HBox alignment="CENTER" prefHeight="42.0" prefWidth="600.0" spacing="5.0" style="-fx-background-color: #FEFAE0;">
+         <children>
+              <TextField fx:id="searchBar" prefHeight="28.0" prefWidth="277.0" promptText="Search your note..." style="-fx-background-color: #F2EED5; -fx-text-fill: #333333; -fx-padding: 5px;">
+               <font>
+                  <Font name="Comic Sans MS" size="12.0" />
+               </font></TextField>
+            <Label alignment="CENTER_RIGHT" contentDisplay="RIGHT" prefHeight="18.0" prefWidth="206.0" text="Collection:" textAlignment="RIGHT">
+               <font>
+                  <Font name="Comic Sans MS Bold" size="12.0" />
+               </font>
+            </Label>
+            <ComboBox fx:id="collectionDropdown" prefHeight="27.0" prefWidth="97.0" style="-fx-background-color: #FFFFFF; -fx-border-color: #000000; -fx-border-width: 0.5px;" />
+         </children>
+      </HBox>
+   </top>
 
 
 </BorderPane>

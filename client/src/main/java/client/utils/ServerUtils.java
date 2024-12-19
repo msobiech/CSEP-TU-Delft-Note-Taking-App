@@ -24,7 +24,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
@@ -152,11 +151,11 @@ public class ServerUtils {
 				.get(new GenericType<List<Collection>>() {});
 	}
 
-	public Set<Note> getAllNotesFromServer() {
+	public List<Note> getAllNotesFromServer() {
 		return ClientBuilder.newClient(new ClientConfig())
 				.target(SERVER).path("notes/get")
 				.request(APPLICATION_JSON)
-				.get(new GenericType<Set<Note>>() {});
+				.get(new GenericType<List<Note>>() {});
 	}
 
 
