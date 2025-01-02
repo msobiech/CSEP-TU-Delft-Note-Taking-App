@@ -51,6 +51,7 @@ public class NoteController {
     public ResponseEntity<Note> updateNote(@PathVariable("id") long id, @RequestBody Note note) {
         try {
             Note updatedNote = noteService.updateNote(id, note);
+            System.out.println("Note " + id + " updated successfully");
             return ResponseEntity.ok(updatedNote);
         } catch (IllegalAccessException e) {
             return ResponseEntity.notFound().build(); // if the note does not exist, return 404 Not Found
