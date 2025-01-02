@@ -1,11 +1,8 @@
 package client.controllers;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+
 import java.net.URL;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
 import client.event.EventBus;
@@ -20,7 +17,7 @@ import client.utils.NoteService;
 import com.google.inject.Inject;
 
 import client.utils.ServerUtils;
-import javafx.application.Platform;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -31,9 +28,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.web.WebView;
 
-import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.ext.tables.TablesExtension;
 import javafx.util.Pair;
 import models.Collection;
 import models.Note;
