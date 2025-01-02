@@ -58,7 +58,7 @@ public class NoteOverviewCtrl implements Initializable {
     private WebView markdownContent;
 
     @FXML
-    private ComboBox<Collection> collectionDropdown;
+    private ComboBox<Pair<Long, String>> collectionDropdown;
 
     @FXML
     private Button addNoteButton, removeNoteButton, refreshNotesButton;
@@ -90,8 +90,8 @@ public class NoteOverviewCtrl implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupSearch();
-        //setupSelectCollection();
-        //handleCollectionSelectionChange();
+        setupSelectCollection();
+        handleCollectionSelectionChange();
         handleNoteTitleChanged();
         handleNoteSelectionChange();
         handleNoteContentChange();
@@ -222,7 +222,7 @@ public class NoteOverviewCtrl implements Initializable {
     private void handleCollectionSelectionChange() {
         collectionDropdown.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
             if(newValue != null) {
-                selectCollection();
+                selectCollection(newValue);
             }
         });
     }
@@ -264,24 +264,50 @@ public class NoteOverviewCtrl implements Initializable {
         });
     }
 
+    /**
+     * setup for 'select collection' menu.
+     * adds 'All' collection, user collections and the edit collection
+     */
     private void setupSelectCollection() {
         List<Collection> collections = server.getAllCollectionsFromServer();       //server.getAllCollections();
 
-        Collection allNotesCollection = new Collection();
-        allNotesCollection.setName("All");
-        allNotesCollection.setId(-1);
-        allNotesCollection.setNotes(server.getAllNotesFromServer());
+        Pair<Long, String> allNotesCollection = new Pair<>((long) -1, "All");
 
-        Collection editOption = new Collection();
-        editOption.setName("Edit Collections...");
-        editOption.setId(-2);
+        List<Pair<Long, String>> listOfCollections = new ArrayList<>();
+        for (Collection collection : collections) {
+            listOfCollections.add(new Pair<>(collection.getId(), collection.getName()));
+        }
+
+        Pair<Long, String> editOption = new Pair<>((long)-2, "Edit Collections...");
 
         collectionDropdown.getItems().clear();
         collectionDropdown.getItems().add(allNotesCollection);
-        collectionDropdown.getItems().addAll(FXCollections.observableArrayList(collections));
+        collectionDropdown.getItems().addAll(FXCollections.observableArrayList(listOfCollections));
         collectionDropdown.getItems().add(editOption);
-
         collectionDropdown.setValue(allNotesCollection);
+
+        collectionDropdown.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<Long, String> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getValue()); // Display name of collection in collection options
+                }
+            }
+        });
+        collectionDropdown.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<Long, String> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getValue()); // Display name of collection in selected collection box
+                }
+            }
+        });
     }
 
     private void handleTitleOnFocusLost() {
@@ -407,13 +433,22 @@ public class NoteOverviewCtrl implements Initializable {
         System.out.println("Refreshed the note list");
         Pair<Long, String> selectedNote = notesList.getSelectionModel().getSelectedItem();
         Long selectedNoteId = (selectedNote != null) ? selectedNote.getKey() : null;
-
-        var notesFromServer = server.getNoteTitles();
         List<Pair<Long, String>> notesAsPairs = new ArrayList<>();
-        for(var row: notesFromServer){
-            Long id = ((Integer)row[0]).longValue();
-            String title = (String)row[1];
-            notesAsPairs.add(new Pair<>(id, title));
+
+        Pair<Long, String> selectedCollection = collectionDropdown.getSelectionModel().getSelectedItem();
+
+        if(selectedCollection.getKey() <= -1) {
+            var notesFromServer = server.getNoteTitles();
+            for(var row: notesFromServer){
+                Long id = ((Integer)row[0]).longValue();
+                String title = (String)row[1];
+                notesAsPairs.add(new Pair<>(id, title));
+            }
+        } else {
+            var collectionNotes = server.getNotesByCollectionId(selectedCollection.getKey());
+            for(var note: collectionNotes){
+                notesAsPairs.add( new Pair<>(note.getId(), note.getTitle()));
+            }
         }
         notes = FXCollections.observableArrayList(notesAsPairs);
         notesList.setItems(notes);
@@ -461,11 +496,25 @@ public class NoteOverviewCtrl implements Initializable {
         Long selectedNoteId = (selectedNote != null) ? selectedNote.getKey() : null;
         List<Pair<Long, String>> notesAsPairs = new ArrayList<>();
 
+        Pair<Long, String> selectedCollection = collectionDropdown.getSelectionModel().getSelectedItem();
+        List<Note> selectedCollectionNotes = server.getNotesByCollectionId(selectedCollection.getKey());
+        List<Long> selectedCollectionNoteIds = new ArrayList<>();
+        for(Note note: selectedCollectionNotes){
+            selectedCollectionNoteIds.add(note.getId());
+        }
+
+        if(selectedCollection.getKey() <= -1) {
         var notesFromServer = server.searchNotes(query);
         for(var row: notesFromServer){
             Long id = ((Integer)row[0]).longValue();
             String title = (String)row[1];
             notesAsPairs.add(new Pair<>(id, title));
+            }
+        } else {
+            var collectionNotes = server.getNotesByCollectionId(selectedCollection.getKey());
+            for(var note: collectionNotes){
+                notesAsPairs.add( new Pair<>(note.getId(), note.getTitle()));
+            }
         }
         notes = FXCollections.observableArrayList(notesAsPairs);
         notesList.setItems(notes);
@@ -497,36 +546,40 @@ public class NoteOverviewCtrl implements Initializable {
         }
     }
 
+
+    /**
+     * action button for dropdown menu
+     */
     @FXML
-    private void selectCollection() {
-        var selectedCollection = collectionDropdown.getSelectionModel().getSelectedItem();
-        System.out.println("selected collection: " + selectedCollection);
+    private void selectCollection(Pair<Long, String> selectedCollection) {
+        System.out.println("selected collection: " + selectedCollection.getValue());
+        List<Pair<Long, String>> collectionNotes = new ArrayList<>();
 
-        if(selectedCollection == null){             // if no collection is chosen
-            return;
-        }
-        if(selectedCollection.getId() == -2) {      // if "Edit Collections..." is chosen
-            //showEditCollectionsScreen();
-            refreshNotes();
-        } else {                                    // if a specific collection is chosen
-            List<Pair<Long, String>> collectionNotes = new ArrayList<>();
-            for (Note note : selectedCollection.getNotes()) {
-                collectionNotes.add(new Pair<>(note.getId(), note.getTitle()));
-            }
-            notes = FXCollections.observableArrayList(collectionNotes);
-            notesList.setItems(notes);
-
-            notesList.setCellFactory(_ -> new ListCell<>() {
-               @Override
-               protected void updateItem(Pair<Long, String> note, boolean empty) {
-                   super.updateItem(note, empty);
-                   if (note == null || empty) {
-                       setText(null);
-                   } else {
-                       setText(note.getValue());
-                   }
-               }
-            });
+        int choice = Math.toIntExact(selectedCollection.getKey());
+        switch(choice) {
+            case 0:
+                return;
+            case -1:
+                List<Note> serverNotes = server.getAllNotesFromServer();
+                for(Note note: serverNotes){
+                    collectionNotes.add(new Pair<>(note.getId(), note.getTitle()));
+                }
+                notes = FXCollections.observableArrayList(collectionNotes);
+                notesList.setItems(notes);
+                refreshNotes();
+                break;
+            case -2:
+                //showEditCollectionsScreen();
+                refreshNotes();
+                break;
+            default:
+                List<Note> notesInCollection = server.getNotesByCollectionId(selectedCollection.getKey());
+                for(Note note: notesInCollection){
+                    collectionNotes.add(new Pair<>(note.getId(), note.getTitle()));
+                }
+                notes = FXCollections.observableArrayList(collectionNotes);
+                notesList.setItems(notes);
+                refreshNotes();
         }
     }
 
