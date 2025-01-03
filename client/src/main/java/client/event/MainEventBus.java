@@ -1,4 +1,4 @@
-//implementation from https://github.com/mkpaz/atlantafx/blob/master/sampler/src/main/java/atlantafx/sampler/event/DefaultEventBus.java
+//Modified implementation from https://github.com/mkpaz/atlantafx/blob/master/sampler/src/main/java/atlantafx/sampler/event/DefaultEventBus.java
 
 package client.event;
 
@@ -31,24 +31,6 @@ public class MainEventBus implements EventBus {
             subscribers.put(eventType, eventSubscribers);
         }
         return eventSubscribers;
-    }
-
-    @Override
-    public <E extends Event> void unsubscribe(Consumer<E> subscriber) {
-        Objects.requireNonNull(subscriber);
-
-        subscribers.values().forEach(eventSubscribers -> eventSubscribers.remove(subscriber));
-    }
-
-    @Override
-    public <E extends Event> void unsubscribe(Class<? extends E> eventType, Consumer<E> subscriber) {
-        Objects.requireNonNull(eventType);
-        Objects.requireNonNull(subscriber);
-
-        subscribers.keySet().stream()
-                .filter(eventType::isAssignableFrom)
-                .map(subscribers::get)
-                .forEach(eventSubscribers -> eventSubscribers.remove(subscriber));
     }
 
     @Override
