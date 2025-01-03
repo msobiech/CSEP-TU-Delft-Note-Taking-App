@@ -1,7 +1,6 @@
 package client.managers;
 
 import client.event.MainEventBus;
-import client.event.NoteContentEvent;
 import client.event.NoteEvent;
 import client.event.NoteEvent.EventType;
 import client.event.NoteStatusEvent;
