@@ -3,13 +3,16 @@ package client.managers;
 import client.event.MainEventBus;
 import client.event.NoteEvent;
 import javafx.collections.ObservableList;
+import javafx.scene.control.ListView;
 import javafx.util.Pair;
 
 public class NoteListManager {
     private ObservableList<Pair<Long, String>> notes;
+    private final ListView<Pair<Long, String>> notesList;
     private final MainEventBus eventBus = MainEventBus.getInstance();
 
-    public NoteListManager() {
+    public NoteListManager(ListView<Pair<Long, String>> notesList) {
+        this.notesList = notesList;
         eventBus.subscribe(NoteEvent.class, event -> {
             handleChange(event);
         });
@@ -26,7 +29,16 @@ public class NoteListManager {
                 } catch(Exception e){
                     System.err.println(e.getMessage());
                 }
+                break;
+            case NOTE_REMOVE:
+                handleNoteDeletion();
+                break;
         }
+    }
+
+    private void handleNoteDeletion() {
+        var selectedNote = notesList.getSelectionModel().getSelectedItem();
+        notesList.getItems().remove(selectedNote);
     }
 
 

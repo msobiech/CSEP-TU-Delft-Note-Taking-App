@@ -4,7 +4,9 @@ import client.event.MainEventBus;
 import client.event.NoteContentEvent;
 import client.event.NoteEvent;
 import client.event.NoteEvent.EventType;
+import client.event.NoteStatusEvent;
 import client.utils.NoteService;
+import client.utils.ServerUtils;
 import javafx.application.Platform;
 
 import java.util.Timer;
@@ -19,12 +21,14 @@ public class NoteManager {
     private final NoteService noteService;
     private final int DELAY = 1000;
     private static final int THRESHOLD = 5;
+    private final ServerUtils server;
 
 
 
-    public NoteManager(NoteService noteService) {
+    public NoteManager(NoteService noteService, ServerUtils server) {
         this.noteService = noteService;
-        eventBus.subscribe(NoteContentEvent.class, this::handleContentChange);
+        this.server = server;
+        eventBus.subscribe(NoteEvent.class, this::handleContentChange);
     }
 
     private void handleContentChange(NoteEvent event) {
@@ -36,6 +40,12 @@ public class NoteManager {
                 break;
             case CONTENT_CHANGE:
                 handleNoteContentChanged(event);
+                break;
+            case NOTE_ADD:
+                handleNoteAddition();
+                break;
+            case NOTE_REMOVE:
+                handleNoteDeletion((NoteStatusEvent) event);
                 break;
 
         }
@@ -106,6 +116,19 @@ public class NoteManager {
             }
             debounceTimer.cancel(); // Cancel any pending debounced update
         }
+    }
+
+    private void handleNoteAddition(){
+        server.addNote();
+    }
+
+    private void handleNoteDeletion(NoteStatusEvent event){
+        try{
+            server.deleteNoteByID(event.getChangeID());
+        } catch (Exception e) {
+            System.out.println("Error while deleting note: " + e.getMessage());
+        }
+
     }
 
 }

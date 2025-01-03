@@ -5,10 +5,7 @@ import java.net.URL;
 
 import java.util.*;
 
-import client.event.EventBus;
-import client.event.MainEventBus;
-import client.event.NoteContentEvent;
-import client.event.NoteEvent;
+import client.event.*;
 import client.managers.MarkdownRenderManager;
 import client.managers.NoteListManager;
 import client.managers.NoteManager;
@@ -68,9 +65,9 @@ public class NoteOverviewCtrl implements Initializable {
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
 
-    private final NoteManager noteManager;
-    private final NoteListManager noteListManager;
-    private  MarkdownRenderManager markdownRenderManager;
+    private NoteManager noteManager;
+    private NoteListManager noteListManager;
+    private MarkdownRenderManager markdownRenderManager;
 
     private Runnable lastTask = null;
 
@@ -83,14 +80,13 @@ public class NoteOverviewCtrl implements Initializable {
         this.mainCtrl = mainCtrl;
         this.noteService = noteService;
         this.debounceService = debounceService;
-        this.noteManager = new NoteManager(noteService);
-        this.noteListManager = new NoteListManager();
-
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         markdownRenderManager = new MarkdownRenderManager(markdownContent,markdownPreview,mainCtrl);
+        noteManager = new NoteManager(noteService, server);
+        noteListManager = new NoteListManager(notesList);
         setupSearch();
         setupSelectCollection();
         handleCollectionSelectionChange();
@@ -380,7 +376,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void addNote(){
         System.out.println("Adding a new note");
-        server.addNote();
+        eventBus.publish(new NoteStatusEvent(NoteEvent.EventType.NOTE_ADD, null));
         refreshNotes();
     }
 
@@ -496,23 +492,16 @@ public class NoteOverviewCtrl implements Initializable {
                     "\nDeleting a note is irreversible!");
 
             Optional<ButtonType> result = alert.showAndWait();
-
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                try {
-                    server.deleteNoteByID(selectedNote.getKey());
-                    notesList.getItems().remove(selectedNote);
-                    // Handle the case when the list is empty
-                    if (notesList.getItems().isEmpty()) {
-                        curNoteId = null;
-                        curNoteIndex = null;
-                        updateNoteTitle(""); // Clear title field
-                        updateNoteDisplay(""); // Clear content field
-                    } else {
-                        // Select the first note in the list
-                        notesList.getSelectionModel().select(0);
-                    }
-                } catch (Exception e) {
-                    System.out.println("Error while deleting note: " + e.getMessage());
+                eventBus.publish(new NoteStatusEvent(NoteEvent.EventType.NOTE_REMOVE, selectedNote.getKey()));
+                if (notesList.getItems().isEmpty()) {
+                    curNoteId = null;
+                    curNoteIndex = null;
+                    updateNoteTitle(""); // Clear title field
+                    updateNoteDisplay(""); // Clear content field
+                } else {
+                    // Select the first note in the list
+                    notesList.getSelectionModel().select(0);
                 }
 
             } else {
