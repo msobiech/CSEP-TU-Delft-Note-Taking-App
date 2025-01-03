@@ -1,0 +1,72 @@
+package UtilsTests;
+
+import client.utils.NoteService;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+
+public class NoteServiceTest {
+
+    private WireMockServer wireMockServer;
+    private NoteService noteService;
+
+
+    @RegisterExtension
+    static WireMockExtension wireMockRule = WireMockExtension.newInstance().options(wireMockConfig().port(8080)).build();
+
+    @BeforeEach
+    void setUp() {
+        wireMockServer = new WireMockServer(WireMockConfiguration.options().dynamicPort());
+        wireMockServer.start();
+        System.out.println(wireMockServer.getStubMappings());
+        noteService = new NoteService();
+    }
+
+    @AfterEach
+    void tearDown() {
+        wireMockServer.stop();
+    }
+
+    @Test
+    public void testUpdateNoteTitle() {
+        Long noteId = 1L;
+        String newTitle = "Updated Title";
+
+        stubFor(put(urlEqualTo("/notes/update/1"))
+            .withRequestBody(containing("Updated Title"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{ \"id\": 1, \"title\": \"Updated Title\", \"content\": \"\" }")));
+
+        noteService.updateNoteTitle(newTitle, noteId);
+
+        verify(1, putRequestedFor(urlEqualTo("/notes/update/1"))
+            .withRequestBody(containing("Updated Title")));
+    }
+
+    @Test
+    public void testUpdateNoteContent() {
+        Long noteId = 1L;
+        String newContent = "Updated Content";
+
+        stubFor(put(urlEqualTo("/notes/update/1"))
+            .withRequestBody(containing("Updated Content"))
+            .willReturn(aResponse()
+                .withStatus(200)
+                .withHeader("Content-Type", "application/json")
+                .withBody("{ \"id\": 1, \"title\": \"\", \"content\": \"Updated Content\" }")));
+
+        noteService.updateNoteContent(newContent, noteId);
+
+        verify(1, putRequestedFor(urlEqualTo("/notes/update/1"))
+            .withRequestBody(containing("Updated Content")));
+    }
+}
