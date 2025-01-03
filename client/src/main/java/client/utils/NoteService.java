@@ -17,4 +17,8 @@ public class NoteService {
         updatedNote.setContent(newContent);
         server.updateNoteByID(curNoteId, updatedNote);
     }
+
+    public void setServerURL(String url){
+        server.setServerURL(url);
+    }
 }

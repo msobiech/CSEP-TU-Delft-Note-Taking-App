@@ -18,15 +18,14 @@ public class NoteServiceTest {
     private NoteService noteService;
 
 
-    @RegisterExtension
-    static WireMockExtension wireMockRule = WireMockExtension.newInstance().options(wireMockConfig().port(8080)).build();
 
     @BeforeEach
     void setUp() {
-        wireMockServer = new WireMockServer(WireMockConfiguration.options().dynamicPort());
+        wireMockServer = new WireMockServer(WireMockConfiguration.options().port(8080));
         wireMockServer.start();
         System.out.println(wireMockServer.getStubMappings());
         noteService = new NoteService();
+        noteService.setServerURL("http://localhost:8080");
     }
 
     @AfterEach
@@ -39,7 +38,7 @@ public class NoteServiceTest {
         Long noteId = 1L;
         String newTitle = "Updated Title";
 
-        stubFor(put(urlEqualTo("/notes/update/1"))
+        wireMockServer.stubFor(put(urlEqualTo("/notes/update/1"))
             .withRequestBody(containing("Updated Title"))
             .willReturn(aResponse()
                 .withStatus(200)
@@ -57,7 +56,7 @@ public class NoteServiceTest {
         Long noteId = 1L;
         String newContent = "Updated Content";
 
-        stubFor(put(urlEqualTo("/notes/update/1"))
+        wireMockServer.stubFor(put(urlEqualTo("/notes/update/1"))
             .withRequestBody(containing("Updated Content"))
             .willReturn(aResponse()
                 .withStatus(200)
