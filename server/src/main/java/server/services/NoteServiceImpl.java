@@ -142,6 +142,10 @@ public class NoteServiceImpl implements NoteService {
                 .toList();
     }
 
+    @Override
+    public boolean titleExists(String title) {
+        return noteRepo.existsByTitle(title);
+    }
 
     @Override
     public List<models.Collection> getAllCollections() {

@@ -79,6 +79,13 @@ public interface NoteService {
     String generateUniqueTitle();
 
     /**
+     * Checks if a note title exists in the database.
+     * @param title to check for.
+     * @return true if the title exists, false otherwise.
+     */
+    boolean titleExists(String title);
+
+    /**
      * Gets all collections from the database
      * @return The list of all collections
      */
