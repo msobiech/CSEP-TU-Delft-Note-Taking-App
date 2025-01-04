@@ -61,7 +61,7 @@ public class NoteOverviewCtrl implements Initializable {
     private ComboBox<Pair<Long, String>> collectionDropdown;
 
     @FXML
-    private Button addNoteButton, removeNoteButton, refreshNotesButton;
+    private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton;
 
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
@@ -135,12 +135,13 @@ public class NoteOverviewCtrl implements Initializable {
     private void handleNoteTitleChanged() {
         noteTitle.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) { // Trigger only on Enter key press
-                handleTitleUpdate();
+                updateTitle();
             }
         });
     }
 
-    private void handleTitleUpdate() {
+    @FXML
+    private void updateTitle() {
         if (curNoteId == null || curNoteIndex == null) {
             return; // No note is currently selected
         }
@@ -150,8 +151,10 @@ public class NoteOverviewCtrl implements Initializable {
             noteTitle.setText(newTitle);
         }
         try {
-            if (noteService.titleExists(newTitle)) {
-                mainCtrl.showError("This title is already in use. Please choose a different title.");
+            if (noteService.titleExists(newTitle)){
+                if (!newTitle.equals(notes.get(curNoteIndex).getValue())) {
+                    mainCtrl.showError("This title is already in use. Please choose a different title.");
+                }
                 return;
             }
             notes.set(curNoteIndex, new Pair<>(curNoteId, newTitle));
@@ -599,6 +602,4 @@ public class NoteOverviewCtrl implements Initializable {
             }
         }
     }
-
-
 }

@@ -56,10 +56,22 @@
             </VBox>
 
             <VBox>
-                <TextField fx:id="noteTitle" maxHeight="20.0" minHeight="20.0" promptText="Note title" style="-fx-background-color: #e2e4d0; -fx-text-fill: #211f1f" VBox.vgrow="ALWAYS">
-               <font>
-                  <Font name="Comic Sans MS" size="12.0" />
-               </font></TextField>
+                <HBox spacing="5.0" alignment="CENTER">
+                    <TextField fx:id="noteTitle" maxHeight="20.0" minHeight="20.0" promptText="Note title" style="-fx-background-color: #e2e4d0; -fx-text-fill: #211f1f" VBox.vgrow="ALWAYS">
+                        <font>
+                            <Font name="Comic Sans MS" size="12.0" />
+                        </font>
+                    </TextField>
+                    <Button mnemonicParsing="false" fx:id="editTitleButton" onAction="#updateTitle">
+                        <graphic>
+                            <FontIcon iconLiteral="fa-edit" />
+                        </graphic>
+                        <styleClass>
+                            <String fx:value="button-icon" />
+                            <String fx:value="flat" />
+                        </styleClass>
+                    </Button>
+                </HBox>
                 <TextArea fx:id="noteDisplay" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333" wrapText="true" VBox.vgrow="ALWAYS" />
             </VBox>
 
