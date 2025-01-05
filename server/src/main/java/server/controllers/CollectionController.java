@@ -18,8 +18,9 @@ public class CollectionController {
     private final CollectionService collectionService;
 
     /**
-     * Establishes the noteServise implementation with autowiring
-     * @param noteService to set the service to
+     * Establishes the noteService implementation with autowiring
+     * @param noteService to set the service to the controller
+     * @param collectionService to set the service to the controller
      */
     @Autowired
     public CollectionController(NoteService noteService, CollectionService collectionService) {
