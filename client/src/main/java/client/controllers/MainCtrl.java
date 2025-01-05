@@ -39,6 +39,9 @@ public class MainCtrl {
     private ServerSelectionCtrl serverCtrl;
     private Scene serverScene;
 
+    private EditCollectionsPopUpCtrl editCtrl;
+    private Scene editScene;
+
     /**
      * Initialization of the main Stage
      * @param primaryStage the stage that will be used to display the app's fronted
@@ -52,7 +55,7 @@ public class MainCtrl {
      *                  with its controller.
      */
     public void initialize(Stage primaryStage, Pair<NoteOverviewCtrl, Parent> overview,
-            Pair<AddNoteCtrl, Parent> add, Pair<ErrorPopUpCtrl, Parent> error, Pair<ServerSelectionCtrl, Parent> serverURL) {
+            Pair<AddNoteCtrl, Parent> add, Pair<ErrorPopUpCtrl, Parent> error, Pair<ServerSelectionCtrl, Parent> serverURL, Pair<EditCollectionsPopUpCtrl, Parent> collectionEdit) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
@@ -65,6 +68,9 @@ public class MainCtrl {
 
         this.serverCtrl = serverURL.getKey();
         this.serverScene = new Scene(serverURL.getValue());
+
+        this.editCtrl = collectionEdit.getKey();
+        this.editScene = new Scene(collectionEdit.getValue());
 
         //showServerSelection();
         showOverview();
@@ -93,7 +99,7 @@ public class MainCtrl {
     }
 
     /**
-     * Thhis method shows the error pupUp
+     * This method shows the error popUp
      * @param error String representing the error message text
      */
     public void showError(String error){
@@ -133,6 +139,15 @@ public class MainCtrl {
         primaryStage.show();
     }
 
-
+    /**
+     * Method to show the scene for collection editing
+     */
+    public void showEditCollections(){
+        this.popUp = new Stage();
+        popUp.setScene(editScene);
+        popUp.setTitle("Collections: Edit");
+        popUp.setResizable(false);
+        popUp.show();
+    }
 
 }
