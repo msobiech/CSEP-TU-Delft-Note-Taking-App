@@ -190,4 +190,37 @@ public class ServerUtils {
 				.request(APPLICATION_JSON)
 				.get(new GenericType<List<Object[]>>() {});
 	}
+
+	/**
+	 * Checks if the given title exists on the server.
+	 *
+	 * @param title the title to check.
+	 * @return true if the title exists, false otherwise.
+	 */
+	public boolean titleExists(String title) {
+		try {
+			return ClientBuilder.newClient(new ClientConfig())
+					.target(SERVER)
+					.path("notes/exists")
+					.queryParam("title", title)
+					.request(APPLICATION_JSON)
+					.get(Boolean.class);
+		} catch (Exception e) {
+			System.err.println("Error checking if title exists: " + e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * Calls the server to generate a unique title.
+	 *
+	 * @return the generated unique title.
+	 */
+	public String generateUniqueTitle() {
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER)
+				.path("notes/generate-title")
+				.request(APPLICATION_JSON)
+				.get(String.class);
+	}
 }

@@ -61,7 +61,7 @@ public class NoteOverviewCtrl implements Initializable {
     private ComboBox<Pair<Long, String>> collectionDropdown;
 
     @FXML
-    private Button addNoteButton, removeNoteButton, refreshNotesButton;
+    private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton;
 
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
@@ -133,36 +133,38 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     private void handleNoteTitleChanged() {
-        noteTitle.textProperty().addListener((_, _, newValue) -> {
-            if (curNoteIndex == null || curNoteId == null) {
-                return; // Ignore updates when no note is selected
-            }
-            changeCountTitle++;
-            try{
-                notes.set(curNoteIndex, new Pair<>(curNoteId, newValue.trim()));
-            } catch(Exception e){
-                System.out.println(e.getMessage());
-            }
-            debounce(() -> {
-                try {
-                    noteService.updateNoteTitle(newValue, curNoteId);
-                } catch (Exception e) {
-                    System.out.println("Failed to update title: " + e.getMessage());
-                }
-            },DELAY);
-            if (changeCountTitle >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
-                try {
-                    noteService.updateNoteTitle(newValue, curNoteId);
-                    changeCountTitle = 0;
-                } catch (Exception e) {
-                    System.out.println("Failed to update title: " + e.getMessage());
-                }
-                changeCountContent = 0; // Reset change count
-                debounceTimer.cancel(); // Cancel any pending debounced update
+        noteTitle.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) { // Trigger only on Enter key press
+                updateTitle();
             }
         });
     }
 
+    @FXML
+    private void updateTitle() {
+        if (curNoteId == null || curNoteIndex == null) {
+            return; // No note is currently selected
+        }
+        String newTitle = noteTitle.getText().trim();
+        if (newTitle.isEmpty()) {
+            newTitle = noteService.generateUniqueTitle();
+            noteTitle.setText(newTitle);
+        }
+        try {
+            if (noteService.titleExists(newTitle)){
+                if (!newTitle.equals(notes.get(curNoteIndex).getValue())) {
+                    mainCtrl.showError("This title is already in use. Please choose a different title.");
+                }
+                return;
+            }
+            notes.set(curNoteIndex, new Pair<>(curNoteId, newTitle));
+            noteService.updateNoteTitle(newTitle, curNoteId);
+            refreshNotes();
+            System.out.println("Title updated successfully!");
+        } catch (Exception e) {
+            mainCtrl.showError("Failed to update the title. Please try again.");
+        }
+    }
 
     private void handleNoteContentChange() {
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
@@ -200,11 +202,6 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
         private void handleNoteSelectionChange() {
-        noteTitle.focusedProperty().addListener((_, _, newValue) -> {
-            if (!newValue) { // Focus lost on title
-                handleTitleOnFocusLost();
-            }
-        });
         noteDisplay.focusedProperty().addListener((_, _, hasFocus) -> {});
         // Listener for switching notes (ensures deletion only happens when switching notes)
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
@@ -229,29 +226,28 @@ public class NoteOverviewCtrl implements Initializable {
 
     private void updateContentAndTitle(Pair<Long, String> oldNote, Pair<Long, String> newNote) {
         if (newNote != null) {
-
             noteDisplay.setEditable(true);
             noteTitle.setEditable(true);
             debounceService.runTask(lastTask);
+
+            // Update the currently selected note's ID and index
             curNoteId = newNote.getKey();
             curNoteIndex = notesList.getSelectionModel().getSelectedIndex();
-            var newTitle = newNote.getValue();
-            if(oldNote !=null && !Objects.equals(oldNote.getKey(), newNote.getKey())) {
-                updateNoteTitle(newTitle);
-            } else if(oldNote ==null){
-                updateNoteTitle(newTitle);
-            }
-            var id = newNote.getKey();
 
+            // Display the title and content of the newly selected note
+            noteTitle.setText(newNote.getValue());
+            var id = newNote.getKey();
             var content = server.getNoteContentByID(id);
+
+            // Display content and render markdown
             updateNoteDisplay(content);
             try {
                 renderMarkdown(content);
             } catch (InterruptedException e) {
                 mainCtrl.showError(e.toString());
             }
-
-        } else{
+        } else {
+            // Disable editing when no note is selected
             noteDisplay.setEditable(false);
         }
     }
@@ -310,20 +306,6 @@ public class NoteOverviewCtrl implements Initializable {
         });
     }
 
-    private void handleTitleOnFocusLost() {
-        if (curNoteId != null) {
-            try {
-                Note updatedNote = new Note();
-                updatedNote.setTitle(noteTitle.getText());
-                updatedNote.setContent(noteDisplay.getText());
-                server.updateNoteByID(curNoteId, updatedNote);
-            } catch (Exception e) {
-                System.out.println("Failed to update note on focus loss: " + e.getMessage());
-            }
-            refreshNotes();
-        }
-    }
-
     /**
      * Handles logic for when the user leaves a note (e.g., switches to a different note).
      */
@@ -346,14 +328,13 @@ public class NoteOverviewCtrl implements Initializable {
                     System.out.println("Failed to delete empty note: " + e.getMessage());
                 }
             } else {
-                // Save changes to the note
+                // Only update the content; title updates are handled by handleTitleUpdate
                 try {
                     Note updatedNote = new Note();
-                    updatedNote.setTitle(noteTitle.getText());
-                    updatedNote.setContent(noteDisplay.getText());
+                    updatedNote.setContent(currentContent);
                     server.updateNoteByID(curNoteId, updatedNote);
                 } catch (Exception e) {
-                    System.out.println("Failed to update note on note switch: " + e.getMessage());
+                    System.out.println("Failed to update note content on note switch: " + e.getMessage());
                 }
             }
         }
@@ -621,6 +602,4 @@ public class NoteOverviewCtrl implements Initializable {
             }
         }
     }
-
-
 }

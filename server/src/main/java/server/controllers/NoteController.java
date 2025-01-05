@@ -50,10 +50,14 @@ public class NoteController {
     @PutMapping("/update/{id}")
     public ResponseEntity<Note> updateNote(@PathVariable("id") long id, @RequestBody Note note) {
         try {
+            if (note.getTitle() != null && noteService.titleExists(note.getTitle())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(null); // 409 Conflict if title already exists
+            }
             Note updatedNote = noteService.updateNote(id, note);
             return ResponseEntity.ok(updatedNote);
         } catch (IllegalAccessException e) {
-            return ResponseEntity.notFound().build(); // if the note does not exist, return 404 Not Found
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -102,5 +106,17 @@ public class NoteController {
     public ResponseEntity<List<Collection>> getCollectionsByNoteId(@PathVariable int id) {
         List<Collection> collections = noteService.getCollectionsByNoteId(id);
         return new ResponseEntity<>(collections, HttpStatus.OK);
+    }
+
+    @GetMapping("/exists")
+    public ResponseEntity<Boolean> checkTitleExists(@RequestParam("title") String title) {
+        boolean exists = noteService.titleExists(title);
+        return ResponseEntity.ok(exists);
+    }
+
+    @GetMapping("/generate-title")
+    public ResponseEntity<String> generateUniqueTitle() {
+        String uniqueTitle = noteService.generateUniqueTitle();
+        return ResponseEntity.ok(uniqueTitle);
     }
 }
