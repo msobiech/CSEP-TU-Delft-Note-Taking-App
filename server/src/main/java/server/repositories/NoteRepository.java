@@ -3,6 +3,7 @@ package server.repositories;
 import models.Note;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -25,6 +26,14 @@ public interface NoteRepository extends JpaRepository<Note, Long> {
             "OR LOWER(n.content) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Note> findByTitleOrContentContainingIgnoreCase(String keyword);
 
+    /**
+     * Checks if a note with the specified title exists in the database.
+     *
+     * @param title the title to check for.
+     * @return {@code true} if a note with the specified title exists, {@code false} otherwise.
+     */
+    @Query("SELECT COUNT(n) > 0 FROM Note n WHERE n.title = :title")
+    boolean existsByTitle(@Param("title") String title);
 
     /**
      * Retrieves notes connected to the collection with given id
