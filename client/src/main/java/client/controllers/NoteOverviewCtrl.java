@@ -211,11 +211,6 @@ public class NoteOverviewCtrl implements Initializable {
 
             // Display content and render markdown
             updateNoteDisplay(content);
-            try {
-                renderMarkdown(content);
-            } catch (InterruptedException e) {
-                mainCtrl.showError(e.toString());
-            }
         } else {
             // Disable editing when no note is selected
             noteDisplay.setEditable(false);
