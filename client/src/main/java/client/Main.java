@@ -51,10 +51,10 @@ public class Main extends Application {
 		var add = FXML.load(AddNoteCtrl.class, "client", "views", "AddNote.fxml");
 		var error = FXML.load(ErrorPopUpCtrl.class, "client", "views", "ErrorPopUp.fxml");
 		var serverURL = FXML.load(ServerSelectionCtrl.class, "client", "views", "ServerSelection.fxml");
-
+		var collectionsEdit = FXML.load(EditCollectionsPopUpCtrl.class, "client", "views", "EditCollectionsPopUp.fxml");
 
 		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
-		mainCtrl.initialize(primaryStage, overview, add, error, serverURL);
+		mainCtrl.initialize(primaryStage, overview, add, error, serverURL, collectionsEdit);
                 primaryStage.setOnCloseRequest(_ -> {
 			Platform.exit();
 			System.exit(0); // Force stop (IDK nothing worked for ending the process when closing the app)

@@ -98,7 +98,17 @@ public class NoteOverviewCtrl implements Initializable {
             removeNoteButton.setDisable(newValue == null);
         });
 
+        handleEditCollectionsPressed();
         setupKeyboardShortcuts();
+    }
+
+    private void handleEditCollectionsPressed() {
+        collectionDropdown.setOnAction(event -> {
+            Pair<Long, String> selectedOption = collectionDropdown.getValue();
+            if ("Edit Collections...".equals(selectedOption.getValue())) {
+                mainCtrl.showEditCollections(); // Call the method to show the popup
+            }
+        });
     }
 
     private void setupKeyboardShortcuts() {
