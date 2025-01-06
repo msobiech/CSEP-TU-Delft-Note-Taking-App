@@ -55,6 +55,7 @@ public class NoteController {
                         .body(null); // 409 Conflict if title already exists
             }
             Note updatedNote = noteService.updateNote(id, note);
+            System.out.println("Note " + id + " updated successfully");
             return ResponseEntity.ok(updatedNote);
         } catch (IllegalAccessException e) {
             return ResponseEntity.notFound().build();

@@ -1,19 +1,20 @@
 package client.controllers;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
+
 import java.net.URL;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 
+import client.event.*;
+import client.managers.MarkdownRenderManager;
+import client.managers.NoteListManager;
+import client.managers.NoteManager;
 import client.utils.DebounceService;
 import client.utils.NoteService;
 import com.google.inject.Inject;
 
 import client.utils.ServerUtils;
-import javafx.application.Platform;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -24,9 +25,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.web.WebView;
 
-import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.ext.tables.TablesExtension;
 import javafx.util.Pair;
 import models.Collection;
 import models.Note;
@@ -38,6 +36,7 @@ public class NoteOverviewCtrl implements Initializable {
     private final MainCtrl mainCtrl;
     private final NoteService noteService;
     private final DebounceService debounceService;
+    private static final EventBus eventBus = MainEventBus.getInstance();
 
     @FXML
     private TextField noteTitle;
@@ -66,14 +65,10 @@ public class NoteOverviewCtrl implements Initializable {
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
 
-    private final Parser markdownParser = Parser.builder().extensions(List.of(TablesExtension.create())).build();
-    private final HtmlRenderer htmlRenderer = HtmlRenderer.builder().extensions(List.of(TablesExtension.create())).build();
-    private Timer debounceTimer = new Timer();
+    private NoteManager noteManager;
+    private NoteListManager noteListManager;
+    private MarkdownRenderManager markdownRenderManager;
 
-    private int changeCountContent = 0;
-    private int changeCountTitle = 0;
-    private final int THRESHOLD = 5;
-    private final int DELAY = 1000;
     private Runnable lastTask = null;
 
     private Long curNoteId = null;
@@ -89,6 +84,9 @@ public class NoteOverviewCtrl implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        markdownRenderManager = new MarkdownRenderManager(markdownContent,markdownPreview,mainCtrl);
+        noteManager = new NoteManager(noteService, server);
+        noteListManager = new NoteListManager(notesList);
         setupSearch();
         setupSelectCollection();
         handleCollectionSelectionChange();
@@ -137,6 +135,7 @@ public class NoteOverviewCtrl implements Initializable {
             if (event.getCode() == KeyCode.ENTER) { // Trigger only on Enter key press
                 updateTitle();
             }
+            //eventBus.publish(new NoteContentEvent(NoteEvent.EventType.TITLE_CHANGE, newValue, curNoteId, curNoteIndex));
         });
     }
 
@@ -168,40 +167,12 @@ public class NoteOverviewCtrl implements Initializable {
 
     private void handleNoteContentChange() {
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
-            changeCountContent++; // Count the amount of changes
-            try {
-                renderMarkdown(newValue);
-            } catch (InterruptedException e) {
-                mainCtrl.showError(e.toString());
-            }
-
-
-            debounce(() -> {
-                if (curNoteId != null) {
-                    try {
-                        noteService.updateNoteContent(newValue, curNoteId);
-                        changeCountContent = 0;
-                    } catch (Exception e) {
-                        System.out.println("Failed to update content: " + e.getMessage());
-                    }
-                }
-            }, DELAY);
-            if (changeCountContent >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
-                if (curNoteId != null) {
-                    try {
-                        noteService.updateNoteContent(newValue, curNoteId);
-                        changeCountContent = 0;
-                        debounceTimer.cancel(); // Cancel any pending debounced update
-                    } catch (Exception e) {
-                        System.out.println("Failed to update content: " + e.getMessage());
-                    }
-                }
-            }
+            eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, newValue, curNoteId, curNoteIndex));
         });
         removeNoteButton.setDisable(true);
     }
 
-        private void handleNoteSelectionChange() {
+    private void handleNoteSelectionChange() {
         noteDisplay.focusedProperty().addListener((_, _, hasFocus) -> {});
         // Listener for switching notes (ensures deletion only happens when switching notes)
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
@@ -211,7 +182,6 @@ public class NoteOverviewCtrl implements Initializable {
         });
         noteDisplay.setEditable(false);
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
-
             updateContentAndTitle(oldNote, newNote);
         });
     }
@@ -241,11 +211,6 @@ public class NoteOverviewCtrl implements Initializable {
 
             // Display content and render markdown
             updateNoteDisplay(content);
-            try {
-                renderMarkdown(content);
-            } catch (InterruptedException e) {
-                mainCtrl.showError(e.toString());
-            }
         } else {
             // Disable editing when no note is selected
             noteDisplay.setEditable(false);
@@ -341,55 +306,6 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     /**
-     * This method allows you to schedule a task that will be executed in the given delay
-     * @param task to schedule
-     * @param delayMillis delay which we wait
-     * Nice explanation of the concept <a href="https://www.geeksforgeeks.org/debouncing-in-javascript/">...</a>
-     */
-    private void debounce(Runnable task, int delayMillis) {
-        debounceTimer.cancel(); // If the previously scheduled task is still there it means that the inactivity wasn't long enough and we can cancel.
-        debounceTimer = new Timer(); // Setup new timer
-
-        lastTask = task;
-
-        debounceTimer.schedule(new TimerTask() { // Schedule new task TimerTask will schedule the task on your timer and execute in a given time
-            @Override
-            public void run() {
-                Platform.runLater(task); // Run the task on a platform thread
-            }
-        }, delayMillis);
-    }
-
-
-    private void renderMarkdown(String markdownText) throws InterruptedException {
-
-        String cssFile = null;
-        String htmlContent = null;
-        //Used markdown style is from here https://github.com/sindresorhus/github-markdown-css
-        try {
-            cssFile = Files.readString(Path.of(getClass().getResource("markdownStyle.css").toURI()));
-            htmlContent = "<style>" + cssFile + "</style><article class=\"markdown-body\">";
-        } catch (IOException | URISyntaxException e) {
-            htmlContent = "<style> body { color-scheme: light;" +
-                    "font-family: -apple-system,BlinkMacSystemFont,\"Segoe UI\"," +
-                    "\"Noto Sans\",Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\";" +
-                    "font-size: 16px; line-height: 1.5; word-wrap: break-word; }" +
-                    "blockquote { margin: 20px 0; padding: 10px 20px;" +
-                    "border-left: 5px solid #ccc; background-color: #f9f9f9; font-style: italic; color: #555; }" +
-                    "table { width: 50%; border-collapse: collapse;}" +
-                    "table, th, td { border: 1px solid #333; }" +
-                    "th, td { padding: 8px; text-align: left; }" +
-                    "th { background-color: #f2f2f2; } </style>";
-        }
-        htmlContent += htmlRenderer.render(markdownParser.parse(markdownText));
-        markdownContent.getEngine().loadContent(htmlContent);
-        markdownContent.setPrefHeight(markdownPreview.getHeight());
-        markdownContent.setPrefWidth(markdownPreview.getWidth());
-    }
-
-
-
-    /**
      * Method to set the noteTitle to given parameter
      * @param note the content to set the title to
      * This method only fills out the client fields. It does not communicate with the server in order to save the title.
@@ -432,6 +348,7 @@ public class NoteOverviewCtrl implements Initializable {
             }
         }
         notes = FXCollections.observableArrayList(notesAsPairs);
+        noteListManager.setNotes(notes);
         notesList.setItems(notes);
         //Since the list is of the pairs, and they are not really observable objects (They do not implement Observable)
         //We have to change the list to only display the note title (The code is strongly from the internet)
@@ -465,7 +382,7 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void addNote(){
         System.out.println("Adding a new note");
-        server.addNote();
+        eventBus.publish(new NoteStatusEvent(NoteEvent.EventType.NOTE_ADD, null));
         refreshNotes();
     }
 
@@ -498,6 +415,7 @@ public class NoteOverviewCtrl implements Initializable {
             }
         }
         notes = FXCollections.observableArrayList(notesAsPairs);
+        noteListManager.setNotes(notes);
         notesList.setItems(notes);
         //Since the list is of the pairs, and they are not really observable objects (They do not implement Observable)
         //We have to change the list to only display the note title (The code is strongly from the internet)
@@ -546,6 +464,7 @@ public class NoteOverviewCtrl implements Initializable {
                     collectionNotes.add(new Pair<>(note.getId(), note.getTitle()));
                 }
                 notes = FXCollections.observableArrayList(collectionNotes);
+                noteListManager.setNotes(notes);
                 notesList.setItems(notes);
                 refreshNotes();
                 break;
@@ -559,6 +478,7 @@ public class NoteOverviewCtrl implements Initializable {
                     collectionNotes.add(new Pair<>(note.getId(), note.getTitle()));
                 }
                 notes = FXCollections.observableArrayList(collectionNotes);
+                noteListManager.setNotes(notes);
                 notesList.setItems(notes);
                 refreshNotes();
         }
@@ -578,23 +498,16 @@ public class NoteOverviewCtrl implements Initializable {
                     "\nDeleting a note is irreversible!");
 
             Optional<ButtonType> result = alert.showAndWait();
-
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                try {
-                    server.deleteNoteByID(selectedNote.getKey());
-                    notesList.getItems().remove(selectedNote);
-                    // Handle the case when the list is empty
-                    if (notesList.getItems().isEmpty()) {
-                        curNoteId = null;
-                        curNoteIndex = null;
-                        updateNoteTitle(""); // Clear title field
-                        updateNoteDisplay(""); // Clear content field
-                    } else {
-                        // Select the first note in the list
-                        notesList.getSelectionModel().select(0);
-                    }
-                } catch (Exception e) {
-                    System.out.println("Error while deleting note: " + e.getMessage());
+                eventBus.publish(new NoteStatusEvent(NoteEvent.EventType.NOTE_REMOVE, selectedNote.getKey()));
+                if (notesList.getItems().isEmpty()) {
+                    curNoteId = null;
+                    curNoteIndex = null;
+                    updateNoteTitle(""); // Clear title field
+                    updateNoteDisplay(""); // Clear content field
+                } else {
+                    // Select the first note in the list
+                    notesList.getSelectionModel().select(0);
                 }
 
             } else {
