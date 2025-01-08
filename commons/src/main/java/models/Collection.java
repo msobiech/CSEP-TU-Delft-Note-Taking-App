@@ -16,6 +16,8 @@ public class Collection {
 
     private String name;
 
+    private boolean isDefault;
+
     @ManyToMany(fetch = FetchType.LAZY, cascade = {
             CascadeType.PERSIST,
             CascadeType.MERGE
@@ -103,5 +105,9 @@ public class Collection {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';
+    }
+
+    public void setDefault (boolean value){
+        this.isDefault = value;
     }
 }
