@@ -1,5 +1,6 @@
 package controllers;
 
+import models.Collection;
 import models.Note;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 import server.controllers.NoteController;
+import server.services.CollectionService;
 import server.services.NoteService;
 
 import java.util.List;
@@ -19,14 +21,26 @@ import static org.mockito.Mockito.*;
 class NoteControllerTest {
 
     @Mock
-    private NoteService noteService; // Mocked service
+    private NoteService noteService;
+
+    @Mock
+    private CollectionService collectionService;
 
     @InjectMocks
-    private NoteController noteController; // Controller under test
+    private NoteController noteController;
+
+    private Note note;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this); // Initialize mocks
+    }
+
+    @BeforeEach
+    public void setup() {
+        note = new Note();
+        note.setTitle("Test Title");
+        note.setContent("Test Content");
     }
 
     @Test
@@ -109,27 +123,20 @@ class NoteControllerTest {
     }
 
     @Test
-    void testAddNoteSuccess() {
+    public void testAddNote_Success() {
         // Arrange
-        Note note = new Note();
-        note.setTitle("New Note");
-
-        Note savedNote = new Note();
-        savedNote.setId(1);
-        savedNote.setTitle("Unique New Note");
-
-        when(noteService.generateUniqueTitle()).thenReturn("Unique New Note");
-        when(noteService.saveNote(note)).thenReturn(savedNote);
+        when(noteService.generateUniqueTitle()).thenReturn("Unique Title");
+        when(collectionService.getDefaultCollection()).thenReturn(new Collection());  // Assuming Collection is a valid object
+        when(noteService.saveNote(any(Note.class))).thenReturn(note);
 
         // Act
         ResponseEntity<Note> response = noteController.addNote(note);
 
         // Assert
-        assertNotNull(response);
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals("Unique New Note", response.getBody().getTitle());
-        verify(noteService ).generateUniqueTitle();
-        verify(noteService).saveNote(note);
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals("Unique Title", response.getBody().getTitle());
+        verify(noteService, times(1)).saveNote(any(Note.class));  // Verify that saveNote() is called once
     }
 
     @Test

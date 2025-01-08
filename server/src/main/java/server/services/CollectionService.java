@@ -3,6 +3,7 @@ package server.services;
 import models.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import server.repositories.CollectionRepository;
 import server.repositories.NoteRepository;
 
@@ -46,5 +47,17 @@ public class CollectionService {
             fetchedCollection.setNotes(collection.getNotes());  //update notes in collection if changed
         }
         return collectionRepo.save(fetchedCollection);
+    }
+
+    public Collection getDefaultCollection() {
+        return collectionRepo.findDefaultCollection();
+    }
+
+
+    @Transactional
+    public void updateDefaultCollection(Long newDefaultCollectionId) {
+        collectionRepo.unsetDefaultCollection();
+
+        collectionRepo.setDefaultCollection(newDefaultCollectionId);
     }
 }

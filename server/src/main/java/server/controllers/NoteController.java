@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import server.services.CollectionService;
 import server.services.NoteService;
 
 import java.util.List;
@@ -19,14 +20,17 @@ import java.util.List;
 @RequestMapping("/notes")
 public class NoteController {
     private final NoteService noteService;
+    private final CollectionService collectionService;
 
     /**
      * Establishes NoteService implementation with Autowiring
      * @param noteService to establish the service
+     * @param collectionService to establish the service
      */
     @Autowired
-    public NoteController(NoteService noteService) {
+    public NoteController(NoteService noteService, CollectionService collectionService) {
         this.noteService = noteService;
+        this.collectionService = collectionService;
     }
 
     @GetMapping("/get")
@@ -66,6 +70,7 @@ public class NoteController {
     public ResponseEntity<Note> addNote(@RequestBody Note note) {
         try {
             note.setTitle(noteService.generateUniqueTitle());
+            note.addCollection(collectionService.getDefaultCollection());
             Note savedNote = noteService.saveNote(note);
             return ResponseEntity.ok(savedNote);
         } catch (IllegalArgumentException e) {

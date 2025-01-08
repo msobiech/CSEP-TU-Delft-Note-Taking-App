@@ -77,5 +77,17 @@ public class CollectionController {
         }
     }
 
+    @GetMapping("/default")
+    public ResponseEntity<Collection> getDefaultCollection() {
+        Collection defaultCollection = collectionService.getDefaultCollection();
+        return ResponseEntity.ok(defaultCollection);
+    }
+
+    @PutMapping("/default")
+    public ResponseEntity<Void> updateDefaultCollection(@RequestBody Long newDefaultCollectionId) {
+        collectionService.updateDefaultCollection(newDefaultCollectionId);
+        return ResponseEntity.ok().build();
+    }
+
 
 }

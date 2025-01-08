@@ -178,5 +178,15 @@ public class Note {
         this.id = id;
     }
 
+    public void addCollection(Collection collection){
+        if (collection != null) {
+            this.collections.add(collection);
+            this.collectionIds.add(collection.getId());
+        } else{
+            this.collections = new HashSet<>();
+        }
+    }
+
+
 
 }
