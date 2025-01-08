@@ -1,7 +1,5 @@
 package client.event;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class LanguageEvent extends Event {
     private final String language;
     public LanguageEvent(String language) {
