@@ -101,6 +101,7 @@ public class NoteOverviewCtrl implements Initializable {
         handleNoteTitleChanged();
         handleNoteSelectionChange();
         handleNoteContentChange();
+        handleLanguageChange();
 
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             removeNoteButton.setDisable(newValue == null);
@@ -108,6 +109,12 @@ public class NoteOverviewCtrl implements Initializable {
 
         handleEditCollectionsPressed();
         setupKeyboardShortcuts();
+    }
+
+    private void handleLanguageChange() {
+        flagDropdown.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
+            System.out.println("Language changed to " +  newValue.getKey());
+        });
     }
 
     private void handleEditCollectionsPressed() {
@@ -124,57 +131,39 @@ public class NoteOverviewCtrl implements Initializable {
         ObservableList<Pair<String,String>> flags = FXCollections.observableArrayList(
                 new Pair<>("UK", "uk_flag.png"),
                 new Pair<>("NL", "nl_flag.png"),
-                new Pair<>("PL", "pl_flag.png")
+                new Pair<>("PL", "pl_flag.png"),
+                new Pair<>("IT", "it_flag.png"),
+                new Pair<>("RO", "ro_flag.png")
         );
         flagDropdown.setItems(flags);
         flagDropdown.getSelectionModel().select(0);
-        flagDropdown.setCellFactory(_ -> new ListCell<>(){
-            private final ImageView flagImage = new ImageView();
-            @Override
-            public void updateItem(Pair<String, String> item, boolean empty){
-                super.updateItem(item, empty);
-                if(!empty && item!=null){
-                    String path = item.getValue();
-                    Image tmp = new Image(Objects.requireNonNull(getClass().getResourceAsStream(path)));
-                    flagImage.setImage(tmp);
-                    flagImage.setFitHeight(20); flagImage.setFitWidth(20); flagImage.setPreserveRatio(true);
-                    setAlignment(Pos.CENTER);
-                    setPadding(new Insets(4,4,4,4)); setGraphic(flagImage); setText(null);
-                }
-                else{
-                    setText(null);
-                    setGraphic(null);
-                }
-            }
-        });
-        flagDropdown.setButtonCell(new ListCell<>() {
+        flagDropdown.setCellFactory(_ -> createFlagCell());
+        flagDropdown.setButtonCell(createFlagCell());
+
+    }
+
+    private ListCell<Pair<String, String>> createFlagCell() {
+        return new ListCell<>() {
             private final ImageView flagImage = new ImageView();
             @Override
             public void updateItem(Pair<String, String> item, boolean empty) {
                 super.updateItem(item, empty);
                 if (!empty && item != null) {
-                    updateFlagCell(item);
+                    updateFlagCell(this, flagImage, item.getValue());
                 } else {
                     setText(null);
                     setGraphic(null);
                 }
             }
+        };
+    }
 
-            private void updateFlagCell(Pair<String, String> item) {
-                String path = item.getValue();
-                Image tmp = new Image(Objects.requireNonNull(getClass().getResourceAsStream(path)));
-                flagImage.setImage(tmp);
-                flagImage.setFitHeight(20);
-                flagImage.setFitWidth(20);
-                flagImage.setPreserveRatio(true);
-                setAlignment(Pos.CENTER);
-                setPadding(new Insets(4,4,4,4));
-                setGraphic(flagImage);
-                setText(null);
-            }
-        });
-
-
+    private void updateFlagCell(ListCell<Pair<String, String>> cell, ImageView flagImage, String path) {
+        Image tmp = new Image(Objects.requireNonNull(getClass().getResourceAsStream(path)));
+        flagImage.setImage(tmp);
+        flagImage.setFitHeight(20); flagImage.setFitWidth(20); flagImage.setPreserveRatio(true);
+        cell.setAlignment(Pos.CENTER);
+        cell.setPadding(new Insets(4,4,4,4)); cell.setGraphic(flagImage); cell.setText(null);
     }
 
     private void setupKeyboardShortcuts() {
