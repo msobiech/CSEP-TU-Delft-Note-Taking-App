@@ -20,7 +20,11 @@ import javafx.collections.ObservableList;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.web.WebView;
@@ -37,6 +41,9 @@ public class NoteOverviewCtrl implements Initializable {
     private final NoteService noteService;
     private final DebounceService debounceService;
     private static final EventBus eventBus = MainEventBus.getInstance();
+
+    @FXML
+    public ComboBox<Pair<String, String>> flagDropdown;
 
     @FXML
     private TextField noteTitle;
@@ -90,6 +97,7 @@ public class NoteOverviewCtrl implements Initializable {
         setupSearch();
         setupSelectCollection();
         handleCollectionSelectionChange();
+        setupLanguageDropdown();
         handleNoteTitleChanged();
         handleNoteSelectionChange();
         handleNoteContentChange();
@@ -109,6 +117,64 @@ public class NoteOverviewCtrl implements Initializable {
                 mainCtrl.showEditCollections(); // Call the method to show the popup
             }
         });
+    }
+
+
+    private void setupLanguageDropdown() {
+        ObservableList<Pair<String,String>> flags = FXCollections.observableArrayList(
+                new Pair<>("UK", "uk_flag.png"),
+                new Pair<>("NL", "nl_flag.png"),
+                new Pair<>("PL", "pl_flag.png")
+        );
+        flagDropdown.setItems(flags);
+        flagDropdown.getSelectionModel().select(0);
+        flagDropdown.setCellFactory(_ -> new ListCell<>(){
+            private final ImageView flagImage = new ImageView();
+            @Override
+            public void updateItem(Pair<String, String> item, boolean empty){
+                super.updateItem(item, empty);
+                if(!empty && item!=null){
+                    String path = item.getValue();
+                    Image tmp = new Image(Objects.requireNonNull(getClass().getResourceAsStream(path)));
+                    flagImage.setImage(tmp);
+                    flagImage.setFitHeight(20); flagImage.setFitWidth(20); flagImage.setPreserveRatio(true);
+                    setAlignment(Pos.CENTER);
+                    setPadding(new Insets(4,4,4,4)); setGraphic(flagImage); setText(null);
+                }
+                else{
+                    setText(null);
+                    setGraphic(null);
+                }
+            }
+        });
+        flagDropdown.setButtonCell(new ListCell<>() {
+            private final ImageView flagImage = new ImageView();
+            @Override
+            public void updateItem(Pair<String, String> item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) {
+                    updateFlagCell(item);
+                } else {
+                    setText(null);
+                    setGraphic(null);
+                }
+            }
+
+            private void updateFlagCell(Pair<String, String> item) {
+                String path = item.getValue();
+                Image tmp = new Image(Objects.requireNonNull(getClass().getResourceAsStream(path)));
+                flagImage.setImage(tmp);
+                flagImage.setFitHeight(20);
+                flagImage.setFitWidth(20);
+                flagImage.setPreserveRatio(true);
+                setAlignment(Pos.CENTER);
+                setPadding(new Insets(4,4,4,4));
+                setGraphic(flagImage);
+                setText(null);
+            }
+        });
+
+
     }
 
     private void setupKeyboardShortcuts() {
