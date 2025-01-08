@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.*;
 
 import client.event.*;
+import client.managers.LanguageManager;
 import client.managers.MarkdownRenderManager;
 import client.managers.NoteListManager;
 import client.managers.NoteManager;
@@ -43,7 +44,10 @@ public class NoteOverviewCtrl implements Initializable {
     private static final EventBus eventBus = MainEventBus.getInstance();
 
     @FXML
-    public ComboBox<Pair<String, String>> flagDropdown;
+    private ComboBox<Pair<String, String>> flagDropdown;
+
+    @FXML
+    private Label collectionText;
 
     @FXML
     private TextField noteTitle;
@@ -75,6 +79,7 @@ public class NoteOverviewCtrl implements Initializable {
     private NoteManager noteManager;
     private NoteListManager noteListManager;
     private MarkdownRenderManager markdownRenderManager;
+    private LanguageManager languageManager;
 
     private Runnable lastTask = null;
 
@@ -94,6 +99,7 @@ public class NoteOverviewCtrl implements Initializable {
         markdownRenderManager = new MarkdownRenderManager(markdownContent,markdownPreview,mainCtrl);
         noteManager = new NoteManager(noteService, server);
         noteListManager = new NoteListManager(notesList);
+        languageManager = new LanguageManager(this);
         setupSearch();
         setupSelectCollection();
         handleCollectionSelectionChange();
@@ -114,6 +120,7 @@ public class NoteOverviewCtrl implements Initializable {
     private void handleLanguageChange() {
         flagDropdown.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             System.out.println("Language changed to " +  newValue.getKey());
+            eventBus.publish(new LanguageEvent(newValue.getKey()));
         });
     }
 
@@ -128,6 +135,7 @@ public class NoteOverviewCtrl implements Initializable {
 
 
     private void setupLanguageDropdown() {
+
         ObservableList<Pair<String,String>> flags = FXCollections.observableArrayList(
                 new Pair<>("UK", "uk_flag.png"),
                 new Pair<>("NL", "nl_flag.png"),
@@ -137,6 +145,9 @@ public class NoteOverviewCtrl implements Initializable {
         );
         flagDropdown.setItems(flags);
         flagDropdown.getSelectionModel().select(0);
+
+        eventBus.publish(new LanguageEvent(flagDropdown.getSelectionModel().getSelectedItem().getKey()));
+
         flagDropdown.setCellFactory(_ -> createFlagCell());
         flagDropdown.setButtonCell(createFlagCell());
 
@@ -579,5 +590,17 @@ public class NoteOverviewCtrl implements Initializable {
                 System.out.println("Deletion canceled.");
             }
         }
+    }
+
+    public Label getCollectionText() {
+        return collectionText;
+    }
+
+    public TextField getNoteTitle() {
+        return noteTitle;
+    }
+
+    public TextField getSearchBar() {
+        return searchBar;
     }
 }
