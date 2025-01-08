@@ -1,0 +1,17 @@
+.combo-box {
+    -fx-background-color: #f0f0f0; /* Change background color of the ComboBox */
+    -fx-border-color: #cccccc;    /* Optional: change border color */
+}
+
+.combo-box .list-cell {
+    -fx-background-color: #f0f0f0; /* Background color of dropdown items */
+    -fx-text-fill: black;          /* Text color */
+}
+
+.combo-box .list-cell:hover {
+    -fx-background-color: #d9d9d9; /* Background color on hover */
+}
+
+.combo-box-popup {
+    -fx-background-color: #f0f0f0; /* Background color of the dropdown */
+}
