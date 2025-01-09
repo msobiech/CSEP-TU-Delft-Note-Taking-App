@@ -15,20 +15,19 @@
  */
 package client;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.ResourceBundle;
-
 import com.google.inject.Injector;
-
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.util.Builder;
 import javafx.util.BuilderFactory;
 import javafx.util.Callback;
 import javafx.util.Pair;
+
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.ResourceBundle;
 
 public class MyFXML {
 
@@ -45,6 +44,7 @@ public class MyFXML {
     /**
      * Loads an FXML file and returns its controller along with the root parent node.
      * @param c the type of the controller associated with the FXML file.
+     * @param resourceBundle resource bundle
      * @param parts the path segments that, when combined, specify the location of the FXML file.
      * @return a Pair containing the controller of type T and the root Parent node.
      * @param <T> the type of the controller associated with the FXML file.

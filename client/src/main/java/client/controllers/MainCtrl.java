@@ -25,9 +25,6 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 import org.kordamp.bootstrapfx.BootstrapFX;
 
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
 import static com.google.inject.Guice.createInjector;

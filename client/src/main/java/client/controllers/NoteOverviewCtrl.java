@@ -1,12 +1,6 @@
 package client.controllers;
 
 
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.net.URL;
-
-import java.util.*;
-
 import client.event.*;
 import client.managers.LanguageManager;
 import client.managers.MarkdownRenderManager;
@@ -14,13 +8,10 @@ import client.managers.NoteListManager;
 import client.managers.NoteManager;
 import client.utils.DebounceService;
 import client.utils.NoteService;
-import com.google.inject.Inject;
-
 import client.utils.ServerUtils;
-
+import com.google.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -31,10 +22,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.web.WebView;
-
 import javafx.util.Pair;
 import models.Collection;
 import models.Note;
+
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.net.URL;
+import java.util.*;
 
 
 public class NoteOverviewCtrl implements Initializable {

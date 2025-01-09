@@ -17,9 +17,7 @@ package client;
 
 import static com.google.inject.Guice.createInjector;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.net.URISyntaxException;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -31,10 +29,7 @@ import com.google.inject.Injector;
 import client.utils.ServerUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 
 public class Main extends Application {
 
