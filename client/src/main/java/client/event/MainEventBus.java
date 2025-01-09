@@ -20,6 +20,7 @@ public class MainEventBus implements EventBus {
         Objects.requireNonNull(eventType);
         Objects.requireNonNull(subscriber);
 
+
         Set<Consumer> eventSubscribers = getOrCreateSubscribers(eventType);
         eventSubscribers.add(subscriber);
     }
@@ -31,6 +32,19 @@ public class MainEventBus implements EventBus {
             subscribers.put(eventType, eventSubscribers);
         }
         return eventSubscribers;
+    }
+
+
+    @Override
+    public void unsubcribeAll(){
+        subscribers.clear();
+    }
+
+    public <E extends Event> void unsubscribe(Class<? extends E> eventType){
+        Objects.requireNonNull(eventType);
+        subscribers.keySet().stream()
+                .filter(eventType::isAssignableFrom)
+                .forEach(subscribers::remove);
     }
 
     @Override

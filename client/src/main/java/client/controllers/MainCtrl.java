@@ -15,14 +15,27 @@
  */
 package client.controllers;
 
+
+import client.MyModule;
+import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import org.kordamp.bootstrapfx.BootstrapFX;
 
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
+import static com.google.inject.Guice.createInjector;
+
+@Singleton
 public class MainCtrl {
+
+    private static final Injector INJECTOR = createInjector(new MyModule());
 
     private Stage primaryStage;
     private Stage popUp;
@@ -41,6 +54,8 @@ public class MainCtrl {
 
     private EditCollectionsPopUpCtrl editCtrl;
     private Scene editScene;
+
+    private ResourceBundle language;
 
     /**
      * Initialization of the main Stage
@@ -74,17 +89,21 @@ public class MainCtrl {
 
         this.editCtrl = collectionEdit.getKey();
         this.editScene = new Scene(collectionEdit.getValue());
-
         //showServerSelection();
         showOverview();
         primaryStage.show();
     }
 
+    public void setLanguage(ResourceBundle language){
+        this.language = language;
+    }
     /**
      * Method to show the scene for notes overview
      */
     public void showOverview() {
-        primaryStage.setTitle("Notes: Overview");
+        System.out.println(this);
+        System.getenv();
+        primaryStage.setTitle(language.getString("window.primary.title"));
         primaryStage.setScene(overview);
         overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         primaryStage.setResizable(true);
@@ -108,7 +127,7 @@ public class MainCtrl {
     public void showError(String error){
         this.popUp = new Stage();
         popUp.setScene(errorScene);
-        popUp.setTitle("Notes: Error");
+        popUp.setTitle(language.getString("window.error.title"));
         popUp.setResizable(false);
         errorCtrl.setErrorLabel(error);
         popUp.show();
@@ -153,4 +172,19 @@ public class MainCtrl {
         popUp.show();
     }
 
+    public void updateOverview(Pair<NoteOverviewCtrl, Parent> overview) {
+        System.out.println(this);
+        this.overviewCtrl = overview.getKey();
+        this.overview = new Scene(overview.getValue());
+        showOverview();
+    }
+
+    private static MainCtrl INSTANCE;
+
+    public static MainCtrl getInstance() {
+        if(INSTANCE == null) {
+            INSTANCE = INJECTOR.getInstance(MainCtrl.class);;
+        }
+        return INSTANCE;
+    }
 }

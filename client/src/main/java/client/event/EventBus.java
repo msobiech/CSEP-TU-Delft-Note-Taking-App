@@ -8,4 +8,6 @@ public interface EventBus {
 
     <T extends Event> void publish(T event);
 
+    void unsubcribeAll();
+
 }

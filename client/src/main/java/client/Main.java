@@ -17,16 +17,24 @@ package client;
 
 import static com.google.inject.Guice.createInjector;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.URISyntaxException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import client.controllers.*;
+import client.managers.LanguageManager;
 import com.google.inject.Injector;
 
 import client.utils.ServerUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 public class Main extends Application {
 
@@ -47,13 +55,18 @@ public class Main extends Application {
 			return;
 		}
 
-		var overview = FXML.load(NoteOverviewCtrl.class, "client", "views", "NoteOverview.fxml");
-		var add = FXML.load(AddNoteCtrl.class, "client", "views", "AddNote.fxml");
-		var error = FXML.load(ErrorPopUpCtrl.class, "client", "views", "ErrorPopUp.fxml");
-		var serverURL = FXML.load(ServerSelectionCtrl.class, "client", "views", "ServerSelection.fxml");
-		var collectionsEdit = FXML.load(EditCollectionsPopUpCtrl.class, "client", "views", "EditCollectionsPopUp.fxml");
+		Locale currentLanguage = LanguageManager.getLanguage();
 
-		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
+		ResourceBundle bundle = ResourceBundle.getBundle("client.controllers.language", currentLanguage);
+
+		var overview = FXML.load(NoteOverviewCtrl.class, bundle, "client", "views", "NoteOverview.fxml");
+		var add = FXML.load(AddNoteCtrl.class, bundle, "client", "views", "AddNote.fxml");
+		var error = FXML.load(ErrorPopUpCtrl.class, bundle, "client", "views", "ErrorPopUp.fxml");
+		var serverURL = FXML.load(ServerSelectionCtrl.class, bundle, "client", "views", "ServerSelection.fxml");
+		var collectionsEdit = FXML.load(EditCollectionsPopUpCtrl.class, bundle, "client", "views", "EditCollectionsPopUp.fxml");
+
+		var mainCtrl = MainCtrl.getInstance();
+		mainCtrl.setLanguage(bundle);
 		mainCtrl.initialize(primaryStage, overview, add, error, serverURL, collectionsEdit);
                 primaryStage.setOnCloseRequest(_ -> {
 			Platform.exit();
