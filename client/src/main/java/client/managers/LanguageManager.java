@@ -4,6 +4,7 @@ import client.InjectorProvider;
 import client.MyFXML;
 import client.controllers.MainCtrl;
 import client.controllers.NoteOverviewCtrl;
+import client.event.EventBus;
 import client.event.LanguageEvent;
 import client.event.MainEventBus;
 import com.google.inject.Injector;
@@ -14,7 +15,7 @@ import java.util.ResourceBundle;
 
 
 public class LanguageManager {
-    private final MainEventBus eventBus = MainEventBus.getInstance();
+    private static final EventBus eventBus = InjectorProvider.getInjector().getInstance(MainEventBus.class);
 
     private static final Injector INJECTOR = InjectorProvider.getInjector();
     static final MyFXML FXML = new MyFXML(INJECTOR);

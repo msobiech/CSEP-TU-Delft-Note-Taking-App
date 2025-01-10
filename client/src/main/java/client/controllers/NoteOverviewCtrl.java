@@ -1,6 +1,7 @@
 package client.controllers;
 
 
+import client.InjectorProvider;
 import client.event.*;
 import client.managers.LanguageManager;
 import client.managers.MarkdownRenderManager;
@@ -38,7 +39,7 @@ public class NoteOverviewCtrl implements Initializable {
     private final MainCtrl mainCtrl;
     private final NoteService noteService;
     private final DebounceService debounceService;
-    private static final EventBus eventBus = MainEventBus.getInstance();
+    private static final EventBus eventBus = InjectorProvider.getInjector().getInstance(MainEventBus.class);
 
     @FXML
     private ComboBox<Pair<String, String>> flagDropdown;

@@ -2,6 +2,8 @@
 
 package client.event;
 
+import jakarta.inject.Singleton;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -9,6 +11,7 @@ import java.util.function.Consumer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
+@Singleton
 public class MainEventBus implements EventBus {
     MainEventBus() {
     }
@@ -66,6 +69,7 @@ public class MainEventBus implements EventBus {
         }
     }
 
+    /*
     private static MainEventBus INSTANCE;
 
     public static MainEventBus getInstance() {
@@ -73,6 +77,6 @@ public class MainEventBus implements EventBus {
             INSTANCE = new MainEventBus();
         }
         return INSTANCE;
-    }
+    }*/
 
 }
