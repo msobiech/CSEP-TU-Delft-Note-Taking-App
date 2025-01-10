@@ -15,8 +15,6 @@
  */
 package client;
 
-import static com.google.inject.Guice.createInjector;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Locale;
@@ -33,7 +31,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-	private static final Injector INJECTOR = createInjector(new MyModule());
+	private static final Injector INJECTOR = InjectorProvider.getInjector();
 	private static final MyFXML FXML = new MyFXML(INJECTOR);
 
 	public static void main(String[] args) throws URISyntaxException, IOException {
@@ -60,7 +58,7 @@ public class Main extends Application {
 		var serverURL = FXML.load(ServerSelectionCtrl.class, bundle, "client", "views", "ServerSelection.fxml");
 		var collectionsEdit = FXML.load(EditCollectionsPopUpCtrl.class, bundle, "client", "views", "EditCollectionsPopUp.fxml");
 
-		var mainCtrl = MainCtrl.getInstance();
+		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
 		mainCtrl.setLanguage(bundle);
 		mainCtrl.initialize(primaryStage, overview, add, error, serverURL, collectionsEdit);
                 primaryStage.setOnCloseRequest(_ -> {

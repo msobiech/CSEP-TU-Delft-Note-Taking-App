@@ -32,7 +32,8 @@ import static com.google.inject.Guice.createInjector;
 @Singleton
 public class MainCtrl {
 
-    private static final Injector INJECTOR = createInjector(new MyModule());
+    MainCtrl() {
+    }
 
     private Stage primaryStage;
     private Stage popUp;
@@ -98,8 +99,6 @@ public class MainCtrl {
      * Method to show the scene for notes overview
      */
     public void showOverview() {
-        System.out.println(this);
-        System.getenv();
         primaryStage.setTitle(language.getString("window.primary.title"));
         primaryStage.setScene(overview);
         overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
@@ -170,18 +169,9 @@ public class MainCtrl {
     }
 
     public void updateOverview(Pair<NoteOverviewCtrl, Parent> overview) {
-        System.out.println(this);
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
         showOverview();
     }
 
-    private static MainCtrl INSTANCE;
-
-    public static MainCtrl getInstance() {
-        if(INSTANCE == null) {
-            INSTANCE = INJECTOR.getInstance(MainCtrl.class);;
-        }
-        return INSTANCE;
-    }
 }

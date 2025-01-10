@@ -1,11 +1,13 @@
 package client.managers;
 
+import client.InjectorProvider;
 import client.MyFXML;
 import client.MyModule;
 import client.controllers.MainCtrl;
 import client.controllers.NoteOverviewCtrl;
 import client.event.LanguageEvent;
 import client.event.MainEventBus;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import java.io.*;
@@ -17,8 +19,8 @@ import static com.google.inject.Guice.createInjector;
 public class LanguageManager {
     private final MainEventBus eventBus = MainEventBus.getInstance();
 
-    private static final Injector INJECTOR = createInjector(new MyModule());
-    private static final MyFXML FXML = new MyFXML(INJECTOR);
+    private static final Injector INJECTOR = InjectorProvider.getInjector();
+    static final MyFXML FXML = new MyFXML(INJECTOR);
 
     public static final String SETTINGS_LOCATION = "settings.ser";
 
@@ -45,7 +47,7 @@ public class LanguageManager {
         ResourceBundle bundle = ResourceBundle.getBundle("client.controllers.language", locale);
         eventBus.unsubcribeAll();
         var overview = FXML.load(NoteOverviewCtrl.class, bundle, "client", "views", "NoteOverview.fxml");
-        var mainCtrl = MainCtrl.getInstance();
+        var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
         mainCtrl.setLanguage(bundle);
         mainCtrl.updateOverview(overview);
     }
