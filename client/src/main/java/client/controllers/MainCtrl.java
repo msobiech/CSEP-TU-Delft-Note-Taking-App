@@ -16,8 +16,6 @@
 package client.controllers;
 
 
-import client.MyModule;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -26,8 +24,6 @@ import javafx.util.Pair;
 import org.kordamp.bootstrapfx.BootstrapFX;
 
 import java.util.ResourceBundle;
-
-import static com.google.inject.Guice.createInjector;
 
 @Singleton
 public class MainCtrl {

@@ -2,19 +2,16 @@ package client.managers;
 
 import client.InjectorProvider;
 import client.MyFXML;
-import client.MyModule;
 import client.controllers.MainCtrl;
 import client.controllers.NoteOverviewCtrl;
 import client.event.LanguageEvent;
 import client.event.MainEventBus;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import java.io.*;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import static com.google.inject.Guice.createInjector;
 
 public class LanguageManager {
     private final MainEventBus eventBus = MainEventBus.getInstance();
