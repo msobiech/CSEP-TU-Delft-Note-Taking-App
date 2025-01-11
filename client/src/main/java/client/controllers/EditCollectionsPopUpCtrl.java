@@ -7,13 +7,10 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.util.Pair;
 import models.Collection;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class EditCollectionsPopUpCtrl {
