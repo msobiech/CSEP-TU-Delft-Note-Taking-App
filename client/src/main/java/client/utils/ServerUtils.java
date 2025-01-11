@@ -223,4 +223,18 @@ public class ServerUtils {
 				.request(APPLICATION_JSON)
 				.get(String.class);
 	}
+
+	public Collection addCollection(Collection collection) {
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("/collections")
+				.request(APPLICATION_JSON)
+				.post(Entity.entity(collection, APPLICATION_JSON), Collection.class);
+	}
+
+	public void deleteCollectionByID(long id) {
+		ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("/collections/delete/" + id)
+				.request()
+				.delete();
+	}
 }

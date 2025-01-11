@@ -21,7 +21,8 @@
          <children>
             <VBox prefHeight="265.0" prefWidth="110.0" spacing="5.0" style="-fx-padding: 5px; -fx-background-color: #CCD5AE;">
                <children>
-                  <ListView prefHeight="273.0" prefWidth="102.0" style="-fx-background-color: #E0E5B6; -fx-text-fill: #333333;" />
+                  <!-- Added fx:id to ListView -->
+                  <ListView fx:id="collectionListView" prefHeight="273.0" prefWidth="102.0" style="-fx-background-color: #E0E5B6; -fx-text-fill: #333333;" />
                   <HBox alignment="CENTER" prefHeight="28.0" prefWidth="102.0" spacing="5.0" style="-fx-background-color: #E0E5B6; -fx-text-fill: #333333;">
                      <children>
                         <Button fx:id="addCollectionButton" mnemonicParsing="false" onAction="#addCollection">
@@ -64,7 +65,8 @@
                               <Font name="Comic Sans MS Bold" size="12.0" />
                            </font>
                         </Label>
-                        <TextField prefHeight="26.0" prefWidth="238.0" translateY="37.0" />
+                        <!-- Added fx:id to TextField -->
+                        <TextField fx:id="collectionTitleField" prefHeight="26.0" prefWidth="238.0" translateY="37.0" />
                      </children>
                   </HBox>
                   <HBox alignment="BOTTOM_RIGHT" prefHeight="155.0" prefWidth="344.0">
