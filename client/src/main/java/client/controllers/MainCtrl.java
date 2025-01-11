@@ -15,14 +15,21 @@
  */
 package client.controllers;
 
+
+import com.google.inject.Singleton;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import org.kordamp.bootstrapfx.BootstrapFX;
 
+import java.util.ResourceBundle;
 
+@Singleton
 public class MainCtrl {
+
+    MainCtrl() {
+    }
 
     private Stage primaryStage;
     private Stage popUp;
@@ -41,6 +48,8 @@ public class MainCtrl {
 
     private EditCollectionsPopUpCtrl editCtrl;
     private Scene editScene;
+
+    private ResourceBundle language;
 
     /**
      * Initialization of the main Stage
@@ -74,17 +83,19 @@ public class MainCtrl {
 
         this.editCtrl = collectionEdit.getKey();
         this.editScene = new Scene(collectionEdit.getValue());
-
         //showServerSelection();
         showOverview();
         primaryStage.show();
     }
 
+    public void setLanguage(ResourceBundle language){
+        this.language = language;
+    }
     /**
      * Method to show the scene for notes overview
      */
     public void showOverview() {
-        primaryStage.setTitle("Notes: Overview");
+        primaryStage.setTitle(language.getString("window.primary.title"));
         primaryStage.setScene(overview);
         overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         primaryStage.setResizable(true);
@@ -108,7 +119,7 @@ public class MainCtrl {
     public void showError(String error){
         this.popUp = new Stage();
         popUp.setScene(errorScene);
-        popUp.setTitle("Notes: Error");
+        popUp.setTitle(language.getString("window.error.title"));
         popUp.setResizable(false);
         errorCtrl.setErrorLabel(error);
         popUp.show();
@@ -151,6 +162,12 @@ public class MainCtrl {
         popUp.setTitle("Collections: Edit");
         popUp.setResizable(false);
         popUp.show();
+    }
+
+    public void updateOverview(Pair<NoteOverviewCtrl, Parent> overview) {
+        this.overviewCtrl = overview.getKey();
+        this.overview = new Scene(overview.getValue());
+        showOverview();
     }
 
 }

@@ -1,5 +1,7 @@
 package client.managers;
 
+import client.InjectorProvider;
+import client.event.EventBus;
 import client.event.MainEventBus;
 import client.event.NoteEvent;
 import javafx.collections.ObservableList;
@@ -9,7 +11,7 @@ import javafx.util.Pair;
 public class NoteListManager {
     private ObservableList<Pair<Long, String>> notes;
     private final ListView<Pair<Long, String>> notesList;
-    private final MainEventBus eventBus = MainEventBus.getInstance();
+    private static final EventBus eventBus = InjectorProvider.getInjector().getInstance(MainEventBus.class);
 
     public NoteListManager(ListView<Pair<Long, String>> notesList) {
         this.notesList = notesList;

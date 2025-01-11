@@ -1,5 +1,7 @@
 package client.managers;
 
+import client.InjectorProvider;
+import client.event.EventBus;
 import client.event.MainEventBus;
 import client.event.NoteEvent;
 import client.event.NoteEvent.EventType;
@@ -12,7 +14,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class NoteManager {
-    private final MainEventBus eventBus = MainEventBus.getInstance();
+    private static final EventBus eventBus = InjectorProvider.getInjector().getInstance(MainEventBus.class);
     private static int changeCountTitle = 0;
     private static int changeCountContent = 0;
     private Timer debounceTimer = new Timer();

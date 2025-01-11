@@ -2,6 +2,8 @@
 
 package client.event;
 
+import jakarta.inject.Singleton;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -9,6 +11,7 @@ import java.util.function.Consumer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 
+@Singleton
 public class MainEventBus implements EventBus {
     MainEventBus() {
     }
@@ -19,6 +22,7 @@ public class MainEventBus implements EventBus {
     public <E extends Event> void subscribe(Class<? extends E> eventType, Consumer<E> subscriber) {
         Objects.requireNonNull(eventType);
         Objects.requireNonNull(subscriber);
+
 
         Set<Consumer> eventSubscribers = getOrCreateSubscribers(eventType);
         eventSubscribers.add(subscriber);
@@ -31,6 +35,19 @@ public class MainEventBus implements EventBus {
             subscribers.put(eventType, eventSubscribers);
         }
         return eventSubscribers;
+    }
+
+
+    @Override
+    public void unsubcribeAll(){
+        subscribers.clear();
+    }
+
+    public <E extends Event> void unsubscribe(Class<? extends E> eventType){
+        Objects.requireNonNull(eventType);
+        subscribers.keySet().stream()
+                .filter(eventType::isAssignableFrom)
+                .forEach(subscribers::remove);
     }
 
     @Override
@@ -52,6 +69,7 @@ public class MainEventBus implements EventBus {
         }
     }
 
+    /*
     private static MainEventBus INSTANCE;
 
     public static MainEventBus getInstance() {
@@ -59,6 +77,6 @@ public class MainEventBus implements EventBus {
             INSTANCE = new MainEventBus();
         }
         return INSTANCE;
-    }
+    }*/
 
 }

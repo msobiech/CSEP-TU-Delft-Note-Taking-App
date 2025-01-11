@@ -1,10 +1,7 @@
 package client.controllers;
 
 
-import java.net.URL;
-
-import java.util.*;
-
+import client.InjectorProvider;
 import client.event.*;
 import client.managers.LanguageManager;
 import client.managers.MarkdownRenderManager;
@@ -12,13 +9,10 @@ import client.managers.NoteListManager;
 import client.managers.NoteManager;
 import client.utils.DebounceService;
 import client.utils.NoteService;
-import com.google.inject.Inject;
-
 import client.utils.ServerUtils;
-
+import com.google.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -29,10 +23,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.web.WebView;
-
 import javafx.util.Pair;
 import models.Collection;
 import models.Note;
+
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.net.URL;
+import java.util.*;
 
 
 public class NoteOverviewCtrl implements Initializable {
@@ -41,7 +39,7 @@ public class NoteOverviewCtrl implements Initializable {
     private final MainCtrl mainCtrl;
     private final NoteService noteService;
     private final DebounceService debounceService;
-    private static final EventBus eventBus = MainEventBus.getInstance();
+    private static final EventBus eventBus = InjectorProvider.getInjector().getInstance(MainEventBus.class);
 
     @FXML
     private ComboBox<Pair<String, String>> flagDropdown;
@@ -81,6 +79,8 @@ public class NoteOverviewCtrl implements Initializable {
     private MarkdownRenderManager markdownRenderManager;
     private LanguageManager languageManager;
 
+    private ResourceBundle language;
+
     private Runnable lastTask = null;
 
     private Long curNoteId = null;
@@ -99,7 +99,8 @@ public class NoteOverviewCtrl implements Initializable {
         markdownRenderManager = new MarkdownRenderManager(markdownContent,markdownPreview,mainCtrl);
         noteManager = new NoteManager(noteService, server);
         noteListManager = new NoteListManager(notesList);
-        languageManager = new LanguageManager(this);
+        languageManager = new LanguageManager();
+        language = ResourceBundle.getBundle("client.controllers.language", LanguageManager.getLanguage());
         setupSearch();
         setupSelectCollection();
         handleCollectionSelectionChange();
@@ -136,17 +137,34 @@ public class NoteOverviewCtrl implements Initializable {
 
     private void setupLanguageDropdown() {
 
+        Locale currentLanguage = null;
+        try {
+            FileInputStream languageSetting = new FileInputStream("settings.ser");
+            ObjectInputStream in = new ObjectInputStream(languageSetting);
+            currentLanguage = (Locale)in.readObject();
+        } catch (Exception e) {
+            currentLanguage = new Locale("en");
+        }
+
+        System.out.println("Currently chosen language : " + currentLanguage.getLanguage());
+
         ObservableList<Pair<String,String>> flags = FXCollections.observableArrayList(
-                new Pair<>("UK", "uk_flag.png"),
-                new Pair<>("NL", "nl_flag.png"),
-                new Pair<>("PL", "pl_flag.png"),
-                new Pair<>("IT", "it_flag.png"),
-                new Pair<>("RO", "ro_flag.png")
+                new Pair<>("en", "flags/uk_flag.png"),
+                new Pair<>("nl", "flags/nl_flag.png"),
+                new Pair<>("pl", "flags/pl_flag.png"),
+                new Pair<>("it", "flags/it_flag.png"),
+                new Pair<>("ro", "flags/ro_flag.png")
         );
         flagDropdown.setItems(flags);
-        flagDropdown.getSelectionModel().select(0);
 
-        eventBus.publish(new LanguageEvent(flagDropdown.getSelectionModel().getSelectedItem().getKey()));
+
+        for(var country:flags){
+            if(country.getKey().equals(currentLanguage.getLanguage())){
+                flagDropdown.getSelectionModel().select(country);
+            }
+        }
+        //flagDropdown.getSelectionModel().select(0);
+        //eventBus.publish(new LanguageEvent(flagDropdown.getSelectionModel().getSelectedItem().getKey()));
 
         flagDropdown.setCellFactory(_ -> createFlagCell());
         flagDropdown.setButtonCell(createFlagCell());
@@ -308,14 +326,14 @@ public class NoteOverviewCtrl implements Initializable {
     private void setupSelectCollection() {
         List<Collection> collections = server.getAllCollectionsFromServer();       //server.getAllCollections();
 
-        Pair<Long, String> allNotesCollection = new Pair<>((long) -1, "All");
+        Pair<Long, String> allNotesCollection = new Pair<>((long) -1, language.getString("collections.all.text"));
 
         List<Pair<Long, String>> listOfCollections = new ArrayList<>();
         for (Collection collection : collections) {
             listOfCollections.add(new Pair<>(collection.getId(), collection.getName()));
         }
 
-        Pair<Long, String> editOption = new Pair<>((long)-2, "Edit Collections...");
+        Pair<Long, String> editOption = new Pair<>((long)-2, language.getString("collections.edit.text"));
 
         collectionDropdown.getItems().clear();
         collectionDropdown.getItems().add(allNotesCollection);

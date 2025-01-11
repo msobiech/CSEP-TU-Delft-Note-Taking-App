@@ -1,6 +1,8 @@
 package client.managers;
 
+import client.InjectorProvider;
 import client.controllers.MainCtrl;
+import client.event.EventBus;
 import client.event.MainEventBus;
 import client.event.NoteContentEvent;
 import client.event.NoteEvent;
@@ -21,7 +23,7 @@ import static client.event.NoteEvent.EventType.CONTENT_CHANGE;
 public class MarkdownRenderManager {
     private final Parser markdownParser = Parser.builder().extensions(List.of(TablesExtension.create())).build();
     private final HtmlRenderer htmlRenderer = HtmlRenderer.builder().extensions(List.of(TablesExtension.create())).build();
-    private final MainEventBus eventBus = MainEventBus.getInstance();
+    private static final EventBus eventBus = InjectorProvider.getInjector().getInstance(MainEventBus.class);
     private final WebView markdownContent;
     private final ScrollPane markdownPreview;
     private final MainCtrl mainCtrl;

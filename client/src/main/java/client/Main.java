@@ -15,12 +15,13 @@
  */
 package client;
 
-import static com.google.inject.Guice.createInjector;
-
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import client.controllers.*;
+import client.managers.LanguageManager;
 import com.google.inject.Injector;
 
 import client.utils.ServerUtils;
@@ -30,7 +31,7 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-	private static final Injector INJECTOR = createInjector(new MyModule());
+	private static final Injector INJECTOR = InjectorProvider.getInjector();
 	private static final MyFXML FXML = new MyFXML(INJECTOR);
 
 	public static void main(String[] args) throws URISyntaxException, IOException {
@@ -47,13 +48,18 @@ public class Main extends Application {
 			return;
 		}
 
-		var overview = FXML.load(NoteOverviewCtrl.class, "client", "views", "NoteOverview.fxml");
-		var add = FXML.load(AddNoteCtrl.class, "client", "views", "AddNote.fxml");
-		var error = FXML.load(ErrorPopUpCtrl.class, "client", "views", "ErrorPopUp.fxml");
-		var serverURL = FXML.load(ServerSelectionCtrl.class, "client", "views", "ServerSelection.fxml");
-		var collectionsEdit = FXML.load(EditCollectionsPopUpCtrl.class, "client", "views", "EditCollectionsPopUp.fxml");
+		Locale currentLanguage = LanguageManager.getLanguage();
+
+		ResourceBundle bundle = ResourceBundle.getBundle("client.controllers.language", currentLanguage);
+
+		var overview = FXML.load(NoteOverviewCtrl.class, bundle, "client", "views", "NoteOverview.fxml");
+		var add = FXML.load(AddNoteCtrl.class, bundle, "client", "views", "AddNote.fxml");
+		var error = FXML.load(ErrorPopUpCtrl.class, bundle, "client", "views", "ErrorPopUp.fxml");
+		var serverURL = FXML.load(ServerSelectionCtrl.class, bundle, "client", "views", "ServerSelection.fxml");
+		var collectionsEdit = FXML.load(EditCollectionsPopUpCtrl.class, bundle, "client", "views", "EditCollectionsPopUp.fxml");
 
 		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
+		mainCtrl.setLanguage(bundle);
 		mainCtrl.initialize(primaryStage, overview, add, error, serverURL, collectionsEdit);
                 primaryStage.setOnCloseRequest(_ -> {
 			Platform.exit();
