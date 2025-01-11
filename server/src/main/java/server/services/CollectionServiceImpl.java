@@ -5,20 +5,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import server.repositories.CollectionRepository;
-import server.repositories.NoteRepository;
 
 @Service
 public class CollectionServiceImpl implements CollectionService {
-//    private final NoteRepository noteRepo;
     private final CollectionRepository collectionRepo;
 
     /**
      * Establishes repositories used in the service
-     * @param noteRepo the repository with notes (Actually I don't think we need noteRepo here)
      * @param collectionRepo the repository with collections
      */
     @Autowired
-    public CollectionServiceImpl(/* NoteRepository noteRepo, */CollectionRepository collectionRepo) {
+    public CollectionServiceImpl(CollectionRepository collectionRepo) {
 //        this.noteRepo = noteRepo;
         this.collectionRepo = collectionRepo;
     }
