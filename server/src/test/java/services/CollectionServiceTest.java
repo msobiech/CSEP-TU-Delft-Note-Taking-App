@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import server.repositories.CollectionRepository;
-import server.services.CollectionService;
+import server.services.CollectionServiceImpl;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -18,7 +18,7 @@ public class CollectionServiceTest {
     private CollectionRepository collectionRepository;
 
     @InjectMocks
-    private CollectionService collectionService;
+    private CollectionServiceImpl collectionService;
 
     private Collection collection;
 
