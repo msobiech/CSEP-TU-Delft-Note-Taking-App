@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import models.Collection;
 
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CollectionRepository extends JpaRepository<Collection, Long> {
@@ -17,6 +19,8 @@ public interface CollectionRepository extends JpaRepository<Collection, Long> {
      * @return a list of match {@link Collection} objects, or an empty list if no matches are found.
      */
     Collection findCollectionsByNotesId(Long noteId);
+
+    Optional<Collection> findByName(String name);
 
 
     @Query("SELECT c FROM Collection c WHERE c.isDefault = true")
