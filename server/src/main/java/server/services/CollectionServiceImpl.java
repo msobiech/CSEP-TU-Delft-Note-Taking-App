@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import server.repositories.CollectionRepository;
 
+import java.util.Optional;
+
 @Service
 public class CollectionServiceImpl implements CollectionService {
     private final CollectionRepository collectionRepo;
@@ -61,5 +63,10 @@ public class CollectionServiceImpl implements CollectionService {
         collectionRepo.unsetDefaultCollection();
 
         collectionRepo.setDefaultCollection(newDefaultCollectionId);
+    }
+
+    public boolean doesCollectionExist(String collectionName) {
+        Optional<Collection> collection = collectionRepo.findByName(collectionName);
+        return collection.map(c -> collectionExists(c.getId())).orElse(false);
     }
 }

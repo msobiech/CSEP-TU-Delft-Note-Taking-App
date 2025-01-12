@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import models.Collection;
@@ -28,6 +29,9 @@ public class EditCollectionsPopUpCtrl {
 
     @FXML
     public TextField collectionTitleField;
+
+    @FXML
+    private Label statusLabel;
 
     private final ServerUtils serverUtils;
     private ObservableList<Collection> collections;
@@ -73,4 +77,23 @@ public class EditCollectionsPopUpCtrl {
         }
     }
 
-}
+    @FXML
+    private void checkCollectionStatus() {
+        String title = collectionTitleField.getText();
+        if (title.isEmpty()) {
+            statusLabel.setText("Please enter a collection title.");
+            return;
+        }
+        try {
+            String status = serverUtils.getCollectionStatus(title);
+            if (status.equals("Collection exists")) {
+                statusLabel.setText("Collection already exists");
+            } else if (status.equals("Collection will be created")) {
+                statusLabel.setText("Collection will be created");
+            } else {
+                statusLabel.setText("Unknown status: " + status);
+            }
+        } catch (Exception e) {
+            statusLabel.setText("Server unreachable");
+        }
+    }}

@@ -25,8 +25,10 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.Response;
 import models.Collection;
 import models.Note;
 
@@ -237,4 +239,28 @@ public class ServerUtils {
 				.request()
 				.delete();
 	}
+
+	public String getCollectionStatus(String collectionName) {
+		try {
+			Client client = ClientBuilder.newClient();
+
+			Response response = client.target(SERVER)
+					.path("/collections/status")
+					.queryParam("collectionName", collectionName)
+					.request()
+					.get();
+			if (response.getStatus() == 200 || response.getStatus() == 201) {
+				return response.readEntity(String.class); // Return the status message
+			} else if (response.getStatus() == 404) {
+				return "Collection does not exist.";
+			} else if (response.getStatus() == 500) {
+				return "Server error.";
+			} else {
+				return "Unexpected status code: " + response.getStatus();
+			}
+		} catch (Exception e) {
+			return "Error contacting server: " + e.getMessage();
+		}
+	}
+
 }

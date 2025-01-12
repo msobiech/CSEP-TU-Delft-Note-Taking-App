@@ -89,5 +89,22 @@ public class CollectionController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/status")
+    public ResponseEntity<String> getCollectionStatus(@RequestParam String collectionName) {
+        // Simulate logic for status
+        if (!serverIsReachable()) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Server not reachable");
+        }
+        boolean exists = collectionService.doesCollectionExist(collectionName);
+        if (exists) {
+            return ResponseEntity.ok("Collection exists");
+        } else {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Collection will be created");
+        }
+    }
+
+    private boolean serverIsReachable() {
+        return true; // for now TODO: NEEDS TO BE CHANGED
+    }
 
 }

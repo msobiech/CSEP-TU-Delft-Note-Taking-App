@@ -66,9 +66,17 @@
                            </font>
                         </Label>
                         <!-- Added fx:id to TextField -->
-                        <TextField fx:id="collectionTitleField" prefHeight="26.0" prefWidth="238.0" translateY="37.0" />
+                        <TextField fx:id="collectionTitleField" onKeyTyped="#checkCollectionStatus" prefHeight="26.0" prefWidth="238.0" translateY="37.0" />
                      </children>
                   </HBox>
+<!--                  status indicator-->
+                  <HBox prefHeight="50.0" prefWidth="364.0" spacing="10.0">
+                     <children>
+                        <Label text="Status:" />
+                        <Label fx:id="statusLabel" text="Waiting for input..." />
+                     </children>
+                  </HBox>
+<!--                  -->
                   <HBox alignment="BOTTOM_RIGHT" prefHeight="155.0" prefWidth="344.0">
                      <children>
                         <Button alignment="BOTTOM_RIGHT" mnemonicParsing="false" text="Save" translateX="-10.0" translateY="-8.0" />
