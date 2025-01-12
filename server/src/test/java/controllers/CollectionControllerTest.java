@@ -83,7 +83,7 @@ public class CollectionControllerTest {
         collection.setId(1L);
         when(noteService.getCollectionById(1)).thenReturn(Optional.of(collection));
 
-        mockMvc.perform(get("/collections/1"))
+        mockMvc.perform(get("/collections/get/1"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(1))
             .andExpect(jsonPath("$.name").value("Collection 1"));
