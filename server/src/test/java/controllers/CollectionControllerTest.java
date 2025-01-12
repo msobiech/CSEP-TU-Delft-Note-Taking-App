@@ -9,8 +9,8 @@ import org.mockito.*;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import server.controllers.CollectionController;
+import server.services.CollectionServiceImpl;
 import server.services.NoteService;
-import server.services.CollectionService;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public class CollectionControllerTest {
     private NoteService noteService;
 
     @Mock
-    private CollectionService collectionService;
+    private CollectionServiceImpl collectionService;
 
     @InjectMocks
     private CollectionController collectionController;
