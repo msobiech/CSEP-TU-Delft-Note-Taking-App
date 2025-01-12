@@ -142,6 +142,39 @@ public class ServerUtils {
 		return collectionNotes;
 	}
 
+	public Collection getCollectionByNoteID(long id) {
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("notes/get/" + id + "/collection")
+				.request(APPLICATION_JSON)
+				.get(new GenericType<Collection>() {});
+	}
+
+	public Collection updateCollectionByID(long id, Collection updatedCollection) {
+		try {
+			return ClientBuilder.newClient(new ClientConfig())
+					.target(SERVER).path("collections/update/" + id)
+					.request(APPLICATION_JSON)
+					.put(Entity.entity(updatedCollection, APPLICATION_JSON), Collection.class);
+		} catch (Exception e) {
+			System.err.println("Error updating collection: " + e.getMessage());
+		}
+		return null;
+	}
+
+	public Collection getCollectionByID(long id) {
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("collections/get/" + id)
+				.request(APPLICATION_JSON)
+				.get(new GenericType<Collection>() {});
+	}
+
+	public Note getNoteByID(long id) {
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("notes/get/" + id)
+				.request(APPLICATION_JSON)
+				.get(new GenericType<Note>() {});
+	}
+
 
 
 	public List<Collection> getAllCollectionsFromServer() {

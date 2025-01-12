@@ -41,7 +41,7 @@ public class CollectionController {
 
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<Collection> getCollectionById(@PathVariable int id) {
         return noteService.getCollectionById(id)
                 .map(ResponseEntity::ok)

@@ -117,5 +117,5 @@ public interface NoteService {
      * @param id of note to search by
      * @return List of Collections that are linked to the given note
      */
-    List<Collection> getCollectionsByNoteId(long id);
+    Collection getCollectionByNoteId(long id);
 }

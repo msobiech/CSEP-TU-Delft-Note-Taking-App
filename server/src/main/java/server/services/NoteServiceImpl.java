@@ -169,7 +169,7 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public List<Collection> getCollectionsByNoteId(long id) {
+    public Collection getCollectionByNoteId(long id) {
         return collectionRepo.findCollectionsByNotesId(id);
     }
 }

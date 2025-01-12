@@ -108,10 +108,10 @@ public class NoteController {
         return ResponseEntity.ok(notes);
     }
 
-    @GetMapping("/get/{id}/collections")
-    public ResponseEntity<List<Collection>> getCollectionsByNoteId(@PathVariable int id) {
-        List<Collection> collections = noteService.getCollectionsByNoteId(id);
-        return new ResponseEntity<>(collections, HttpStatus.OK);
+    @GetMapping("/get/{id}/collection")
+    public ResponseEntity<Collection> getCollectionByNoteId(@PathVariable int id) {
+        Collection collection = noteService.getCollectionByNoteId(id);
+        return new ResponseEntity<>(collection, HttpStatus.OK);
     }
 
     @GetMapping("/exists")

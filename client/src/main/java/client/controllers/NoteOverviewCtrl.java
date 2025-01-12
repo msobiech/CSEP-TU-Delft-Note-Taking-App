@@ -69,6 +69,9 @@ public class NoteOverviewCtrl implements Initializable {
     private ComboBox<Pair<Long, String>> collectionDropdown;
 
     @FXML
+    private ComboBox<Pair<Long, String>> noteCollectionDropdown;
+
+    @FXML
     private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton;
 
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
@@ -103,6 +106,10 @@ public class NoteOverviewCtrl implements Initializable {
         language = ResourceBundle.getBundle("client.controllers.language", LanguageManager.getLanguage());
         setupSearch();
         setupSelectCollection();
+
+        setupNoteCollectionDropdown();
+        handleNoteCollectionChange();
+
         handleCollectionSelectionChange();
         setupLanguageDropdown();
         handleNoteTitleChanged();
@@ -130,6 +137,59 @@ public class NoteOverviewCtrl implements Initializable {
             Pair<Long, String> selectedOption = collectionDropdown.getValue();
             if ("Edit Collections...".equals(selectedOption.getValue())) {
                 mainCtrl.showEditCollections(); // Call the method to show the popup
+            }
+        });
+    }
+
+    public void setupNoteCollectionDropdown() {
+        List<Collection> collections = server.getAllCollectionsFromServer();
+        List<Pair<Long, String>> listOfCollections = new ArrayList<>();
+        for (Collection collection : collections) {
+            listOfCollections.add(new Pair<>(collection.getId(), collection.getName()));
+        }
+        noteCollectionDropdown.setItems(FXCollections.observableList(listOfCollections));
+
+
+        // Configure how items are displayed in the dropdown
+        noteCollectionDropdown.setCellFactory(comboBox -> new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<Long, String> item, boolean empty) {
+                super.updateItem(item, empty);
+                setText((empty || item == null) ? null : item.getValue());
+            }
+        });
+
+        // Configure the button cell to display the selected collection
+        noteCollectionDropdown.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Pair<Long, String> item, boolean empty) {
+                super.updateItem(item, empty);
+                setText((empty || item == null) ? null : item.getValue());
+            }
+        });
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
+            if (newValue != null) {
+                // Step 3: Fetch the collection of the newly selected note
+                Collection curNoteCollection = server.getCollectionByNoteID(newValue.getKey());
+                if (curNoteCollection != null) {
+                    // Find the corresponding Pair in the ComboBox items
+                    Pair<Long, String> matchingCollection = noteCollectionDropdown.getItems().stream()
+                            .filter(pair -> pair.getKey().equals(curNoteCollection.getId()))
+                            .findFirst()
+                            .orElse(null);
+
+                    // Step 4: Update the ComboBox's value
+                    noteCollectionDropdown.setValue(matchingCollection);
+                    refreshNotes();
+                }
+            }
+        });
+    }
+
+    public void handleNoteCollectionChange() {
+        noteCollectionDropdown.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
+            if(newValue != null && oldValue != null && newValue != oldValue) {
+                selectNewCollection(oldValue, newValue);
             }
         });
     }
@@ -537,6 +597,25 @@ public class NoteOverviewCtrl implements Initializable {
         } else {
             notesList.getSelectionModel().clearSelection(); // Clear selection if no valid note
         }
+    }
+
+    @FXML
+    private void selectNewCollection(Pair<Long, String> oldCollection, Pair<Long, String> newCollection) {
+        Note curNote = new Note();
+        if(curNoteId != null) {
+            curNote = server.getNoteByID(curNoteId);
+        }
+        System.out.println("Note: " + curNote.getTitle() +
+                "\nGot removed from collection: " + oldCollection.getValue() +
+                "\nGot added to collection: " + newCollection.getValue());
+
+        Collection removedNoteCollection = server.getCollectionByID(oldCollection.getKey());
+        removedNoteCollection.removeNoteFromCollection(curNote);
+        server.updateCollectionByID(oldCollection.getKey(), removedNoteCollection);
+
+        Collection addedNoteCollection = server.getCollectionByID(newCollection.getKey());
+        addedNoteCollection.addNoteToCollection(curNote);
+        server.updateCollectionByID(newCollection.getKey(), addedNoteCollection);
     }
 
 
