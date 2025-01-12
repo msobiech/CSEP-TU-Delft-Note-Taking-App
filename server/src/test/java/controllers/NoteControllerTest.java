@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.ResponseEntity;
 import server.controllers.NoteController;
-import server.services.CollectionService;
+import server.services.CollectionServiceImpl;
 import server.services.NoteService;
 
 import java.util.List;
@@ -24,7 +24,7 @@ class NoteControllerTest {
     private NoteService noteService;
 
     @Mock
-    private CollectionService collectionService;
+    private CollectionServiceImpl collectionService;
 
     @InjectMocks
     private NoteController noteController;

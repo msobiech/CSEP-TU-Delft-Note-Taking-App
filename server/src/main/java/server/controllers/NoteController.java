@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import server.services.CollectionService;
+import server.services.CollectionServiceImpl;
 import server.services.NoteService;
 
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequestMapping("/notes")
 public class NoteController {
     private final NoteService noteService;
-    private final CollectionService collectionService;
+    private final CollectionServiceImpl collectionService;
 
     /**
      * Establishes NoteService implementation with Autowiring
@@ -28,7 +28,7 @@ public class NoteController {
      * @param collectionService to establish the service
      */
     @Autowired
-    public NoteController(NoteService noteService, CollectionService collectionService) {
+    public NoteController(NoteService noteService, CollectionServiceImpl collectionService) {
         this.noteService = noteService;
         this.collectionService = collectionService;
     }
