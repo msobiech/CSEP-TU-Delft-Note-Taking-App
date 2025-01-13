@@ -2,7 +2,6 @@ package client.controllers;
 
 
 import client.DialogFactory;
-import client.InjectorProvider;
 import client.event.*;
 import client.managers.LanguageManager;
 import client.managers.MarkdownRenderManager;
@@ -12,7 +11,6 @@ import client.utils.DebounceService;
 import client.utils.NoteService;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
