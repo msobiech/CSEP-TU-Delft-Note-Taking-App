@@ -31,6 +31,18 @@ public class EditCollectionsPopUpCtrl {
     public TextField collectionTitleField;
 
     @FXML
+    public TextField collectionServerField;
+
+    @FXML
+    public TextField userFriendlyNameField;
+
+    @FXML
+    public Button makeDefaultButton;
+
+    @FXML
+    public Button SaveCollectionButton;
+
+    @FXML
     private Label statusLabel;
 
     private final ServerUtils serverUtils;

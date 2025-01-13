@@ -12,7 +12,7 @@
          <children>
             <Label alignment="CENTER" prefHeight="42.0" prefWidth="459.0" text="Edit Collections">
                <font>
-                  <Font name="Comic Sans MS Bold" size="14.0" />
+                  <Font name="System Bold" size="14.0" />
                </font>
             </Label>
          </children>
@@ -34,7 +34,7 @@
                               <String fx:value="flat" />
                            </styleClass>
                         </Button>
-                        <Button mnemonicParsing="false" fx:id="deleteCollectionButton" onAction="#deleteCollection">
+                        <Button fx:id="deleteCollectionButton" mnemonicParsing="false" onAction="#deleteCollection">
                            <graphic>
                               <FontIcon iconLiteral="fa-minus" />
                            </graphic>
@@ -43,7 +43,7 @@
                               <String fx:value="flat" />
                            </styleClass>
                         </Button>
-                        <Button mnemonicParsing="false" fx:id="refreshCollectionsButton" onAction="#refreshCollections">
+                        <Button fx:id="refreshCollectionsButton" mnemonicParsing="false" onAction="#refreshCollections">
                            <graphic>
                               <FontIcon iconLiteral="fa-rotate-right" />
                            </graphic>
@@ -58,28 +58,54 @@
             </VBox>
             <VBox prefHeight="254.0" prefWidth="344.0">
                <children>
-                  <HBox prefHeight="100.0" prefWidth="364.0" spacing="50.0">
+                  <HBox prefHeight="90.0" prefWidth="344.0" />
+                  <HBox prefHeight="100.0" prefWidth="344.0" spacing="50.0">
                      <children>
-                        <Label prefHeight="100.0" prefWidth="30.0" text="Title">
+                        <Label alignment="TOP_LEFT" prefHeight="26.0" prefWidth="31.0" text="Title:">
                            <font>
-                              <Font name="Comic Sans MS Bold" size="12.0" />
+                              <Font name="System Bold" size="12.0" />
                            </font>
                         </Label>
                         <!-- Added fx:id to TextField -->
-                        <TextField fx:id="collectionTitleField" onKeyTyped="#checkCollectionStatus" prefHeight="26.0" prefWidth="238.0" translateY="37.0" />
+                        <TextField fx:id="collectionTitleField" onKeyTyped="#checkCollectionStatus" prefHeight="26.0" prefWidth="238.0" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="100.0" prefWidth="344.0" spacing="41.0">
+                     <children>
+                        <Label text="Server:">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="collectionServerField" prefHeight="26.0" prefWidth="238.0" />
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="100.0" prefWidth="344.0" spacing="21.0">
+                     <children>
+                        <Label text="Collection:">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="userFriendlyNameField" prefHeight="26.0" prefWidth="238.0" />
                      </children>
                   </HBox>
 <!--                  status indicator-->
-                  <HBox prefHeight="50.0" prefWidth="364.0" spacing="10.0">
+                  <HBox prefHeight="29.0" prefWidth="344.0" spacing="42.0">
                      <children>
-                        <Label text="Status:" />
+                        <Label text="Status:">
+                        <font>
+                           <Font name="System Bold" size="12.0" />
+                        </font>
+                     </Label>
                         <Label fx:id="statusLabel" text="Waiting for input..." />
                      </children>
                   </HBox>
 <!--                  -->
-                  <HBox alignment="BOTTOM_RIGHT" prefHeight="155.0" prefWidth="344.0">
+                  <HBox alignment="BOTTOM_RIGHT" prefHeight="116.0" prefWidth="344.0">
                      <children>
-                        <Button alignment="BOTTOM_RIGHT" mnemonicParsing="false" text="Save" translateX="-10.0" translateY="-8.0" />
+                        <Button fx:id="makeDefaultButton" alignment="BOTTOM_RIGHT" mnemonicParsing="false" text="Make Default" translateX="-20.0" translateY="-8.0" />
+                        <Button fx:id="SaveCollectionButton" alignment="BOTTOM_RIGHT" mnemonicParsing="false" text="Save" translateX="-10.0" translateY="-8.0" />
                      </children>
                   </HBox>
                </children>
