@@ -50,12 +50,6 @@ public class NoteOverviewCtrlTest extends ApplicationTest {
     private TextField searchBar;
 
     @BeforeEach
-    void checkHeadlessEnvironment() {
-        if (System.getProperty("java.awt.headless", "false").equals("true")) {
-            Assumptions.assumeTrue(false, "Skipping tests in headless environment");
-        }
-    }
-    @BeforeEach
     void setUp() {
         // Mock dependencies
         serverUtils = mock(ServerUtils.class);
