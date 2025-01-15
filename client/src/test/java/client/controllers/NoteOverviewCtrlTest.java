@@ -13,6 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.util.Pair;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -48,6 +49,12 @@ public class NoteOverviewCtrlTest extends ApplicationTest {
     private TextArea noteDisplay;
     private TextField searchBar;
 
+    @BeforeEach
+    void checkHeadlessEnvironment() {
+        if (System.getProperty("java.awt.headless", "false").equals("true")) {
+            Assumptions.assumeTrue(false, "Skipping tests in headless environment");
+        }
+    }
     @BeforeEach
     void setUp() {
         // Mock dependencies
