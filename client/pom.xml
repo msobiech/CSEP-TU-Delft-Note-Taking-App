@@ -197,7 +197,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.2.5</version>
 				<configuration>
-					<argLine>-Djavafx.headless=true</argLine>
+					<argLine>-Djavafx.headless=true -Dprism.order=sw</argLine>
 				</configuration>
 			</plugin>
 		</plugins>
