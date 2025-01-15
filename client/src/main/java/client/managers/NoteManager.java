@@ -1,6 +1,7 @@
 package client.managers;
 
 import client.InjectorProvider;
+import client.controllers.NoteOverviewCtrl;
 import client.event.EventBus;
 import client.event.MainEventBus;
 import client.event.NoteEvent;
@@ -9,6 +10,8 @@ import client.event.NoteStatusEvent;
 import client.utils.NoteService;
 import client.utils.ServerUtils;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
+import javafx.util.Pair;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -123,13 +126,29 @@ public class NoteManager {
         server.addNote();
     }
 
-    private void handleNoteDeletion(NoteStatusEvent event){
-        try{
-            server.deleteNoteByID(event.getChangeID());
-        } catch (Exception e) {
-            System.out.println("Error while deleting note: " + e.getMessage());
-        }
+    private void handleNoteDeletion(NoteStatusEvent event) {
+        try {
+            if (event.getChangeID() != null) {
+                // Delete the note from the backend
+                server.deleteNoteByID(event.getChangeID());
+                System.out.println("Note " + event.getChangeID() + " deleted successfully.");
 
+                // Update the UI (must be done on the JavaFX thread)
+                Platform.runLater(() -> {
+                    // Assuming there's a way to get the ObservableList from the controller
+                    NoteOverviewCtrl controller = InjectorProvider.getInjector().getInstance(NoteOverviewCtrl.class);
+                    ObservableList<Pair<Long, String>> notes = controller.getNotes();
+
+                    // Find and remove the note
+                    notes.removeIf(note -> note.getKey().equals(event.getChangeID()));
+                    controller.getNotesList().refresh();
+                });
+            } else {
+                System.err.println("Note ID is null. Cannot delete note.");
+            }
+        } catch (Exception e) {
+            System.err.println("Error while deleting note: " + e.getMessage());
+        }
     }
 
 }

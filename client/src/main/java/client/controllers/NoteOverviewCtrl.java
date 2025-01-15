@@ -1,7 +1,7 @@
 package client.controllers;
 
 
-import client.InjectorProvider;
+import client.DialogFactory;
 import client.event.*;
 import client.managers.LanguageManager;
 import client.managers.MarkdownRenderManager;
@@ -39,7 +39,8 @@ public class NoteOverviewCtrl implements Initializable {
     private final MainCtrl mainCtrl;
     private final NoteService noteService;
     private final DebounceService debounceService;
-    private static final EventBus eventBus = InjectorProvider.getInjector().getInstance(MainEventBus.class);
+    private final DialogFactory dialogFactory;
+    private final EventBus eventBus;
 
     @FXML
     private ComboBox<Pair<String, String>> flagDropdown;
@@ -90,11 +91,14 @@ public class NoteOverviewCtrl implements Initializable {
     private Integer curNoteIndex = null;
 
     @Inject
-    public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl, NoteService noteService, DebounceService debounceService) {
+    public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl, NoteService noteService,
+                            DebounceService debounceService, DialogFactory dialogFactory, EventBus eventbus) {
         this.server = server;
         this.mainCtrl = mainCtrl;
         this.noteService = noteService;
         this.debounceService = debounceService;
+        this.dialogFactory = dialogFactory;
+        this.eventBus = eventbus;
     }
 
     @Override
@@ -294,7 +298,7 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     @FXML
-    private void updateTitle() {
+    void updateTitle() {
         if (curNoteId == null || curNoteIndex == null) {
             return; // No note is currently selected
         }
@@ -326,7 +330,7 @@ public class NoteOverviewCtrl implements Initializable {
         removeNoteButton.setDisable(true);
     }
 
-    private void handleNoteSelectionChange() {
+    void handleNoteSelectionChange() {
         noteDisplay.focusedProperty().addListener((_, _, hasFocus) -> {});
         // Listener for switching notes (ensures deletion only happens when switching notes)
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
@@ -482,48 +486,63 @@ public class NoteOverviewCtrl implements Initializable {
      */
     public void refreshNotes() {
         System.out.println("Refreshed the note list");
+
+        if (noteListManager == null) {
+            System.err.println("NoteListManager is not initialized. Skipping refresh.");
+            return;
+        }
         Pair<Long, String> selectedNote = notesList.getSelectionModel().getSelectedItem();
         Long selectedNoteId = (selectedNote != null) ? selectedNote.getKey() : null;
         List<Pair<Long, String>> notesAsPairs = new ArrayList<>();
 
         Pair<Long, String> selectedCollection = collectionDropdown.getSelectionModel().getSelectedItem();
+        if (selectedCollection == null) {
+            System.err.println("No collection selected. Skipping refresh.");
+            return;
+        }
 
-        if(selectedCollection.getKey() <= -1) {
+        // Fetch notes from the server based on the selected collection
+        if (selectedCollection.getKey() <= -1) { // All Notes
             var notesFromServer = server.getNoteTitles();
-            for(var row: notesFromServer){
-                Long id = ((Integer)row[0]).longValue();
-                String title = (String)row[1];
+            for (var row : notesFromServer) {
+                Long id = ((Number) row[0]).longValue();
+                String title = (String) row[1];
                 notesAsPairs.add(new Pair<>(id, title));
             }
-        } else {
+        } else { // Specific Collection
             var collectionNotes = server.getNotesByCollectionId(selectedCollection.getKey());
-            for(var note: collectionNotes){
-                notesAsPairs.add( new Pair<>(note.getId(), note.getTitle()));
+            for (var note : collectionNotes) {
+                notesAsPairs.add(new Pair<>(note.getId(), note.getTitle()));
             }
         }
+
+        // Update the observable list
         notes = FXCollections.observableArrayList(notesAsPairs);
+
+        // Synchronize the note list manager with the updated notes
         noteListManager.setNotes(notes);
+
+        // Update the ListView with the refreshed notes
         notesList.setItems(notes);
-        //Since the list is of the pairs, and they are not really observable objects (They do not implement Observable)
-        //We have to change the list to only display the note title (The code is strongly from the internet)
-        notesList.setCellFactory(_ -> new ListCell<>() { //The cell factory is responsible for rendering the data contained
-            // within each TableCell for a single table column.
+
+        // Update the ListView's cell factory to display only the note titles
+        notesList.setCellFactory(_ -> new ListCell<>() {
             @Override
-            protected void updateItem(Pair<Long, String> item, boolean empty) { //updateItem is called whenever a cell needs to be updated
-                super.updateItem(item, empty); //supposedly its necessary from what I understand the updateItem
-                // needs to call its parents class in order to do all the basic checks
+            protected void updateItem(Pair<Long, String> item, boolean empty) {
+                super.updateItem(item, empty);
                 if (item == null || empty) {
-                    setText(null); //If the item is empty then set the text to null (Shouldn't happen I think)
+                    setText(null);
                 } else {
-                    setText(item.getValue());  // Display only the title (second value of the pair)
+                    setText(item.getValue()); // Display the title only
                 }
             }
         });
-        // Re-select the previously selected note (if it exists)
+
+        // Re-select the previously selected note, if it still exists
         if (selectedNoteId != null) {
             for (int i = 0; i < notes.size(); i++) {
                 if (notes.get(i).getKey().equals(selectedNoteId)) {
-                    notesList.getSelectionModel().select(i); // Select the note by index
+                    notesList.getSelectionModel().select(i); // Re-select the note by index
                     break;
                 }
             }
@@ -531,6 +550,7 @@ public class NoteOverviewCtrl implements Initializable {
             notesList.getSelectionModel().clearSelection(); // Clear selection if no valid note
         }
     }
+
     /**
      * Method to add notes
      */
@@ -541,7 +561,7 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     @FXML
-    private void searchNotes() {
+    void searchNotes() {
         String query = searchBar.getText();
         System.out.println(query);
         Pair<Long, String> selectedNote = notesList.getSelectionModel().getSelectedItem();
@@ -558,7 +578,7 @@ public class NoteOverviewCtrl implements Initializable {
         if(selectedCollection.getKey() <= -1) {
         var notesFromServer = server.searchNotes(query);
         for(var row: notesFromServer){
-            Long id = ((Integer)row[0]).longValue();
+            Long id = ((Number) row[0]).longValue();
             String title = (String)row[1];
             notesAsPairs.add(new Pair<>(id, title));
             }
@@ -661,34 +681,25 @@ public class NoteOverviewCtrl implements Initializable {
      * Method to remove notes form UI
      */
     @FXML
-    private void removeNote() {
+    void removeNote() {
         var selectedNote = notesList.getSelectionModel().getSelectedItem();
         if (selectedNote != null) {
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Confirm deletion");
-            alert.setHeaderText("Are you sure you want to delete this note?");
-            alert.setContentText("You are trying to delete note: " + selectedNote.getValue() + "." +
-                    "\nDeleting a note is irreversible!");
+            Optional<ButtonType> result = dialogFactory.createConfirmationDialog(
+                    "Confirm deletion",
+                    "Are you sure you want to delete this note?",
+                    "You are trying to delete note: " + selectedNote.getValue() + ".\nDeleting a note is irreversible!"
+            );
 
-            Optional<ButtonType> result = alert.showAndWait();
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                eventBus.publish(new NoteStatusEvent(NoteEvent.EventType.NOTE_REMOVE, selectedNote.getKey()));
-                if (notesList.getItems().isEmpty()) {
-                    curNoteId = null;
-                    curNoteIndex = null;
-                    updateNoteTitle(""); // Clear title field
-                    updateNoteDisplay(""); // Clear content field
-                } else {
-                    // Select the first note in the list
-                    notesList.getSelectionModel().select(0);
-                }
-
+                // Publish the deletion event
+                eventBus.publish(new NoteStatusEvent(NoteEvent.EventType.NOTE_REMOVE, null, selectedNote.getKey(), null));
             } else {
                 System.out.println("Deletion canceled.");
             }
         }
     }
 
+    // Getters and setters for testing
     public Label getCollectionText() {
         return collectionText;
     }
@@ -700,4 +711,106 @@ public class NoteOverviewCtrl implements Initializable {
     public TextField getSearchBar() {
         return searchBar;
     }
+
+    public ListView<Pair<Long, String>> getNotesList() {
+        return notesList;
+    }
+
+    public TextArea getNoteDisplay() {
+        return noteDisplay;
+    }
+
+    public ComboBox<Pair<String, String>> getFlagDropdown() {
+        return flagDropdown;
+    }
+
+    public ComboBox<Pair<Long, String>> getCollectionDropdown() {
+        return collectionDropdown;
+    }
+
+    public Button getAddNoteButton() {
+        return addNoteButton;
+    }
+
+    public Button getRemoveNoteButton() {
+        return removeNoteButton;
+    }
+
+    public Button getRefreshNotesButton() {
+        return refreshNotesButton;
+    }
+
+    public ObservableList<Pair<Long, String>> getNotes() {
+        return notes;
+    }
+
+    public Long getCurNoteId() {
+        return curNoteId;
+    }
+
+    public Integer getCurNoteIndex() {
+        return curNoteIndex;
+    }
+
+    public ServerUtils getServerUtils() {
+        return server;
+    }
+
+    public NoteService getNoteService() {
+        return noteService;
+    }
+
+    // Setters
+    public void setNoteTitle(TextField noteTitle) {
+        this.noteTitle = noteTitle;
+    }
+
+    public void setNotesList(ListView<Pair<Long, String>> notesList) {
+        this.notesList = notesList;
+    }
+
+    public void setNoteDisplay(TextArea noteDisplay) {
+        this.noteDisplay = noteDisplay;
+    }
+
+    public void setFlagDropdown(ComboBox<Pair<String, String>> flagDropdown) {
+        this.flagDropdown = flagDropdown;
+    }
+
+    public void setCollectionDropdown(ComboBox<Pair<Long, String>> collectionDropdown) {
+        this.collectionDropdown = collectionDropdown;
+    }
+
+    public void setAddNoteButton(Button addNoteButton) {
+        this.addNoteButton = addNoteButton;
+    }
+
+    public void setRemoveNoteButton(Button removeNoteButton) {
+        this.removeNoteButton = removeNoteButton;
+    }
+
+    public void setRefreshNotesButton(Button refreshNotesButton) {
+        this.refreshNotesButton = refreshNotesButton;
+    }
+
+    public void setNotes(ObservableList<Pair<Long, String>> notes) {
+        this.notes = notes;
+    }
+
+    public void setCurNoteId(Long curNoteId) {
+        this.curNoteId = curNoteId;
+    }
+
+    public void setCurNoteIndex(Integer curNoteIndex) {
+        this.curNoteIndex = curNoteIndex;
+    }
+
+    public void setNoteListManager(NoteListManager noteListManager) {
+        this.noteListManager = noteListManager;
+    }
+
+    public void setSearchBar(TextField searchBar) {
+        this.searchBar = searchBar;
+    }
+
 }

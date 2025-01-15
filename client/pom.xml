@@ -116,6 +116,17 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>net.bytebuddy</groupId>
+			<artifactId>byte-buddy</artifactId>
+			<version>1.14.19</version>
+		</dependency>
+		<dependency>
+			<groupId>org.testfx</groupId>
+			<artifactId>testfx-core</artifactId>
+			<version>4.0.18</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.testfx</groupId>
 			<artifactId>testfx-junit5</artifactId>
 			<version>4.0.18</version>
@@ -180,6 +191,14 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+				<configuration>
+					<argLine>-Djavafx.headless=true -Dprism.order=sw</argLine>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
