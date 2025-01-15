@@ -13,6 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.util.Pair;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -47,6 +48,12 @@ public class NoteOverviewCtrlTest extends ApplicationTest {
     private TextField noteTitle;
     private TextArea noteDisplay;
     private TextField searchBar;
+
+    @BeforeAll
+    static void initToolkit() {
+        // Initialize JavaFX Toolkit
+        Platform.startup(() -> {});
+    }
 
     @BeforeEach
     void setUp() {
