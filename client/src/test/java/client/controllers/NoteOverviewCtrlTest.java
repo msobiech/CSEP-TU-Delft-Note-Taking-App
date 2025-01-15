@@ -51,8 +51,13 @@ public class NoteOverviewCtrlTest extends ApplicationTest {
 
     @BeforeAll
     static void initToolkit() {
-        // Initialize JavaFX Toolkit
-        Platform.startup(() -> {});
+        // Confirm headless mode
+        System.out.println("JavaFX Headless Mode: " + System.getProperty("javafx.headless"));
+
+        // Initialize JavaFX Toolkit if not already initialized
+        if (!Platform.isFxApplicationThread()) {
+            Platform.startup(() -> {});
+        }
     }
 
     @BeforeEach
