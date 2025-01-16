@@ -30,6 +30,7 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.Response;
 import models.Collection;
+import models.EmbeddedFile;
 import models.Note;
 
 //import org.checkerframework.checker.units.qual.A;
@@ -58,6 +59,7 @@ public class ServerUtils {
 				.get(new GenericType<Note>() {});
 		return note.getContent();
 	}
+
 
 	/**
 	 * Method to update a note with given id using the unified PUT endpoint.
@@ -206,6 +208,12 @@ public class ServerUtils {
 				.post(Entity.entity(new Note("Untitled Note", ""),APPLICATION_JSON), Note.class);
 	}
 
+	public EmbeddedFile addFile(EmbeddedFile file) {
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("files")
+				.request(APPLICATION_JSON)
+				.post(Entity.entity(file, APPLICATION_JSON), EmbeddedFile.class);
+	}
 	/**
 	 * Method to set ServerUrl to given parameter
 	 * @param serverURL the url to set to.

@@ -18,6 +18,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import models.EmbeddedFile;
 import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -33,8 +34,12 @@ import models.Note;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -710,7 +715,10 @@ public class NoteOverviewCtrl implements Initializable {
         }
     }
 
-    public void AddFile() {
+    public void AddFile() throws IOException {
+        if(curNoteId==null){
+            return;
+        }
         System.out.println("Adding a file");
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(Paths.get(System.getProperty("user.home")).toFile());
@@ -719,12 +727,18 @@ public class NoteOverviewCtrl implements Initializable {
         fileChooser.setTitle("Choose file to save");
         Stage curStage = (Stage) noteDisplay.getScene().getWindow();
         File file = fileChooser.showOpenDialog(curStage);
+
         if (file == null) {
             System.out.println("No file was chosen");
             return;
         } else{
             System.out.println("File selected: " + file.getAbsolutePath());
+            URLConnection connection = file.toURL().openConnection();
+            String mimeType = connection.getContentType();
+            Note curNote = server.getNoteByID(curNoteId);
+            EmbeddedFile EmbFile = new EmbeddedFile(file.getName(), mimeType, Files.readAllBytes(file.toPath()), curNote);
             String fileName = file.getName();
+            server.addFile(EmbFile);
             fileListContainer.getChildren().add(createFileBox(fileName,fileName));
         }
 
