@@ -140,8 +140,11 @@ public class NoteManager {
                     ObservableList<Pair<Long, String>> notes = controller.getNotes();
 
                     // Find and remove the note
-                    notes.removeIf(note -> note.getKey().equals(event.getChangeID()));
-                    controller.getNotesList().refresh();
+                    if(notes!=null){
+                        notes.removeIf(note -> note.getKey().equals(event.getChangeID()));
+                        controller.getNotesList().refresh();
+                    }
+
                 });
             } else {
                 System.err.println("Note ID is null. Cannot delete note.");

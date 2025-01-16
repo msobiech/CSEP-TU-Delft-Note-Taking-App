@@ -24,7 +24,7 @@ public class EmbeddedFilesController {
 
     @GetMapping("/{noteId}")
     public ResponseEntity<List<EmbeddedFile>> getByNoteId(@PathVariable("noteId") Long noteId){
-        List<EmbeddedFile> list = embeddedFileService.getFilesByNoteId(noteId);
+        List<EmbeddedFile> list = embeddedFileService.getFilesTitleAndId(noteId);
         return ResponseEntity.ok(list);
     }
 
@@ -40,7 +40,9 @@ public class EmbeddedFilesController {
     @GetMapping("/{noteId}/{fileId}/download")
     public ResponseEntity<Resource> downloadFile(@PathVariable("noteId") Long noteId, @PathVariable("fileId") Long fileId){
         EmbeddedFile file = embeddedFileService.getFileById(fileId);
-        if(file.getNote().getId()!=noteId){
+        if(file==null){
+            return ResponseEntity.notFound().build();
+        } else if(file.getNote().getId()!=noteId){
             //return ResponseEntity.notFound().build();
         }
         ByteArrayResource resource = new ByteArrayResource(file.getFileContent());

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import server.repositories.EmbeddedFileRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -48,6 +49,16 @@ public class EmbeddedFileServiceImpl implements EmbeddedFileService {
     @Override
     public List<EmbeddedFile> getFilesByNoteId(Long noteId){
         return fileRepo.findByNoteId(noteId);
+    }
+
+    @Override
+    public List<EmbeddedFile> getFilesTitleAndId(Long noteId){
+        List<EmbeddedFile> list = fileRepo.findByNoteId(noteId);
+        List<EmbeddedFile> list1 = new ArrayList<>();
+        for(var e: list){
+            list1.add(new EmbeddedFile(e.getFileName(), e.getFileType(), e.getId()));
+        }
+        return list1;
     }
 
     @Override

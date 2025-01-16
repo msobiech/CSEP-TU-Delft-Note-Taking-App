@@ -214,6 +214,13 @@ public class ServerUtils {
 				.request(APPLICATION_JSON)
 				.post(Entity.entity(file, APPLICATION_JSON), EmbeddedFile.class);
 	}
+
+	public List<EmbeddedFile> getFilesForNote(Long noteId) {
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("files/" + noteId)
+				.request(APPLICATION_JSON)
+				.get(new GenericType<List<EmbeddedFile>>() {});
+	}
 	/**
 	 * Method to set ServerUrl to given parameter
 	 * @param serverURL the url to set to.

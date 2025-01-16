@@ -16,10 +16,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import models.EmbeddedFile;
-import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -28,15 +24,18 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Pair;
 import models.Collection;
+import models.EmbeddedFile;
 import models.Note;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -200,6 +199,7 @@ public class NoteOverviewCtrl implements Initializable {
                     noteCollectionDropdown.setValue(matchingCollection);
                     if(oldValue!=null) {
                         refreshNotes();
+                        refreshFiles();
                     }
                 }
             }
@@ -357,6 +357,7 @@ public class NoteOverviewCtrl implements Initializable {
         noteDisplay.setEditable(false);
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
             updateContentAndTitle(oldNote, newNote);
+            refreshFiles();
         });
     }
 
@@ -454,6 +455,7 @@ public class NoteOverviewCtrl implements Initializable {
             return;
         }
         if (curNoteId != null) {
+
             String currentTitle = noteTitle.getText() != null ? noteTitle.getText().trim() : "";
             String currentContent = noteDisplay.getText() != null ? noteDisplay.getText().trim() : "";
             if (currentTitle.isEmpty() && currentContent.isEmpty()) {
@@ -463,6 +465,7 @@ public class NoteOverviewCtrl implements Initializable {
                     notesList.getItems().remove(selectedNote);
                     curNoteId = null;
                     refreshNotes();
+
                 } catch (Exception e) {
                     System.out.println("Failed to delete empty note: " + e.getMessage());
                 }
@@ -472,6 +475,7 @@ public class NoteOverviewCtrl implements Initializable {
                     Note updatedNote = new Note();
                     updatedNote.setContent(currentContent);
                     server.updateNoteByID(curNoteId, updatedNote);
+                    refreshFiles();
                 } catch (Exception e) {
                     System.out.println("Failed to update note content on note switch: " + e.getMessage());
                 }
@@ -715,6 +719,21 @@ public class NoteOverviewCtrl implements Initializable {
         }
     }
 
+    private void refreshFiles(){
+        var noteToSearch = notesList.getSelectionModel().getSelectedItem();
+        if(noteToSearch==null){
+            return;
+        }
+        Long idToSearch = noteToSearch.getKey();
+
+        System.out.println("Refreshing files for note " + idToSearch);
+        List<EmbeddedFile> files = server.getFilesForNote(idToSearch);
+        fileListContainer.getChildren().clear();
+        for(var file:files){
+            fileListContainer.getChildren().add(createFileBox(file.getFileName(),file.getId()));
+        }
+    }
+
     public void AddFile() throws IOException {
         if(curNoteId==null){
             return;
@@ -737,9 +756,9 @@ public class NoteOverviewCtrl implements Initializable {
             String mimeType = connection.getContentType();
             Note curNote = server.getNoteByID(curNoteId);
             EmbeddedFile EmbFile = new EmbeddedFile(file.getName(), mimeType, Files.readAllBytes(file.toPath()), curNote);
-            String fileName = file.getName();
+            System.out.println("Adding a file " + file.getName() + " to Note " + curNote.getId());
             server.addFile(EmbFile);
-            fileListContainer.getChildren().add(createFileBox(fileName,fileName));
+            refreshFiles();
         }
 
     }
@@ -752,7 +771,7 @@ public class NoteOverviewCtrl implements Initializable {
         System.out.println("Deleting file: " + box.getUserData().toString());
     }
 
-    private HBox createFileBox(String name, String fileID) {
+    private HBox createFileBox(String name, Long fileID) {
         HBox file = new HBox();
         file.setUserData(fileID);
         file.setAlignment(Pos.CENTER);

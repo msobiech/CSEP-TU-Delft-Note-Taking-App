@@ -18,4 +18,5 @@ public interface EmbeddedFileService {
 
     EmbeddedFile saveFile(EmbeddedFile file) throws IllegalAccessException;
 
+    List<EmbeddedFile> getFilesTitleAndId(Long noteId);
 }
