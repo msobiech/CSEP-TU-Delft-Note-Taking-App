@@ -16,12 +16,14 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.util.Pair;
 import models.Collection;
@@ -74,6 +76,9 @@ public class NoteOverviewCtrl implements Initializable {
 
     @FXML
     private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton;
+
+    @FXML
+    private HBox fileListContainer;
 
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
@@ -701,6 +706,43 @@ public class NoteOverviewCtrl implements Initializable {
         }
     }
 
+    public void AddFile() {
+        System.out.println("Adding a file");
+
+        fileListContainer.getChildren().add(createFileBox("THE ALIAS", "THE REAL NAME"));
+    }
+
+    private void handleEditAlias(HBox box) {
+        System.out.println("Editing alias: " + box.getUserData().toString());
+    }
+
+    private void handleDeleteFile(HBox box) {
+        System.out.println("Deleting file: " + box.getUserData().toString());
+    }
+
+    private HBox createFileBox(String name, String fileID) {
+        HBox file = new HBox();
+        file.setUserData(fileID);
+        file.setAlignment(Pos.CENTER);
+        file.setStyle("-fx-padding: 2px 5px; -fx-border-width: 1px 1px; -fx-border-color: black; -fx-border-radius: 15px");
+        Label fileLabel = new Label(name);
+        Button editButton = new Button();
+        FontIcon editIcon = new FontIcon("fa-pencil");
+        editButton.setGraphic(editIcon);
+        editButton.getStyleClass().addAll("button-icon", "flat");
+
+        Button deleteButton = new Button();
+        FontIcon deleteIcon = new FontIcon("fa-trash");
+        deleteButton.setGraphic(deleteIcon);
+        deleteButton.getStyleClass().addAll("button-icon", "flat");
+
+        editButton.setOnAction(_ -> {handleEditAlias(file);});
+        deleteButton.setOnAction(_ -> handleDeleteFile(file));
+
+        file.getChildren().addAll(fileLabel, editButton, deleteButton);
+        return file;
+    }
+
     // Getters and setters for testing
     public Label getCollectionText() {
         return collectionText;
@@ -814,5 +856,6 @@ public class NoteOverviewCtrl implements Initializable {
     public void setSearchBar(TextField searchBar) {
         this.searchBar = searchBar;
     }
+
 
 }
