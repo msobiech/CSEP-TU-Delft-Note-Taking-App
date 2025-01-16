@@ -16,6 +16,8 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -29,9 +31,11 @@ import javafx.util.Pair;
 import models.Collection;
 import models.Note;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.*;
 
 
@@ -708,8 +712,22 @@ public class NoteOverviewCtrl implements Initializable {
 
     public void AddFile() {
         System.out.println("Adding a file");
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(Paths.get(System.getProperty("user.home")).toFile());
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("All Files (*.*)", "*.*"); // For now we allow all types of files
+        fileChooser.getExtensionFilters().add(extFilter);
+        fileChooser.setTitle("Choose file to save");
+        Stage curStage = (Stage) noteDisplay.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(curStage);
+        if (file == null) {
+            return;
+        }
+        else{
+            System.out.println("File selected: " + file.getAbsolutePath());
+            String fileName = file.getName();
+            fileListContainer.getChildren().add(createFileBox(fileName,fileName));
+        }
 
-        fileListContainer.getChildren().add(createFileBox("THE ALIAS", "THE REAL NAME"));
     }
 
     private void handleEditAlias(HBox box) {
