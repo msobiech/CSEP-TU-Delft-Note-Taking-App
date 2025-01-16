@@ -1,6 +1,7 @@
 package client;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -32,8 +33,10 @@ public class Main extends Application {
 			System.err.println(msg);
 			return;
 		}
-
+		WebSocketClientApp webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
+		webSocketClientApp.startClient();
 		Locale currentLanguage = LanguageManager.getLanguage();
+
 
 		ResourceBundle bundle = ResourceBundle.getBundle("client.controllers.language", currentLanguage);
 
@@ -46,9 +49,9 @@ public class Main extends Application {
 		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
 		mainCtrl.setLanguage(bundle);
 		mainCtrl.initialize(primaryStage, overview, add, error, serverURL, collectionsEdit);
-                primaryStage.setOnCloseRequest(_ -> {
+		primaryStage.setOnCloseRequest(_ -> {
 			Platform.exit();
-			System.exit(0); // Force stop (IDK nothing worked for ending the process when closing the app)
+			System.exit(0); // Force stop
 		});
 	}
 
@@ -58,5 +61,4 @@ public class Main extends Application {
 	}
 
 
-
-}
+	}
