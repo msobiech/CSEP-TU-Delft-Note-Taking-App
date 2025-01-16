@@ -45,6 +45,8 @@ public class ServerUtils {
 
 	private static String SERVER = "http://localhost:8080/";
 
+	private static String webSocketUrl =   "ws://localhost:8008/websocket-endpoint";
+
 	/**
 	 * Fetches the content of the note with given id
 	 * @param id the id of the note to fetch
@@ -296,4 +298,7 @@ public class ServerUtils {
 		}
 	}
 
+	public String getWebSocketUrl() {
+		return webSocketUrl;
+	}
 }
