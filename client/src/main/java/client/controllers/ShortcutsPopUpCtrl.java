@@ -1,6 +1,5 @@
 package client.controllers;
 
-import client.utils.ServerUtils;
 import jakarta.inject.Inject;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
