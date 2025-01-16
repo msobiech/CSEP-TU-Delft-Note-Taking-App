@@ -107,6 +107,8 @@ public class MainCtrl {
         primaryStage.setScene(overview);
         overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         primaryStage.setResizable(true);
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(500);
         overviewCtrl.refreshNotes();
 
     }
