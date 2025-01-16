@@ -49,6 +49,9 @@ public class MainCtrl {
     private EditCollectionsPopUpCtrl editCtrl;
     private Scene editScene;
 
+    private ShortcutsPopUpCtrl shortcutsCtrl;
+    private Scene shortcutsScene;
+
     private ResourceBundle language;
 
     /**
@@ -67,7 +70,8 @@ public class MainCtrl {
      *                       with its controller
      */
     public void initialize(Stage primaryStage, Pair<NoteOverviewCtrl, Parent> overview,
-            Pair<AddNoteCtrl, Parent> add, Pair<ErrorPopUpCtrl, Parent> error, Pair<ServerSelectionCtrl, Parent> serverURL, Pair<EditCollectionsPopUpCtrl, Parent> collectionEdit) {
+            Pair<AddNoteCtrl, Parent> add, Pair<ErrorPopUpCtrl, Parent> error, Pair<ServerSelectionCtrl, Parent> serverURL, Pair<EditCollectionsPopUpCtrl, Parent> collectionEdit
+            ,Pair<ShortcutsPopUpCtrl, Parent> showShortcuts) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
@@ -83,6 +87,10 @@ public class MainCtrl {
 
         this.editCtrl = collectionEdit.getKey();
         this.editScene = new Scene(collectionEdit.getValue());
+
+        this.shortcutsCtrl = showShortcuts.getKey();
+        this.shortcutsScene = new Scene(showShortcuts.getValue());
+
         //showServerSelection();
         showOverview();
         primaryStage.show();
@@ -162,6 +170,18 @@ public class MainCtrl {
         popUp.setTitle("Collections: Edit");
         popUp.setResizable(false);
         popUp.show();
+    }
+
+    public void showShortcuts(){
+        this.popUp = new Stage();
+        popUp.setScene(shortcutsScene);
+        popUp.setTitle("Shortcuts: Overview");
+        popUp.setResizable(false);
+        popUp.show();
+    }
+
+    public void hideShortcuts() {
+        popUp.hide();
     }
 
     public void updateOverview(Pair<NoteOverviewCtrl, Parent> overview) {
