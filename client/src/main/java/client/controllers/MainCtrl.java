@@ -66,8 +66,11 @@ public class MainCtrl {
      *                  popups and JavaFX class Parent that links the corresponding UI
      *                  with its controller.
      * @param collectionEdit the pair of controller for the handling of edit collection
-     *                       popups and JavaFX class Parent that links th corresponding UI
-     *                       with its controller
+     *                       popups and JavaFX class Parent that links the corresponding UI
+     *                       with its controller.
+     * @param showShortcuts the pair of controller for the handling of show shortcuts popups
+     *                      and JavaFX class Parent that links the corresponding UI with its
+     *                      controller
      */
     public void initialize(Stage primaryStage, Pair<NoteOverviewCtrl, Parent> overview,
             Pair<AddNoteCtrl, Parent> add, Pair<ErrorPopUpCtrl, Parent> error, Pair<ServerSelectionCtrl, Parent> serverURL, Pair<EditCollectionsPopUpCtrl, Parent> collectionEdit
