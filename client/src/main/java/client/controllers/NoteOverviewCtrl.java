@@ -720,6 +720,7 @@ public class NoteOverviewCtrl implements Initializable {
         Stage curStage = (Stage) noteDisplay.getScene().getWindow();
         File file = fileChooser.showOpenDialog(curStage);
         if (file == null) {
+            System.out.println("No file was chosen");
             return;
         }
         else{
