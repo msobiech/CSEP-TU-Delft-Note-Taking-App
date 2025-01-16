@@ -14,7 +14,6 @@ import client.utils.ServerUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import server.WebSocketServerApp;
 
 public class Main extends Application {
 
@@ -34,11 +33,10 @@ public class Main extends Application {
 			System.err.println(msg);
 			return;
 		}
+		WebSocketClientApp webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
+		webSocketClientApp.startClient();
 		Locale currentLanguage = LanguageManager.getLanguage();
-		WebSocketClientApp webSocket = new WebSocketClientApp(URI.create("ws://localhost:8008"));
-		WebSocketServerApp webSocketServer = new WebSocketServerApp(8008);
-		webSocketServer.startWebSocketServer();
-		webSocket.startClient();
+
 
 		ResourceBundle bundle = ResourceBundle.getBundle("client.controllers.language", currentLanguage);
 

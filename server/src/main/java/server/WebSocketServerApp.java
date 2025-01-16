@@ -37,8 +37,8 @@ public class WebSocketServerApp extends WebSocketServer {
     }
 
     public void startWebSocketServer() {
-        WebSocketServerApp server = new WebSocketServerApp(8080);
+        WebSocketServerApp server = new WebSocketServerApp(8008);
         server.start();
-        System.out.println("WebSocket server started on ws://localhost:8080");
+        System.out.println("WebSocket server started on ws://localhost:8008");
     }
 }
