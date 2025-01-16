@@ -722,8 +722,7 @@ public class NoteOverviewCtrl implements Initializable {
         if (file == null) {
             System.out.println("No file was chosen");
             return;
-        }
-        else{
+        } else{
             System.out.println("File selected: " + file.getAbsolutePath());
             String fileName = file.getName();
             fileListContainer.getChildren().add(createFileBox(fileName,fileName));
@@ -755,7 +754,7 @@ public class NoteOverviewCtrl implements Initializable {
         deleteButton.setGraphic(deleteIcon);
         deleteButton.getStyleClass().addAll("button-icon", "flat");
 
-        editButton.setOnAction(_ -> {handleEditAlias(file);});
+        editButton.setOnAction(_ -> handleEditAlias(file));
         deleteButton.setOnAction(_ -> handleDeleteFile(file));
 
         file.getChildren().addAll(fileLabel, editButton, deleteButton);
