@@ -15,8 +15,21 @@
  */
 package client.utils;
 
-import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.Response;
+import models.Collection;
+import models.EmbeddedFile;
+import models.Note;
+import org.glassfish.jersey.client.ClientConfig;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -25,19 +38,7 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.core.GenericType;
-import jakarta.ws.rs.core.Response;
-import models.Collection;
-import models.Note;
-
-//import org.checkerframework.checker.units.qual.A;
-import org.glassfish.jersey.client.ClientConfig;
-
-
-import jakarta.ws.rs.ProcessingException;
-import jakarta.ws.rs.client.ClientBuilder;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 
 public class ServerUtils {
@@ -60,6 +61,7 @@ public class ServerUtils {
 				.get(new GenericType<Note>() {});
 		return note.getContent();
 	}
+
 
 	/**
 	 * Method to update a note with given id using the unified PUT endpoint.
@@ -165,6 +167,28 @@ public class ServerUtils {
 		return null;
 	}
 
+	public void downloadFile(long noteId, long fileId, File downloadLocation) throws FileNotFoundException {
+		Response response = ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("files/"+noteId+"/"+fileId+"/download")
+				.request()
+				.get();
+		try{
+			InputStream input = response.readEntity(InputStream.class);
+			FileOutputStream output = new FileOutputStream(downloadLocation);
+			byte[] buffer = new byte[4096];
+			int length;
+			while((length = input.read(buffer)) != -1) {
+				output.write(buffer, 0, length);
+			}
+			output.flush();
+			output.close();
+			input.close();
+		} catch(Exception e) {
+			System.err.println("Error downloading file: " + e.getMessage());
+		}
+		response.close();
+	}
+
 	public Collection getCollectionByID(long id) {
 		return ClientBuilder.newClient(new ClientConfig())
 				.target(SERVER).path("collections/get/" + id)
@@ -208,6 +232,19 @@ public class ServerUtils {
 				.post(Entity.entity(new Note("Untitled Note", ""),APPLICATION_JSON), Note.class);
 	}
 
+	public EmbeddedFile addFile(EmbeddedFile file) {
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("files")
+				.request(APPLICATION_JSON)
+				.post(Entity.entity(file, APPLICATION_JSON), EmbeddedFile.class);
+	}
+
+	public List<EmbeddedFile> getFilesForNote(Long noteId) {
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("files/" + noteId)
+				.request(APPLICATION_JSON)
+				.get(new GenericType<List<EmbeddedFile>>() {});
+	}
 	/**
 	 * Method to set ServerUrl to given parameter
 	 * @param serverURL the url to set to.
