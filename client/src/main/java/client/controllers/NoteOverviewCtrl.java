@@ -733,6 +733,11 @@ public class NoteOverviewCtrl implements Initializable {
         }
     }
 
+    public String getNameWithoutExtension(String file) {
+        int dotIndex = file.lastIndexOf('.');
+        return (dotIndex == -1) ? file : file.substring(0, dotIndex);
+    }
+
     public void AddFile() throws IOException {
         if(curNoteId==null){
             return;
@@ -754,7 +759,7 @@ public class NoteOverviewCtrl implements Initializable {
             URLConnection connection = file.toURL().openConnection();
             String mimeType = connection.getContentType();
             Note curNote = server.getNoteByID(curNoteId);
-            EmbeddedFile EmbFile = new EmbeddedFile(file.getName(), mimeType, Files.readAllBytes(file.toPath()), curNote);
+            EmbeddedFile EmbFile = new EmbeddedFile(getNameWithoutExtension(file.getName()), mimeType, Files.readAllBytes(file.toPath()), curNote);
             System.out.println("Adding a file " + file.getName() + " to Note " + curNote.getId());
             server.addFile(EmbFile);
             refreshFiles();
@@ -762,15 +767,63 @@ public class NoteOverviewCtrl implements Initializable {
 
     }
 
-    private void handleEditAlias(HBox box) {
-        System.out.println("Editing alias: " + box.getUserData().toString());
+    private void saveEdit(Label label, TextField textField, HBox box, int indexOfChange) {
+        if(!textField.getText().isEmpty()){
+            label.setText(textField.getText().trim().substring(0, Math.min(textField.getText().length(), 249)));
+        }
+        if(indexOfChange!=-1){
+            box.getChildren().set(indexOfChange, label);
+        }
+
     }
 
+    private void handleEditAlias(HBox file, Label fileLabel) {
+        int labelIndex = file.getChildren().indexOf(fileLabel);
+        if (labelIndex == -1) {
+            System.err.println("Couldn't change the title");
+            return;
+        }
+        TextField textField = new TextField(fileLabel.getText());
+        file.getChildren().set(labelIndex, textField);
+        textField.requestFocus();
+        Long fileId = Long.parseLong(file.getUserData().toString());
+        textField.setOnAction(_ -> {
+            saveEdit(fileLabel, textField, file, labelIndex);
+            try {
+                server.modifyFileName(fileId, fileLabel.getText());
+            } catch (Exception e) {
+                System.err.println("File couldn't be found");
+                refreshFiles();
+            }
+        });
+        textField.focusedProperty().addListener((_, _, isFocused) -> {
+            if (!isFocused) {
+                saveEdit(fileLabel, textField, file, labelIndex);
+
+                try {
+                    server.modifyFileName(fileId, fileLabel.getText());
+                } catch (Exception e) {
+                    System.err.println("File couldn't be found");
+                    refreshFiles();
+                }
+            }
+        });
+
+    }
+
+
     private void handleDeleteFile(HBox box) {
-        System.out.println("Deleting file: " + box.getUserData().toString());
+        boolean delete = server.deleteFile(Long.parseLong(box.getUserData().toString()));
+        if(delete){
+            System.out.println("Deleted file " + box.getUserData().toString());
+        } else{
+            System.out.println("Failed to delete file " + box.getUserData().toString());
+        }
+        refreshFiles();
     }
 
     private String getExtensionFromMime(String fileType){
+        System.out.println("CURRENT TYPE: " + fileType );
         String extension = null;
         try{
             extension = MimeTypes.getDefaultMimeTypes().forName(fileType).getExtension();
@@ -778,30 +831,18 @@ public class NoteOverviewCtrl implements Initializable {
             System.err.println("Couldn't convert the MIME Type to extension. Setting it to txt");
             extension = "txt";
         }
+        System.out.println("EXTENSION: " + extension);
         return extension;
     }
     private HBox createFileBox(String name, Long fileId, String fileType, Long noteId) {
         HBox file = new HBox();
         file.setUserData(fileId);
         file.setAlignment(Pos.CENTER);
-        file.setStyle("-fx-padding: 2px 5px; -fx-border-width: 1px 1px; -fx-border-color: rgba(0,0,0,0.47); -fx-border-radius: 15px");
+        file.setStyle("-fx-spacing: 3px; -fx-padding: 2px 5px; -fx-border-width: 1px 1px; -fx-border-color: rgba(0,0,0,0.47); -fx-border-radius: 15px");
         Label fileLabel = new Label(name);
 
         fileLabel.setOnMouseClicked((MouseEvent _) -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save File");
-            fileChooser.setInitialDirectory(Paths.get(System.getProperty("user.home")).toFile());
-            String fileExtension = getExtensionFromMime(fileType);
-            fileChooser.setInitialFileName(name + fileExtension);
-            File downloadLocation = fileChooser.showSaveDialog(noteDisplay.getScene().getWindow());
-
-            if(downloadLocation != null){
-                try {
-                    server.downloadFile(noteId, fileId, downloadLocation);
-                } catch (FileNotFoundException e) {
-                    System.err.println("Error downloading file");
-                }
-            }
+            downloadFile(fileId, fileType, noteId, fileLabel);
         });
         Button editButton = new Button();
         FontIcon editIcon = new FontIcon("fa-pencil");
@@ -813,11 +854,29 @@ public class NoteOverviewCtrl implements Initializable {
         deleteButton.setGraphic(deleteIcon);
         deleteButton.getStyleClass().addAll("button-icon", "flat");
 
-        editButton.setOnAction(_ -> handleEditAlias(file));
-        deleteButton.setOnAction(_ -> handleDeleteFile(file));
-
         file.getChildren().addAll(fileLabel, editButton, deleteButton);
+
+        editButton.setOnAction(_ -> handleEditAlias(file,fileLabel));
+        deleteButton.setOnAction(_ -> handleDeleteFile(file));
         return file;
+    }
+
+    private void downloadFile(Long fileId, String fileType, Long noteId, Label fileLabel) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save File");
+        fileChooser.setInitialDirectory(Paths.get(System.getProperty("user.home")).toFile());
+        String fileExtension = getExtensionFromMime(fileType);
+        fileChooser.setInitialFileName(fileLabel.getText());
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(fileType, "*"+fileExtension));
+        File downloadLocation = fileChooser.showSaveDialog(noteDisplay.getScene().getWindow());
+
+        if(downloadLocation != null){
+            try {
+                server.downloadFile(noteId, fileId, downloadLocation);
+            } catch (FileNotFoundException e) {
+                System.err.println("Error downloading file");
+            }
+        }
     }
 
     // Getters and setters for testing
