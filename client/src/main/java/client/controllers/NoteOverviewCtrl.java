@@ -173,7 +173,7 @@ public class NoteOverviewCtrl implements Initializable {
                 setText((empty || item == null) ? null : item.getValue());
             }
         });
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
             if (newValue != null) {
                 // Step 3: Fetch the collection of the newly selected note
                 Collection curNoteCollection = server.getCollectionByNoteID(newValue.getKey());
@@ -186,7 +186,9 @@ public class NoteOverviewCtrl implements Initializable {
 
                     // Step 4: Update the ComboBox's value
                     noteCollectionDropdown.setValue(matchingCollection);
-                    refreshNotes();
+                    if(oldValue!=null) {
+                        refreshNotes();
+                    }
                 }
             }
         });
