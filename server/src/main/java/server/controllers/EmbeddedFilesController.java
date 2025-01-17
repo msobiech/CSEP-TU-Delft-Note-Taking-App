@@ -43,7 +43,7 @@ public class EmbeddedFilesController {
         if(file==null){
             return ResponseEntity.notFound().build();
         } else if(file.getNote().getId()!=noteId){
-            //return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build();
         }
         ByteArrayResource resource = new ByteArrayResource(file.getFileContent());
         return ResponseEntity.ok()

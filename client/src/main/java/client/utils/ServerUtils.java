@@ -17,6 +17,10 @@ package client.utils;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -29,6 +33,7 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.Response;
+import javafx.stage.FileChooser;
 import models.Collection;
 import models.EmbeddedFile;
 import models.Note;
@@ -163,6 +168,29 @@ public class ServerUtils {
 			System.err.println("Error updating collection: " + e.getMessage());
 		}
 		return null;
+	}
+
+	public void downloadFile(long noteId, long fileId, File downloadLocation) throws FileNotFoundException {
+		Response response = ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("files/"+noteId+"/"+fileId+"/download")
+				.request()
+				.get();
+		try{
+			InputStream input = response.readEntity(InputStream.class);
+			FileOutputStream output = new FileOutputStream(downloadLocation);
+			byte[] buffer = new byte[4096];
+			int length;
+			while((length = input.read(buffer)) != -1) {
+				output.write(buffer, 0, length);
+			}
+			output.flush();
+			output.close();
+			input.close();
+		}
+		catch(Exception e){
+			System.err.println("Error downloading file: " + e.getMessage());
+		}
+		response.close();
 	}
 
 	public Collection getCollectionByID(long id) {

@@ -22,6 +22,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -32,15 +33,14 @@ import models.EmbeddedFile;
 import models.Note;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+
+import org.apache.tika.mime.*;
 
 
 public class NoteOverviewCtrl implements Initializable {
@@ -199,7 +199,7 @@ public class NoteOverviewCtrl implements Initializable {
                     noteCollectionDropdown.setValue(matchingCollection);
                     if(oldValue!=null) {
                         refreshNotes();
-                        refreshFiles();
+                        //refreshFiles();
                     }
                 }
             }
@@ -475,7 +475,6 @@ public class NoteOverviewCtrl implements Initializable {
                     Note updatedNote = new Note();
                     updatedNote.setContent(currentContent);
                     server.updateNoteByID(curNoteId, updatedNote);
-                    refreshFiles();
                 } catch (Exception e) {
                     System.out.println("Failed to update note content on note switch: " + e.getMessage());
                 }
@@ -730,7 +729,7 @@ public class NoteOverviewCtrl implements Initializable {
         List<EmbeddedFile> files = server.getFilesForNote(idToSearch);
         fileListContainer.getChildren().clear();
         for(var file:files){
-            fileListContainer.getChildren().add(createFileBox(file.getFileName(),file.getId()));
+            fileListContainer.getChildren().add(createFileBox(file.getFileName(),file.getId(), file.getFileType(), idToSearch));
         }
     }
 
@@ -771,12 +770,39 @@ public class NoteOverviewCtrl implements Initializable {
         System.out.println("Deleting file: " + box.getUserData().toString());
     }
 
-    private HBox createFileBox(String name, Long fileID) {
+    private String getExtensionFromMime(String fileType){
+        String extension = null;
+        try{
+            extension = MimeTypes.getDefaultMimeTypes().forName(fileType).getExtension();
+        }catch(Exception e){
+            System.err.println("Couldn't convert the MIME Type to extension. Setting it to txt");
+            extension = "txt";
+        }
+        return extension;
+    }
+    private HBox createFileBox(String name, Long fileId, String fileType, Long noteId) {
         HBox file = new HBox();
-        file.setUserData(fileID);
+        file.setUserData(fileId);
         file.setAlignment(Pos.CENTER);
-        file.setStyle("-fx-padding: 2px 5px; -fx-border-width: 1px 1px; -fx-border-color: black; -fx-border-radius: 15px");
+        file.setStyle("-fx-padding: 2px 5px; -fx-border-width: 1px 1px; -fx-border-color: rgba(0,0,0,0.47); -fx-border-radius: 15px");
         Label fileLabel = new Label(name);
+
+        fileLabel.setOnMouseClicked((MouseEvent _) -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save File");
+            fileChooser.setInitialDirectory(Paths.get(System.getProperty("user.home")).toFile());
+            String fileExtension = getExtensionFromMime(fileType);
+            fileChooser.setInitialFileName(name + fileExtension);
+            File downloadLocation = fileChooser.showSaveDialog(noteDisplay.getScene().getWindow());
+
+            if(downloadLocation != null){
+                try {
+                    server.downloadFile(noteId, fileId, downloadLocation);
+                } catch (FileNotFoundException e) {
+                    System.err.println("Error downloading file");
+                }
+            }
+        });
         Button editButton = new Button();
         FontIcon editIcon = new FontIcon("fa-pencil");
         editButton.setGraphic(editIcon);
