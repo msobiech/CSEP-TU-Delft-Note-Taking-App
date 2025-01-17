@@ -103,6 +103,8 @@ public class NoteOverviewCtrl implements Initializable {
     private Long curNoteId = null;
     private Integer curNoteIndex = null;
 
+    Map<String, String> aliases = new HashMap<>();
+
     @Inject
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl, NoteService noteService,
                             DebounceService debounceService, DialogFactory dialogFactory, EventBus eventbus) {
@@ -341,7 +343,7 @@ public class NoteOverviewCtrl implements Initializable {
 
     private void handleNoteContentChange() {
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
-            eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, newValue, curNoteId, curNoteIndex));
+            eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, newValue, curNoteId, curNoteIndex, aliases));
         });
         removeNoteButton.setDisable(true);
     }
@@ -720,6 +722,7 @@ public class NoteOverviewCtrl implements Initializable {
 
     private void refreshFiles(){
         var noteToSearch = notesList.getSelectionModel().getSelectedItem();
+        var noteListIndex = notesList.getSelectionModel().getSelectedIndex();
         if(noteToSearch==null){
             return;
         }
@@ -728,15 +731,19 @@ public class NoteOverviewCtrl implements Initializable {
         System.out.println("Refreshing files for note " + idToSearch);
         List<EmbeddedFile> files = server.getFilesForNote(idToSearch);
         fileListContainer.getChildren().clear();
+        aliases.clear();
         for(var file:files){
             fileListContainer.getChildren().add(createFileBox(file.getFileName(),file.getId(), file.getFileType(), idToSearch));
+            String path = ServerUtils.getSERVER()+"files/"+idToSearch+"/"+file.getId()+"/download";
+            String fileName = file.getFileName();
+            if(file.getFileType().contains("image")){
+                aliases.put(fileName,path);
+            }
         }
+        eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, noteDisplay.getText(), noteToSearch.getKey(), noteListIndex, aliases));
     }
 
-    public String getNameWithoutExtension(String file) {
-        int dotIndex = file.lastIndexOf('.');
-        return (dotIndex == -1) ? file : file.substring(0, dotIndex);
-    }
+
 
     public void AddFile() throws IOException {
         if(curNoteId==null){
@@ -759,7 +766,7 @@ public class NoteOverviewCtrl implements Initializable {
             URLConnection connection = file.toURL().openConnection();
             String mimeType = connection.getContentType();
             Note curNote = server.getNoteByID(curNoteId);
-            EmbeddedFile EmbFile = new EmbeddedFile(getNameWithoutExtension(file.getName()), mimeType, Files.readAllBytes(file.toPath()), curNote);
+            EmbeddedFile EmbFile = new EmbeddedFile(EmbeddedFile.getNameWithoutExtension(file.getName()), mimeType, Files.readAllBytes(file.toPath()), curNote);
             System.out.println("Adding a file " + file.getName() + " to Note " + curNote.getId());
             server.addFile(EmbFile);
             refreshFiles();
@@ -802,12 +809,14 @@ public class NoteOverviewCtrl implements Initializable {
 
                 try {
                     server.modifyFileName(fileId, fileLabel.getText());
+                    refreshFiles();
                 } catch (Exception e) {
                     System.err.println("File couldn't be found");
                     refreshFiles();
                 }
             }
         });
+
 
     }
 
@@ -823,7 +832,6 @@ public class NoteOverviewCtrl implements Initializable {
     }
 
     private String getExtensionFromMime(String fileType){
-        System.out.println("CURRENT TYPE: " + fileType );
         String extension = null;
         try{
             extension = MimeTypes.getDefaultMimeTypes().forName(fileType).getExtension();
@@ -831,7 +839,6 @@ public class NoteOverviewCtrl implements Initializable {
             System.err.println("Couldn't convert the MIME Type to extension. Setting it to txt");
             extension = "txt";
         }
-        System.out.println("EXTENSION: " + extension);
         return extension;
     }
     private HBox createFileBox(String name, Long fileId, String fileType, Long noteId) {

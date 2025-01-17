@@ -354,4 +354,8 @@ public class ServerUtils {
 	public String getWebSocketUrl() {
 		return webSocketUrl;
 	}
+
+	public static String getSERVER() {
+		return SERVER;
+	}
 }
