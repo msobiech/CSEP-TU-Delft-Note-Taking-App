@@ -15,7 +15,16 @@
  */
 package client.utils;
 
-import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.GenericType;
+import jakarta.ws.rs.core.Response;
+import models.Collection;
+import models.EmbeddedFile;
+import models.Note;
+import org.glassfish.jersey.client.ClientConfig;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,21 +38,7 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.core.GenericType;
-import jakarta.ws.rs.core.Response;
-import javafx.stage.FileChooser;
-import models.Collection;
-import models.EmbeddedFile;
-import models.Note;
-
-//import org.checkerframework.checker.units.qual.A;
-import org.glassfish.jersey.client.ClientConfig;
-
-
-import jakarta.ws.rs.ProcessingException;
-import jakarta.ws.rs.client.ClientBuilder;
+import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 
 public class ServerUtils {
@@ -186,8 +181,7 @@ public class ServerUtils {
 			output.flush();
 			output.close();
 			input.close();
-		}
-		catch(Exception e){
+		} catch(Exception e) {
 			System.err.println("Error downloading file: " + e.getMessage());
 		}
 		response.close();
