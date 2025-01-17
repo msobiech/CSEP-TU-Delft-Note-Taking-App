@@ -78,6 +78,7 @@ public class Note {
         this.collectionIds = collectionIds;
     }
 
+
     /**
      * Gets the title of the object.
      * @return the title as a String.
