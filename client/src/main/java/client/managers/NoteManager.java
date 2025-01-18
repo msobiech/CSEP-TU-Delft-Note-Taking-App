@@ -153,8 +153,7 @@ public class NoteManager {
                         controller.getNotesList().refresh();
                     }
 
-                });
-            } else {
+                }else {
                 System.err.println("Note ID is null. Cannot delete note.");
             }
         } catch (Exception e) {
@@ -163,3 +162,4 @@ public class NoteManager {
     }
 
 }
+
