@@ -12,7 +12,7 @@ public class WebSocketClientApp extends WebSocketClient {
 
     public WebSocketClientApp(URI serverUri) {
         super(serverUri);
-        System.out.println("WebSocketClientApp started");
+        System.out.println("FUCKCCKCKC");
     }
 
     @Override
