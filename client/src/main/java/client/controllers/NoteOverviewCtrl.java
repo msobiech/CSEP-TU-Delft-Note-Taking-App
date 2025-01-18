@@ -144,7 +144,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             removeNoteButton.setDisable(newValue == null);
         });
 
-        handleEditCollectionsPressed();
         setupKeyboardShortcuts();
     }
 
@@ -152,15 +151,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         flagDropdown.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             System.out.println("Language changed to " +  newValue.getKey());
             eventBus.publish(new LanguageEvent(newValue.getKey()));
-        });
-    }
-
-    private void handleEditCollectionsPressed() {
-        collectionDropdown.setOnAction(event -> {
-            Pair<Long, String> selectedOption = collectionDropdown.getValue();
-            if ("Edit Collections...".equals(selectedOption.getValue())) {
-                mainCtrl.showEditCollections(); // Call the method to show the popup
-            }
         });
     }
 
@@ -687,7 +677,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                 refreshNotes();
                 break;
             case -2:
-                //showEditCollectionsScreen();
+                mainCtrl.showEditCollections();
                 refreshNotes();
                 break;
             default:
