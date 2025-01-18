@@ -75,6 +75,12 @@ public class NoteOverviewCtrl implements Initializable {
     @FXML
     private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton;
 
+    @FXML
+    private void toggleMode() {
+        mainCtrl.toggleMode();
+    }
+
+
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
 

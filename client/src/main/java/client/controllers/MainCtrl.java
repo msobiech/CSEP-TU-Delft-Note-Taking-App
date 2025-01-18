@@ -51,6 +51,9 @@ public class MainCtrl {
 
     private ResourceBundle language;
 
+    private boolean isDarkMode = false;
+    private final String LIGHT_MODE_CSS = "/client/css/styles.css";
+    private final String DARK_MODE_CSS = "/client/css/darkstyles.css";
     /**
      * Initialization of the main Stage
      * @param primaryStage the stage that will be used to display the app's fronted
@@ -84,6 +87,8 @@ public class MainCtrl {
         this.editCtrl = collectionEdit.getKey();
         this.editScene = new Scene(collectionEdit.getValue());
         //showServerSelection();
+
+        applyStylesheet(this.overview);
         showOverview();
         primaryStage.show();
     }
@@ -97,12 +102,29 @@ public class MainCtrl {
     public void showOverview() {
         primaryStage.setTitle(language.getString("window.primary.title"));
         primaryStage.setScene(overview);
-        overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
+        applyStylesheet(overview);
+//        overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         primaryStage.setResizable(true);
         overviewCtrl.refreshNotes();
-
     }
 
+    public void toggleMode() {
+        isDarkMode = !isDarkMode;
+        applyStylesheet(primaryStage.getScene());
+        if (popUp != null && popUp.isShowing()) {
+            applyStylesheet(popUp.getScene());
+        }
+    }
+
+    public void applyStylesheet(Scene scene) {
+        scene.getStylesheets().clear();
+        if (isDarkMode) {
+            scene.getStylesheets().add(DARK_MODE_CSS);
+        }
+        else {
+            scene.getStylesheets().add(LIGHT_MODE_CSS);
+        }
+    }
     /**
      * Method to show the scene for note addition
      */
