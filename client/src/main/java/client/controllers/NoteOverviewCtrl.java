@@ -13,6 +13,7 @@ import client.utils.DebounceService;
 import client.utils.NoteService;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -940,7 +941,9 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     @Override
     public void onMessageReceived(String message) {
         System.out.println("Received WebSocket message in NoteOverviewCtrl: " + message);
-        refreshNotes();
+        Platform.runLater(()->{
+            refreshNotes();
+        });
     }
 
 }
