@@ -12,18 +12,15 @@ import java.util.Optional;
 public class CollectionServiceImpl implements CollectionService {
     private final CollectionRepository collectionRepo;
 
-    private final CustomWebSocketHandler webSocketHandler;
 
     /**
      * Establishes repositories used in the service
      * @param collectionRepo the repository with collections
-     * @param webSocketHandler the handler
      */
     @Autowired
-    public CollectionServiceImpl(CollectionRepository collectionRepo, CustomWebSocketHandler webSocketHandler) {
+    public CollectionServiceImpl(CollectionRepository collectionRepo) {
 //        this.noteRepo = noteRepo;
         this.collectionRepo = collectionRepo;
-        this.webSocketHandler = webSocketHandler;
     }
 
 
@@ -74,9 +71,6 @@ public class CollectionServiceImpl implements CollectionService {
         return collection.map(c -> collectionExists(c.getId())).orElse(false);
     }
 
-    public void notifyClients(String message) {
-        webSocketHandler.broadcastMessage(message);
-    }
 
 
 }

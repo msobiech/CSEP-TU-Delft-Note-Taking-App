@@ -1,6 +1,7 @@
 package client.managers;
 
 import client.InjectorProvider;
+import client.WebSockets.WebSocketClientApp;
 import client.controllers.NoteOverviewCtrl;
 import client.event.EventBus;
 import client.event.MainEventBus;
@@ -13,6 +14,7 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
+import java.net.URI;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -27,12 +29,16 @@ public class NoteManager {
     private static final int THRESHOLD = 5;
     private final ServerUtils server;
 
+    private final WebSocketClientApp webSocketClientApp;
+
+
 
 
     public NoteManager(NoteService noteService, ServerUtils server) {
         this.noteService = noteService;
         this.server = server;
         eventBus.subscribe(NoteEvent.class, this::handleContentChange);
+        webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
     }
 
     private void handleContentChange(NoteEvent event) {
@@ -47,9 +53,11 @@ public class NoteManager {
                 break;
             case NOTE_ADD:
                 handleNoteAddition();
+                webSocketClientApp.broadcastAdd();
                 break;
             case NOTE_REMOVE:
                 handleNoteDeletion((NoteStatusEvent) event);
+                webSocketClientApp.broadcastDelete();
                 break;
 
         }
@@ -134,7 +142,7 @@ public class NoteManager {
                 System.out.println("Note " + event.getChangeID() + " deleted successfully.");
 
                 // Update the UI (must be done on the JavaFX thread)
-                Platform.runLater(() -> {
+
                     // Assuming there's a way to get the ObservableList from the controller
                     NoteOverviewCtrl controller = InjectorProvider.getInjector().getInstance(NoteOverviewCtrl.class);
                     ObservableList<Pair<Long, String>> notes = controller.getNotes();
@@ -142,7 +150,7 @@ public class NoteManager {
                     // Find and remove the note
                     notes.removeIf(note -> note.getKey().equals(event.getChangeID()));
                     controller.getNotesList().refresh();
-                });
+                ;
             } else {
                 System.err.println("Note ID is null. Cannot delete note.");
             }

@@ -2,6 +2,8 @@ package client.controllers;
 
 
 import client.DialogFactory;
+import client.WebSockets.GlobalWebSocketManager;
+import client.WebSockets.WebSocketMessageListener;
 import client.event.*;
 import client.managers.LanguageManager;
 import client.managers.MarkdownRenderManager;
@@ -33,7 +35,7 @@ import java.net.URL;
 import java.util.*;
 
 
-public class NoteOverviewCtrl implements Initializable {
+public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener {
 
     private final ServerUtils server;
     private final MainCtrl mainCtrl;
@@ -99,6 +101,7 @@ public class NoteOverviewCtrl implements Initializable {
         this.debounceService = debounceService;
         this.dialogFactory = dialogFactory;
         this.eventBus = eventbus;
+        GlobalWebSocketManager.getInstance().addMessageListener(this);
     }
 
     @Override
@@ -813,6 +816,12 @@ public class NoteOverviewCtrl implements Initializable {
 
     public void setSearchBar(TextField searchBar) {
         this.searchBar = searchBar;
+    }
+
+    @Override
+    public void onMessageReceived(String message) {
+        System.out.println("Received WebSocket message in NoteOverviewCtrl: " + message);
+        refreshNotes();
     }
 
 }
