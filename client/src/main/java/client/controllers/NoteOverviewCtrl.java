@@ -16,6 +16,7 @@ import com.google.inject.Inject;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -54,6 +55,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private final DebounceService debounceService;
     private final DialogFactory dialogFactory;
     private final EventBus eventBus;
+    public Button showShortcutsButton;
 
     @FXML
     private ComboBox<Pair<String, String>> flagDropdown;
@@ -720,6 +722,10 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                 System.out.println("Deletion canceled.");
             }
         }
+    }
+
+    public void showShortcutsPopUp(ActionEvent actionEvent) {
+        mainCtrl.showShortcuts();
     }
 
     private void refreshFiles(){

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="368.0" prefWidth="260.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.ShortcutsPopUpCtrl">
+   <children>
+      <HBox alignment="CENTER" prefHeight="42.0" prefWidth="260.0" style="-fx-background-color: #FEFAE0;">
+         <children>
+            <Label text="Keyboard Shortcuts">
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+            </Label>
+         </children></HBox>
+      <VBox layoutY="42.0" prefHeight="325.0" prefWidth="260.0" spacing="5.0" style="-fx-background-color: #CCD5AE; -fx-padding: 5px;">
+         <children>
+            <VBox prefHeight="331.0" prefWidth="250.0" spacing="2.0" style="-fx-background-color: #e8e9e8;">
+               <children>
+                  <HBox prefHeight="37.0" prefWidth="250.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
+                     <children>
+                        <Label text="Add a note:">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <Label text="Ctrl + N" translateX="100.0">
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="37.0" prefWidth="250.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
+                     <children>
+                        <Label text="Delete a note:">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <Label text="Ctrl + D" translateX="87.0">
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="37.0" prefWidth="250.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
+                     <children>
+                        <Label text="Refresh all notes:">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <Label text="Ctrl + R" translateX="69.0">
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </HBox>
+               </children></VBox>
+            <HBox alignment="CENTER_LEFT" prefHeight="87.0" prefWidth="464.0" style="-fx-background-color: #E0E5B6;">
+               <children>
+                  <Button fx:id="ShortcutPopUpOKButton" onAction="#closePopUp" mnemonicParsing="false" text="OK" translateX="5.0" />
+               </children></HBox>
+         </children></VBox>
+   </children>
+</AnchorPane>
