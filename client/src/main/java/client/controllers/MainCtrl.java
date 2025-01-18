@@ -21,7 +21,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-import org.kordamp.bootstrapfx.BootstrapFX;
 
 import java.util.ResourceBundle;
 
@@ -120,8 +119,7 @@ public class MainCtrl {
         scene.getStylesheets().clear();
         if (isDarkMode) {
             scene.getStylesheets().add(DARK_MODE_CSS);
-        }
-        else {
+        } else {
             scene.getStylesheets().add(LIGHT_MODE_CSS);
         }
     }
