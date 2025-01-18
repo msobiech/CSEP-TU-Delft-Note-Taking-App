@@ -2,6 +2,8 @@ package client.controllers;
 
 
 import client.DialogFactory;
+import client.WebSockets.GlobalWebSocketManager;
+import client.WebSockets.WebSocketMessageListener;
 import client.event.*;
 import client.managers.LanguageManager;
 import client.managers.MarkdownRenderManager;
@@ -11,6 +13,7 @@ import client.utils.DebounceService;
 import client.utils.NoteService;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -43,7 +46,7 @@ import java.util.*;
 import org.apache.tika.mime.*;
 
 
-public class NoteOverviewCtrl implements Initializable {
+public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener {
 
     private final ServerUtils server;
     private final MainCtrl mainCtrl;
@@ -112,6 +115,7 @@ public class NoteOverviewCtrl implements Initializable {
         this.debounceService = debounceService;
         this.dialogFactory = dialogFactory;
         this.eventBus = eventbus;
+        GlobalWebSocketManager.getInstance().addMessageListener(this);
     }
 
     @Override
@@ -934,5 +938,12 @@ public class NoteOverviewCtrl implements Initializable {
         this.searchBar = searchBar;
     }
 
+    @Override
+    public void onMessageReceived(String message) {
+        System.out.println("Received WebSocket message in NoteOverviewCtrl: " + message);
+        Platform.runLater(()->{
+            refreshNotes();
+        });
+    }
 
 }

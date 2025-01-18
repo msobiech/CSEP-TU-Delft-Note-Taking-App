@@ -1,11 +1,11 @@
 package client;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import client.WebSockets.GlobalWebSocketManager;
 import client.controllers.*;
 import client.managers.LanguageManager;
 import com.google.inject.Injector;
@@ -33,8 +33,8 @@ public class Main extends Application {
 			System.err.println(msg);
 			return;
 		}
-		WebSocketClientApp webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
-		webSocketClientApp.startClient();
+		GlobalWebSocketManager webSocketManager = GlobalWebSocketManager.getInstance();
+		webSocketManager.initializeWebSocket("ws://localhost:8008/ws");
 		Locale currentLanguage = LanguageManager.getLanguage();
 
 
