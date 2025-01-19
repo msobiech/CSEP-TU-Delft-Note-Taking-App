@@ -57,7 +57,7 @@
                 <HBox alignment="CENTER" prefHeight="26.0" prefWidth="327.0" spacing="5.0">
                     <TextField fx:id="noteTitle" maxHeight="23.0" minHeight="23.0" promptText="%note.title.text" HBox.hgrow="ALWAYS">
                         <font>
-                            <Font name="Comic Sans MS" size="12.0" />
+                            <Font name="System" size="12.0" />
                         </font>
                     </TextField>
                     <Button fx:id="editTitleButton" mnemonicParsing="false" onAction="#updateTitle">
@@ -73,7 +73,7 @@
                 </HBox>
                 <TextArea fx:id="noteDisplay" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333" wrapText="true" VBox.vgrow="ALWAYS" />
                 <HBox alignment="CENTER" prefHeight="46.0" spacing="5.0">
-                    <Label minWidth="100.0" text="Embedded Files:" />
+                    <Label minWidth="100.0" text="%embedded.files" />
                     <ScrollPane prefWidth="400.0" hbarPolicy="ALWAYS" vbarPolicy="NEVER" prefHeight="100.0">
                         <HBox fx:id="fileListContainer" spacing="5" />
                     </ScrollPane>
@@ -104,11 +104,11 @@
             <children>
                 <TextField fx:id="searchBar" prefHeight="28.0" prefWidth="277.0" promptText="%search.panel.text">
                     <font>
-                        <Font name="Comic Sans MS" size="12.0" />
+                        <Font name="System" size="12.0" />
                     </font>
                 </TextField>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button onAction="#toggleMode">
+                <Button fx:id="toggleModeButton" onAction="#toggleMode">
                     <graphic>
                         <FontIcon iconLiteral="fa-moon-o" />
                     </graphic>
@@ -119,7 +119,7 @@
                 <ComboBox fx:id="flagDropdown" prefHeight="27.0" prefWidth="55.0" />
                 <Label fx:id="collectionText" alignment="CENTER_RIGHT" contentDisplay="RIGHT" text="%collection.text" textAlignment="RIGHT">
                     <font>
-                        <Font name="Comic Sans MS Bold" size="12.0" />
+                        <Font name="System" size="12.0" />
                     </font>
                 </Label>
                 <ComboBox fx:id="collectionDropdown" prefHeight="27.0" prefWidth="97.0" />
