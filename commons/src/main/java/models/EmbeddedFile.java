@@ -82,6 +82,8 @@ public class EmbeddedFile {
         return id;
     }
 
+    public void setFileId(long id) { this.id = id; }
+
     public static String getNameWithoutExtension(String file) {
         int dotIndex = file.lastIndexOf('.');
         return (dotIndex == -1) ? file : file.substring(0, dotIndex);
