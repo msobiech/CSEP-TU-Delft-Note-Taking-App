@@ -1,8 +1,6 @@
 package client.managers;
 
 import client.InjectorProvider;
-import client.WebSockets.GlobalWebSocketManager;
-import client.WebSockets.WebSocketMessageListener;
 import client.controllers.MainCtrl;
 import client.event.EventBus;
 import client.event.MainEventBus;
@@ -35,7 +33,6 @@ public class MarkdownRenderManager {
         this.markdownPreview = preview;
         this.mainCtrl = mainCtrl;
         eventBus.subscribe(NoteContentEvent.class, this::handleContentChange);
-        GlobalWebSocketManager.getInstance().addMessageListener(this);
     }
 
     private void handleContentChange(NoteEvent noteEvent) {
