@@ -53,7 +53,7 @@ HBox[top] {
 }
 
 Label, TextField, TextArea, ComboBox {
-    -fx-font-family: "Comic Sans MS";
+    -fx-font-family: "System";
 }
 
 #collectionListView {
