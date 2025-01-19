@@ -66,7 +66,7 @@
                 <HBox alignment="CENTER" prefHeight="46.0" spacing="5.0">
                     <Label minWidth="100.0" text="Embedded Files:" />
                     <ScrollPane prefWidth="400.0" hbarPolicy="ALWAYS" vbarPolicy="NEVER" prefHeight="100.0">
-                        <HBox fx:id="fileListContainer" spacing="10" />
+                        <HBox fx:id="fileListContainer" spacing="5" />
                     </ScrollPane>
                     <Button onAction="#AddFile">
                         <graphic>

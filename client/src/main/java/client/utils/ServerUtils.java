@@ -239,12 +239,28 @@ public class ServerUtils {
 				.post(Entity.entity(file, APPLICATION_JSON), EmbeddedFile.class);
 	}
 
+	public EmbeddedFile modifyFileName(Long fileId, String fileName) {
+
+		return ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("files/" + fileId)
+				.request(APPLICATION_JSON)
+				.put(Entity.entity(fileName, APPLICATION_JSON), EmbeddedFile.class);
+	}
+
 	public List<EmbeddedFile> getFilesForNote(Long noteId) {
 		return ClientBuilder.newClient(new ClientConfig())
 				.target(SERVER).path("files/" + noteId)
 				.request(APPLICATION_JSON)
 				.get(new GenericType<List<EmbeddedFile>>() {});
 	}
+
+	public boolean deleteFile(Long fileId) {
+		var response = ClientBuilder.newClient(new ClientConfig())
+				.target(SERVER).path("files/" + fileId)
+				.request(APPLICATION_JSON)
+				.delete();
+        return response.getStatus() == 200;
+    }
 	/**
 	 * Method to set ServerUrl to given parameter
 	 * @param serverURL the url to set to.
@@ -337,5 +353,9 @@ public class ServerUtils {
 
 	public String getWebSocketUrl() {
 		return webSocketUrl;
+	}
+
+	public static String getSERVER() {
+		return SERVER;
 	}
 }
