@@ -17,6 +17,7 @@ import com.google.inject.Inject;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -56,6 +57,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private final DebounceService debounceService;
     private final DialogFactory dialogFactory;
     private final EventBus eventBus;
+    public Button showShortcutsButton;
 
     private boolean webSocketChange = true;
 
@@ -112,6 +114,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
     private static WebSocketClientApp webSocketClientApp;
     private static int id;
+     Map<String, String> aliases = new HashMap<>();
 
     @Inject
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl, NoteService noteService,
@@ -361,6 +364,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             if(webSocketChange){
                 webSocketClientApp1.broadcastContent(newValue,curNoteId);
             }
+            eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, newValue, curNoteId, curNoteIndex, aliases));
         });
         removeNoteButton.setDisable(true);
     }
@@ -737,8 +741,13 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         }
     }
 
+    public void showShortcutsPopUp(ActionEvent actionEvent) {
+        mainCtrl.showShortcuts();
+    }
+
     private void refreshFiles(){
         var noteToSearch = notesList.getSelectionModel().getSelectedItem();
+        var noteListIndex = notesList.getSelectionModel().getSelectedIndex();
         if(noteToSearch==null){
             return;
         }
@@ -747,10 +756,19 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         System.out.println("Refreshing files for note " + idToSearch);
         List<EmbeddedFile> files = server.getFilesForNote(idToSearch);
         fileListContainer.getChildren().clear();
+        aliases.clear();
         for(var file:files){
             fileListContainer.getChildren().add(createFileBox(file.getFileName(),file.getId(), file.getFileType(), idToSearch));
+            String path = ServerUtils.getSERVER()+"files/"+idToSearch+"/"+file.getId()+"/download";
+            String fileName = file.getFileName();
+            if(file.getFileType().contains("image")){
+                aliases.put(fileName,path);
+            }
         }
+        eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, noteDisplay.getText(), noteToSearch.getKey(), noteListIndex, aliases));
     }
+
+
 
     public void AddFile() throws IOException {
         if(curNoteId==null){
@@ -773,7 +791,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             URLConnection connection = file.toURL().openConnection();
             String mimeType = connection.getContentType();
             Note curNote = server.getNoteByID(curNoteId);
-            EmbeddedFile EmbFile = new EmbeddedFile(file.getName(), mimeType, Files.readAllBytes(file.toPath()), curNote);
+            EmbeddedFile EmbFile = new EmbeddedFile(EmbeddedFile.getNameWithoutExtension(file.getName()), mimeType, Files.readAllBytes(file.toPath()), curNote);
             System.out.println("Adding a file " + file.getName() + " to Note " + curNote.getId());
             server.addFile(EmbFile);
             refreshFiles();
@@ -781,12 +799,61 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
     }
 
-    private void handleEditAlias(HBox box) {
-        System.out.println("Editing alias: " + box.getUserData().toString());
+    private void saveEdit(Label label, TextField textField, HBox box, int indexOfChange) {
+        if(!textField.getText().isEmpty()){
+            label.setText(textField.getText().trim().substring(0, Math.min(textField.getText().length(), 249)));
+        }
+        if(indexOfChange!=-1){
+            box.getChildren().set(indexOfChange, label);
+        }
+
     }
 
+    private void handleEditAlias(HBox file, Label fileLabel) {
+        int labelIndex = file.getChildren().indexOf(fileLabel);
+        if (labelIndex == -1) {
+            System.err.println("Couldn't change the title");
+            return;
+        }
+        TextField textField = new TextField(fileLabel.getText());
+        file.getChildren().set(labelIndex, textField);
+        textField.requestFocus();
+        Long fileId = Long.parseLong(file.getUserData().toString());
+        textField.setOnAction(_ -> {
+            saveEdit(fileLabel, textField, file, labelIndex);
+            try {
+                server.modifyFileName(fileId, fileLabel.getText());
+            } catch (Exception e) {
+                System.err.println("File couldn't be found");
+                refreshFiles();
+            }
+        });
+        textField.focusedProperty().addListener((_, _, isFocused) -> {
+            if (!isFocused) {
+                saveEdit(fileLabel, textField, file, labelIndex);
+
+                try {
+                    server.modifyFileName(fileId, fileLabel.getText());
+                    refreshFiles();
+                } catch (Exception e) {
+                    System.err.println("File couldn't be found");
+                    refreshFiles();
+                }
+            }
+        });
+
+
+    }
+
+
     private void handleDeleteFile(HBox box) {
-        System.out.println("Deleting file: " + box.getUserData().toString());
+        boolean delete = server.deleteFile(Long.parseLong(box.getUserData().toString()));
+        if(delete){
+            System.out.println("Deleted file " + box.getUserData().toString());
+        } else{
+            System.out.println("Failed to delete file " + box.getUserData().toString());
+        }
+        refreshFiles();
     }
 
     private String getExtensionFromMime(String fileType){
@@ -803,24 +870,11 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         HBox file = new HBox();
         file.setUserData(fileId);
         file.setAlignment(Pos.CENTER);
-        file.setStyle("-fx-padding: 2px 5px; -fx-border-width: 1px 1px; -fx-border-color: rgba(0,0,0,0.47); -fx-border-radius: 15px");
+        file.setStyle("-fx-spacing: 3px; -fx-padding: 2px 5px; -fx-border-width: 1px 1px; -fx-border-color: rgba(0,0,0,0.47); -fx-border-radius: 15px");
         Label fileLabel = new Label(name);
 
         fileLabel.setOnMouseClicked((MouseEvent _) -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save File");
-            fileChooser.setInitialDirectory(Paths.get(System.getProperty("user.home")).toFile());
-            String fileExtension = getExtensionFromMime(fileType);
-            fileChooser.setInitialFileName(name + fileExtension);
-            File downloadLocation = fileChooser.showSaveDialog(noteDisplay.getScene().getWindow());
-
-            if(downloadLocation != null){
-                try {
-                    server.downloadFile(noteId, fileId, downloadLocation);
-                } catch (FileNotFoundException e) {
-                    System.err.println("Error downloading file");
-                }
-            }
+            downloadFile(fileId, fileType, noteId, fileLabel);
         });
         Button editButton = new Button();
         FontIcon editIcon = new FontIcon("fa-pencil");
@@ -832,11 +886,29 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         deleteButton.setGraphic(deleteIcon);
         deleteButton.getStyleClass().addAll("button-icon", "flat");
 
-        editButton.setOnAction(_ -> handleEditAlias(file));
-        deleteButton.setOnAction(_ -> handleDeleteFile(file));
-
         file.getChildren().addAll(fileLabel, editButton, deleteButton);
+
+        editButton.setOnAction(_ -> handleEditAlias(file,fileLabel));
+        deleteButton.setOnAction(_ -> handleDeleteFile(file));
         return file;
+    }
+
+    private void downloadFile(Long fileId, String fileType, Long noteId, Label fileLabel) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save File");
+        fileChooser.setInitialDirectory(Paths.get(System.getProperty("user.home")).toFile());
+        String fileExtension = getExtensionFromMime(fileType);
+        fileChooser.setInitialFileName(fileLabel.getText());
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(fileType, "*"+fileExtension));
+        File downloadLocation = fileChooser.showSaveDialog(noteDisplay.getScene().getWindow());
+
+        if(downloadLocation != null){
+            try {
+                server.downloadFile(noteId, fileId, downloadLocation);
+            } catch (FileNotFoundException e) {
+                System.err.println("Error downloading file");
+            }
+        }
     }
 
     // Getters and setters for testing

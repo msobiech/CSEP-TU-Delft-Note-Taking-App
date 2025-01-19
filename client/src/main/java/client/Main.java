@@ -45,11 +45,12 @@ public class Main extends Application {
 		var error = FXML.load(ErrorPopUpCtrl.class, bundle, "client", "views", "ErrorPopUp.fxml");
 		var serverURL = FXML.load(ServerSelectionCtrl.class, bundle, "client", "views", "ServerSelection.fxml");
 		var collectionsEdit = FXML.load(EditCollectionsPopUpCtrl.class, bundle, "client", "views", "EditCollectionsPopUp.fxml");
+		var showShortcuts = FXML.load(ShortcutsPopUpCtrl.class, bundle, "client", "views", "ShowShortcutsPopUp.fxml");
 
 		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
 		mainCtrl.setLanguage(bundle);
-		mainCtrl.initialize(primaryStage, overview, add, error, serverURL, collectionsEdit);
-		primaryStage.setOnCloseRequest(_ -> {
+		mainCtrl.initialize(primaryStage, overview, add, error, serverURL, collectionsEdit, showShortcuts);
+                primaryStage.setOnCloseRequest(_ -> {
 			Platform.exit();
 			System.exit(0); // Force stop
 		});
