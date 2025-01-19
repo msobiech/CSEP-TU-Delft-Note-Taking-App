@@ -21,7 +21,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-import org.kordamp.bootstrapfx.BootstrapFX;
 
 import java.util.ResourceBundle;
 
@@ -54,6 +53,9 @@ public class MainCtrl {
 
     private ResourceBundle language;
 
+    private boolean isDarkMode = false;
+    private final String LIGHT_MODE_CSS = "/client/css/styles.css";
+    private final String DARK_MODE_CSS = "/client/css/darkstyles.css";
     /**
      * Initialization of the main Stage
      * @param primaryStage the stage that will be used to display the app's fronted
@@ -95,6 +97,9 @@ public class MainCtrl {
         this.shortcutsScene = new Scene(showShortcuts.getValue());
 
         //showServerSelection();
+
+        applyStylesheet(this.overview);
+        applyStylesheet(this.editScene);
         showOverview();
         primaryStage.show();
     }
@@ -108,14 +113,32 @@ public class MainCtrl {
     public void showOverview() {
         primaryStage.setTitle(language.getString("window.primary.title"));
         primaryStage.setScene(overview);
-        overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
+        applyStylesheet(overview);
+//        overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         primaryStage.setResizable(true);
         primaryStage.setMinWidth(700);
         primaryStage.setMinHeight(500);
         overviewCtrl.refreshNotes();
-
     }
 
+    public void toggleMode() {
+        isDarkMode = !isDarkMode;
+        if(primaryStage!=null){
+            applyStylesheet(primaryStage.getScene());
+        }
+        if(popUp!=null){
+            applyStylesheet(popUp.getScene());
+        }
+    }
+
+    public void applyStylesheet(Scene scene) {
+        scene.getStylesheets().clear();
+        if (isDarkMode) {
+            scene.getStylesheets().add(DARK_MODE_CSS);
+        } else {
+            scene.getStylesheets().add(LIGHT_MODE_CSS);
+        }
+    }
     /**
      * Method to show the scene for note addition
      */

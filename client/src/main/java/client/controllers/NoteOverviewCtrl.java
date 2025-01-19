@@ -82,6 +82,9 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private WebView markdownContent;
 
     @FXML
+    private HBox fileListContainer;
+
+    @FXML
     private ComboBox<Pair<Long, String>> collectionDropdown;
 
     @FXML
@@ -91,7 +94,10 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton;
 
     @FXML
-    private HBox fileListContainer;
+    private void toggleMode() {
+        mainCtrl.toggleMode();
+    }
+
 
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
@@ -576,6 +582,10 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         } else {
             notesList.getSelectionModel().clearSelection(); // Clear selection if no valid note
         }
+    }
+
+    public void refreshCollections() {
+
     }
 
     /**
