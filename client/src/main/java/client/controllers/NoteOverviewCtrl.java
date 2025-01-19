@@ -90,14 +90,19 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     @FXML
     private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton, toggleModeButton;
 
-    private Tooltip toggleModeTooltip = new Tooltip();
-
     @FXML
     private void toggleMode() {
         mainCtrl.toggleMode();
-        toggleModeTooltip.setText(mainCtrl.isDarkMode() ? "Switch to Light Mode" : "Switch to Dark Mode"); // Update tooltip text dynamically
+        toggleModeTooltip.setText(mainCtrl.isDarkMode()
+                ? language.getString("tooltip.toggleLightMode")
+                : language.getString("tooltip.toggleDarkMode"));
     }
 
+    private Tooltip addNoteTooltip;
+    private Tooltip removeNoteTooltip;
+    private Tooltip refreshNotesTooltip;
+    private Tooltip editTitleTooltip;
+    private Tooltip toggleModeTooltip;
 
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
@@ -161,19 +166,32 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     }
 
     private void setupTooltips() {
-        Tooltip addNoteTooltip = new Tooltip("Add Note");
-        Tooltip refreshNotesTooltip = new Tooltip("Refresh Notes");
-        Tooltip removeNoteTooltip = new Tooltip("Remove Note");
-        Tooltip editTitleTooltip = new Tooltip("Edit Note Title");
-        toggleModeTooltip.setText(mainCtrl.isDarkMode() ? "Switch to Light Mode" : "Switch to Dark Mode");
+        addNoteTooltip = new Tooltip();
+        refreshNotesTooltip = new Tooltip();
+        removeNoteTooltip = new Tooltip();
+        editTitleTooltip = new Tooltip();
+        toggleModeTooltip = new Tooltip();
 
+        // Attach tooltips to elements
         Tooltip.install(addNoteButton, addNoteTooltip);
         Tooltip.install(refreshNotesButton, refreshNotesTooltip);
         Tooltip.install(removeNoteButton, removeNoteTooltip);
         Tooltip.install(editTitleButton, editTitleTooltip);
         Tooltip.install(toggleModeButton, toggleModeTooltip);
+
+        // Set initial text
+        updateTooltips();
     }
 
+    public void updateTooltips() {
+        addNoteTooltip.setText(language.getString("tooltip.addNote"));
+        refreshNotesTooltip.setText(language.getString("tooltip.refreshNotes"));
+        removeNoteTooltip.setText(language.getString("tooltip.removeNote"));
+        editTitleTooltip.setText(language.getString("tooltip.editTitle"));
+        toggleModeTooltip.setText(mainCtrl.isDarkMode()
+                ? language.getString("tooltip.toggleLightMode")
+                : language.getString("tooltip.toggleDarkMode"));
+    }
 
 
     private void handleNoteNavigation() {
@@ -322,17 +340,37 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private ListCell<Pair<String, String>> createFlagCell() {
         return new ListCell<>() {
             private final ImageView flagImage = new ImageView();
+            private final Tooltip tooltip = new Tooltip();
             @Override
             public void updateItem(Pair<String, String> item, boolean empty) {
                 super.updateItem(item, empty);
                 if (!empty && item != null) {
                     updateFlagCell(this, flagImage, item.getValue());
+                    setTooltip(tooltip);
+                    tooltip.setText(getLanguageName(item.getKey()));
                 } else {
                     setText(null);
                     setGraphic(null);
                 }
             }
         };
+    }
+
+    private String getLanguageName(String languageCode) {
+        switch (languageCode) {
+            case "en":
+                return "English";
+            case "nl":
+                return "Nederlands";
+            case "pl":
+                return "Polski";
+            case "it":
+                return "Italiano";
+            case "ro":
+                return "Română";
+            default:
+                return "";
+        }
     }
 
     private void updateFlagCell(ListCell<Pair<String, String>> cell, ImageView flagImage, String path) {

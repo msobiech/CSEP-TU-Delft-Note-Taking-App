@@ -45,6 +45,7 @@ public class LanguageManager {
         ResourceBundle bundle = ResourceBundle.getBundle("client.controllers.language", locale);
         eventBus.unsubcribeAll();
         var overview = FXML.load(NoteOverviewCtrl.class, bundle, "client", "views", "NoteOverview.fxml");
+        overview.getKey().updateTooltips();
         var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
         mainCtrl.setLanguage(bundle);
         mainCtrl.updateOverview(overview);

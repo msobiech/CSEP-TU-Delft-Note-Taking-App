@@ -14,7 +14,7 @@ public class WebSocketClientApp extends WebSocketClient {
     @Inject
     public WebSocketClientApp(URI serverUri) {
         super(serverUri);
-        System.out.println("FUCKCCKCKC");
+//        System.out.println("FUCKCCKCKC");
     }
 
     @Override
