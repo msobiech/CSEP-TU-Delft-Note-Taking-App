@@ -82,6 +82,9 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private WebView markdownContent;
 
     @FXML
+    private HBox fileListContainer;
+
+    @FXML
     private ComboBox<Pair<Long, String>> collectionDropdown;
 
     @FXML
