@@ -123,8 +123,12 @@ public class MainCtrl {
 
     public void toggleMode() {
         isDarkMode = !isDarkMode;
-        applyStylesheet(primaryStage.getScene());
-        applyStylesheet(popUp.getScene());
+        if(primaryStage!=null){
+            applyStylesheet(primaryStage.getScene());
+        }
+        if(popUp!=null){
+            applyStylesheet(popUp.getScene());
+        }
     }
 
     public void applyStylesheet(Scene scene) {
