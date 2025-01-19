@@ -559,6 +559,10 @@ public class NoteOverviewCtrl implements Initializable {
         }
     }
 
+    public void refreshCollections() {
+
+    }
+
     /**
      * Method to add notes
      */

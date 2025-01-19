@@ -88,6 +88,7 @@ public class MainCtrl {
         //showServerSelection();
 
         applyStylesheet(this.overview);
+        applyStylesheet(this.editScene);
         showOverview();
         primaryStage.show();
     }
@@ -110,9 +111,7 @@ public class MainCtrl {
     public void toggleMode() {
         isDarkMode = !isDarkMode;
         applyStylesheet(primaryStage.getScene());
-        if (popUp != null && popUp.isShowing()) {
-            applyStylesheet(popUp.getScene());
-        }
+        applyStylesheet(popUp.getScene());
     }
 
     public void applyStylesheet(Scene scene) {
