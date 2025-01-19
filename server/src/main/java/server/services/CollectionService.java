@@ -9,7 +9,7 @@ public interface CollectionService {
 
     Collection updateCollection(long id, Collection collection) throws IllegalAccessException;
 
-    public void updateDefaultCollection(Long newDefaultCollectionId);
+    void updateDefaultCollection(Long newDefaultCollectionId);
 
     Collection getDefaultCollection();
 }

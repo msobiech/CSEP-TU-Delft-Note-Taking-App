@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import client.WebSockets.GlobalWebSocketManager;
 import client.controllers.*;
 import client.managers.LanguageManager;
 import com.google.inject.Injector;
@@ -32,8 +33,10 @@ public class Main extends Application {
 			System.err.println(msg);
 			return;
 		}
-
+		GlobalWebSocketManager webSocketManager = GlobalWebSocketManager.getInstance();
+		webSocketManager.initializeWebSocket("ws://localhost:8008/ws");
 		Locale currentLanguage = LanguageManager.getLanguage();
+
 
 		ResourceBundle bundle = ResourceBundle.getBundle("client.controllers.language", currentLanguage);
 
@@ -42,13 +45,14 @@ public class Main extends Application {
 		var error = FXML.load(ErrorPopUpCtrl.class, bundle, "client", "views", "ErrorPopUp.fxml");
 		var serverURL = FXML.load(ServerSelectionCtrl.class, bundle, "client", "views", "ServerSelection.fxml");
 		var collectionsEdit = FXML.load(EditCollectionsPopUpCtrl.class, bundle, "client", "views", "EditCollectionsPopUp.fxml");
+		var showShortcuts = FXML.load(ShortcutsPopUpCtrl.class, bundle, "client", "views", "ShowShortcutsPopUp.fxml");
 
 		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
 		mainCtrl.setLanguage(bundle);
-		mainCtrl.initialize(primaryStage, overview, add, error, serverURL, collectionsEdit);
+		mainCtrl.initialize(primaryStage, overview, add, error, serverURL, collectionsEdit, showShortcuts);
                 primaryStage.setOnCloseRequest(_ -> {
 			Platform.exit();
-			System.exit(0); // Force stop (IDK nothing worked for ending the process when closing the app)
+			System.exit(0); // Force stop
 		});
 	}
 
@@ -58,5 +62,4 @@ public class Main extends Application {
 	}
 
 
-
-}
+	}

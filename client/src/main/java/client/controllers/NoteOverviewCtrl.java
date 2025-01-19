@@ -2,6 +2,8 @@ package client.controllers;
 
 
 import client.DialogFactory;
+import client.WebSockets.GlobalWebSocketManager;
+import client.WebSockets.WebSocketMessageListener;
 import client.event.*;
 import client.managers.LanguageManager;
 import client.managers.MarkdownRenderManager;
@@ -11,8 +13,10 @@ import client.utils.DebounceService;
 import client.utils.NoteService;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -22,18 +26,28 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.util.Pair;
 import models.Collection;
+import models.EmbeddedFile;
 import models.Note;
+import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
+import org.apache.tika.mime.*;
 
-public class NoteOverviewCtrl implements Initializable {
+
+public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener {
 
     private final ServerUtils server;
     private final MainCtrl mainCtrl;
@@ -41,6 +55,7 @@ public class NoteOverviewCtrl implements Initializable {
     private final DebounceService debounceService;
     private final DialogFactory dialogFactory;
     private final EventBus eventBus;
+    public Button showShortcutsButton;
 
     @FXML
     private ComboBox<Pair<String, String>> flagDropdown;
@@ -105,6 +120,7 @@ public class NoteOverviewCtrl implements Initializable {
         this.debounceService = debounceService;
         this.dialogFactory = dialogFactory;
         this.eventBus = eventbus;
+        GlobalWebSocketManager.getInstance().addMessageListener(this);
     }
 
     @Override
@@ -192,6 +208,7 @@ public class NoteOverviewCtrl implements Initializable {
                     noteCollectionDropdown.setValue(matchingCollection);
                     if(oldValue!=null) {
                         refreshNotes();
+                        //refreshFiles();
                     }
                 }
             }
@@ -349,6 +366,7 @@ public class NoteOverviewCtrl implements Initializable {
         noteDisplay.setEditable(false);
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
             updateContentAndTitle(oldNote, newNote);
+            refreshFiles();
         });
     }
 
@@ -446,6 +464,7 @@ public class NoteOverviewCtrl implements Initializable {
             return;
         }
         if (curNoteId != null) {
+
             String currentTitle = noteTitle.getText() != null ? noteTitle.getText().trim() : "";
             String currentContent = noteDisplay.getText() != null ? noteDisplay.getText().trim() : "";
             if (currentTitle.isEmpty() && currentContent.isEmpty()) {
@@ -455,6 +474,7 @@ public class NoteOverviewCtrl implements Initializable {
                     notesList.getItems().remove(selectedNote);
                     curNoteId = null;
                     refreshNotes();
+
                 } catch (Exception e) {
                     System.out.println("Failed to delete empty note: " + e.getMessage());
                 }
@@ -707,6 +727,112 @@ public class NoteOverviewCtrl implements Initializable {
         }
     }
 
+    public void showShortcutsPopUp(ActionEvent actionEvent) {
+        mainCtrl.showShortcuts();
+    }
+
+    private void refreshFiles(){
+        var noteToSearch = notesList.getSelectionModel().getSelectedItem();
+        if(noteToSearch==null){
+            return;
+        }
+        Long idToSearch = noteToSearch.getKey();
+
+        System.out.println("Refreshing files for note " + idToSearch);
+        List<EmbeddedFile> files = server.getFilesForNote(idToSearch);
+        fileListContainer.getChildren().clear();
+        for(var file:files){
+            fileListContainer.getChildren().add(createFileBox(file.getFileName(),file.getId(), file.getFileType(), idToSearch));
+        }
+    }
+
+    public void AddFile() throws IOException {
+        if(curNoteId==null){
+            return;
+        }
+        System.out.println("Adding a file");
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(Paths.get(System.getProperty("user.home")).toFile());
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("All Files (*.*)", "*.*"); // For now we allow all types of files
+        fileChooser.getExtensionFilters().add(extFilter);
+        fileChooser.setTitle("Choose file to save");
+        Stage curStage = (Stage) noteDisplay.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(curStage);
+
+        if (file == null) {
+            System.out.println("No file was chosen");
+            return;
+        } else{
+            System.out.println("File selected: " + file.getAbsolutePath());
+            URLConnection connection = file.toURL().openConnection();
+            String mimeType = connection.getContentType();
+            Note curNote = server.getNoteByID(curNoteId);
+            EmbeddedFile EmbFile = new EmbeddedFile(file.getName(), mimeType, Files.readAllBytes(file.toPath()), curNote);
+            System.out.println("Adding a file " + file.getName() + " to Note " + curNote.getId());
+            server.addFile(EmbFile);
+            refreshFiles();
+        }
+
+    }
+
+    private void handleEditAlias(HBox box) {
+        System.out.println("Editing alias: " + box.getUserData().toString());
+    }
+
+    private void handleDeleteFile(HBox box) {
+        System.out.println("Deleting file: " + box.getUserData().toString());
+    }
+
+    private String getExtensionFromMime(String fileType){
+        String extension = null;
+        try{
+            extension = MimeTypes.getDefaultMimeTypes().forName(fileType).getExtension();
+        }catch(Exception e){
+            System.err.println("Couldn't convert the MIME Type to extension. Setting it to txt");
+            extension = "txt";
+        }
+        return extension;
+    }
+    private HBox createFileBox(String name, Long fileId, String fileType, Long noteId) {
+        HBox file = new HBox();
+        file.setUserData(fileId);
+        file.setAlignment(Pos.CENTER);
+        file.setStyle("-fx-padding: 2px 5px; -fx-border-width: 1px 1px; -fx-border-color: rgba(0,0,0,0.47); -fx-border-radius: 15px");
+        Label fileLabel = new Label(name);
+
+        fileLabel.setOnMouseClicked((MouseEvent _) -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save File");
+            fileChooser.setInitialDirectory(Paths.get(System.getProperty("user.home")).toFile());
+            String fileExtension = getExtensionFromMime(fileType);
+            fileChooser.setInitialFileName(name + fileExtension);
+            File downloadLocation = fileChooser.showSaveDialog(noteDisplay.getScene().getWindow());
+
+            if(downloadLocation != null){
+                try {
+                    server.downloadFile(noteId, fileId, downloadLocation);
+                } catch (FileNotFoundException e) {
+                    System.err.println("Error downloading file");
+                }
+            }
+        });
+        Button editButton = new Button();
+        FontIcon editIcon = new FontIcon("fa-pencil");
+        editButton.setGraphic(editIcon);
+        editButton.getStyleClass().addAll("button-icon", "flat");
+
+        Button deleteButton = new Button();
+        FontIcon deleteIcon = new FontIcon("fa-trash");
+        deleteButton.setGraphic(deleteIcon);
+        deleteButton.getStyleClass().addAll("button-icon", "flat");
+
+        editButton.setOnAction(_ -> handleEditAlias(file));
+        deleteButton.setOnAction(_ -> handleDeleteFile(file));
+
+        file.getChildren().addAll(fileLabel, editButton, deleteButton);
+        return file;
+    }
+
     // Getters and setters for testing
     public Label getCollectionText() {
         return collectionText;
@@ -819,6 +945,14 @@ public class NoteOverviewCtrl implements Initializable {
 
     public void setSearchBar(TextField searchBar) {
         this.searchBar = searchBar;
+    }
+
+    @Override
+    public void onMessageReceived(String message) {
+        System.out.println("Received WebSocket message in NoteOverviewCtrl: " + message);
+        Platform.runLater(()->{
+            refreshNotes();
+        });
     }
 
 }
