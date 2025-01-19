@@ -22,7 +22,10 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 @SpringBootApplication
 @EntityScan(basePackages = {"models", "server" })
 public class Main {
+
     public static void main(String[] args) {
+        WebSocketServerApp webApp = new WebSocketServerApp(3030);
+        webApp.startWebSocketServer();
         SpringApplication.run(Main.class, args);
     }
 }

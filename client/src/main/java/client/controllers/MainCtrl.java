@@ -48,6 +48,9 @@ public class MainCtrl {
     private EditCollectionsPopUpCtrl editCtrl;
     private Scene editScene;
 
+    private ShortcutsPopUpCtrl shortcutsCtrl;
+    private Scene shortcutsScene;
+
     private ResourceBundle language;
 
     private boolean isDarkMode = false;
@@ -65,11 +68,15 @@ public class MainCtrl {
      *                  popups and JavaFX class Parent that links the corresponding UI
      *                  with its controller.
      * @param collectionEdit the pair of controller for the handling of edit collection
-     *                       popups and JavaFX class Parent that links th corresponding UI
-     *                       with its controller
+     *                       popups and JavaFX class Parent that links the corresponding UI
+     *                       with its controller.
+     * @param showShortcuts the pair of controller for the handling of show shortcuts popups
+     *                      and JavaFX class Parent that links the corresponding UI with its
+     *                      controller
      */
     public void initialize(Stage primaryStage, Pair<NoteOverviewCtrl, Parent> overview,
-            Pair<AddNoteCtrl, Parent> add, Pair<ErrorPopUpCtrl, Parent> error, Pair<ServerSelectionCtrl, Parent> serverURL, Pair<EditCollectionsPopUpCtrl, Parent> collectionEdit) {
+            Pair<AddNoteCtrl, Parent> add, Pair<ErrorPopUpCtrl, Parent> error, Pair<ServerSelectionCtrl, Parent> serverURL, Pair<EditCollectionsPopUpCtrl, Parent> collectionEdit
+            ,Pair<ShortcutsPopUpCtrl, Parent> showShortcuts) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
@@ -85,6 +92,10 @@ public class MainCtrl {
 
         this.editCtrl = collectionEdit.getKey();
         this.editScene = new Scene(collectionEdit.getValue());
+
+        this.shortcutsCtrl = showShortcuts.getKey();
+        this.shortcutsScene = new Scene(showShortcuts.getValue());
+
         //showServerSelection();
 
         applyStylesheet(this.overview);
@@ -105,6 +116,8 @@ public class MainCtrl {
         applyStylesheet(overview);
 //        overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         primaryStage.setResizable(true);
+        primaryStage.setMinWidth(700);
+        primaryStage.setMinHeight(500);
         overviewCtrl.refreshNotes();
     }
 
@@ -181,6 +194,18 @@ public class MainCtrl {
         popUp.setTitle("Collections: Edit");
         popUp.setResizable(false);
         popUp.show();
+    }
+
+    public void showShortcuts(){
+        this.popUp = new Stage();
+        popUp.setScene(shortcutsScene);
+        popUp.setTitle("Shortcuts: Overview");
+        popUp.setResizable(false);
+        popUp.show();
+    }
+
+    public void hideShortcuts() {
+        popUp.hide();
     }
 
     public void updateOverview(Pair<NoteOverviewCtrl, Parent> overview) {

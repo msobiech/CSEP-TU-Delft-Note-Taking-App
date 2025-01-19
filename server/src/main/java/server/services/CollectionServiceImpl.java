@@ -12,6 +12,7 @@ import java.util.Optional;
 public class CollectionServiceImpl implements CollectionService {
     private final CollectionRepository collectionRepo;
 
+
     /**
      * Establishes repositories used in the service
      * @param collectionRepo the repository with collections
@@ -69,4 +70,7 @@ public class CollectionServiceImpl implements CollectionService {
         Optional<Collection> collection = collectionRepo.findByName(collectionName);
         return collection.map(c -> collectionExists(c.getId())).orElse(false);
     }
+
+
+
 }
