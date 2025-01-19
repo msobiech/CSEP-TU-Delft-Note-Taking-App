@@ -5,10 +5,7 @@ import client.DialogFactory;
 import client.WebSockets.GlobalWebSocketManager;
 import client.WebSockets.WebSocketMessageListener;
 import client.event.*;
-import client.managers.LanguageManager;
-import client.managers.MarkdownRenderManager;
-import client.managers.NoteListManager;
-import client.managers.NoteManager;
+import client.managers.*;
 import client.utils.DebounceService;
 import client.utils.NoteService;
 import client.utils.ServerUtils;
@@ -126,6 +123,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         this.dialogFactory = dialogFactory;
         this.eventBus = eventbus;
         GlobalWebSocketManager.getInstance().addMessageListener(this);
+        Platform.runLater(() -> new KeyEventManager(eventBus, searchBar));
     }
 
     @Override
@@ -147,6 +145,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         handleNoteSelectionChange();
         handleNoteContentChange();
         handleLanguageChange();
+        handleEscapeKeyPressed();
+        handleNoteNavigation();
 
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             removeNoteButton.setDisable(newValue == null);
@@ -154,6 +154,40 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
         handleEditCollectionsPressed();
         setupKeyboardShortcuts();
+    }
+
+    private void handleNoteNavigation() {
+        boolean useCommand = isMacOS(); // Check if the app is running on macOS
+
+        Platform.runLater(() -> {
+            noteDisplay.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                if ((useCommand && event.isMetaDown()) || (!useCommand && event.isControlDown())) {
+                    switch (event.getCode()) {
+                        case UP:
+                            eventBus.publish(new NoteNavigationEvent(NoteNavigationEvent.Direction.PREVIOUS));
+                            event.consume();
+                            break;
+                        case DOWN:
+                            eventBus.publish(new NoteNavigationEvent(NoteNavigationEvent.Direction.NEXT));
+                            event.consume();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+        });
+    }
+
+    private void handleEscapeKeyPressed() {
+        Platform.runLater(() -> {
+            searchBar.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    eventBus.publish(new EscapeKeyEvent()); // Publish the ESC key event
+                    event.consume(); // Prevent further propagation
+                }
+            });
+        });
     }
 
     private void handleLanguageChange() {
@@ -289,11 +323,17 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         cell.setPadding(new Insets(4,4,4,4)); cell.setGraphic(flagImage); cell.setText(null);
     }
 
+    private boolean isMacOS() {
+        return System.getProperty("os.name").toLowerCase().contains("mac");
+    }
+
     private void setupKeyboardShortcuts() {
+        // Determine the appropriate modifier key based on the OS
+        String modifierKey = isMacOS() ? "Meta" : "Ctrl"; // Use "Meta" for Command on macOS, "Ctrl" otherwise
         addNoteButton.sceneProperty().addListener((_, _, newScene) -> {
             if (newScene != null) {
                 newScene.getAccelerators().put(
-                        KeyCombination.keyCombination("Ctrl+N"),
+                        KeyCombination.keyCombination(modifierKey + "+N"),
                         this::addNote
                 );
             }
@@ -302,7 +342,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         refreshNotesButton.sceneProperty().addListener((_, _, newScene) -> {
             if (newScene != null) {
                 newScene.getAccelerators().put(
-                        KeyCombination.keyCombination("Ctrl+R"),
+                        KeyCombination.keyCombination(modifierKey + "+R"),
                         this::refreshNotes
                 );
             }
@@ -311,7 +351,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         removeNoteButton.sceneProperty().addListener((_, _, newScene) -> {
                 if (newScene != null) {
                     newScene.getAccelerators().put(
-                            KeyCombination.keyCombination("Ctrl+D"),
+                            KeyCombination.keyCombination(modifierKey + "+D"),
                             this::removeNote
                     );
                 }
