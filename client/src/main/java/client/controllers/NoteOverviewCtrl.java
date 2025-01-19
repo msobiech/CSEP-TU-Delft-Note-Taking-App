@@ -360,7 +360,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private void handleNoteContentChange() {
         WebSocketClientApp webSocketClientApp1 = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
-            eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, newValue, curNoteId, curNoteIndex));
             if(webSocketChange){
                 webSocketClientApp1.broadcastContent(newValue,curNoteId);
             }
