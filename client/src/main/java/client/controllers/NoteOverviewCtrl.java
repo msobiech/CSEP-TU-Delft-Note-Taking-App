@@ -147,6 +147,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         handleLanguageChange();
         handleEscapeKeyPressed();
         handleNoteNavigation();
+        setupTooltips();
 
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             removeNoteButton.setDisable(newValue == null);
@@ -154,6 +155,18 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
         handleEditCollectionsPressed();
         setupKeyboardShortcuts();
+    }
+
+    private void setupTooltips() {
+        Tooltip addNoteTooltip = new Tooltip("Add Note");
+        Tooltip refreshNotesTooltip = new Tooltip("Refresh Notes");
+        Tooltip removeNoteTooltip = new Tooltip("Remove Note");
+        Tooltip editTitleTooltip = new Tooltip("Edit Note Title");
+
+        Tooltip.install(addNoteButton, addNoteTooltip);
+        Tooltip.install(refreshNotesButton, refreshNotesTooltip);
+        Tooltip.install(removeNoteButton, removeNoteTooltip);
+        Tooltip.install(editTitleButton, editTitleTooltip);
     }
 
     private void handleNoteNavigation() {
