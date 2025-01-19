@@ -218,4 +218,7 @@ public class MainCtrl {
         showOverview();
     }
 
+    public boolean isDarkMode() {
+        return isDarkMode;
+    }
 }

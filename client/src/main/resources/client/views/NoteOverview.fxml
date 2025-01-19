@@ -108,7 +108,7 @@
                     </font>
                 </TextField>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button onAction="#toggleMode">
+                <Button fx:id="toggleModeButton" onAction="#toggleMode">
                     <graphic>
                         <FontIcon iconLiteral="fa-moon-o" />
                     </graphic>

@@ -88,11 +88,14 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private ComboBox<Pair<Long, String>> noteCollectionDropdown;
 
     @FXML
-    private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton;
+    private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton, toggleModeButton;
+
+    private Tooltip toggleModeTooltip = new Tooltip();
 
     @FXML
     private void toggleMode() {
         mainCtrl.toggleMode();
+        toggleModeTooltip.setText(mainCtrl.isDarkMode() ? "Switch to Light Mode" : "Switch to Dark Mode"); // Update tooltip text dynamically
     }
 
 
@@ -162,12 +165,16 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         Tooltip refreshNotesTooltip = new Tooltip("Refresh Notes");
         Tooltip removeNoteTooltip = new Tooltip("Remove Note");
         Tooltip editTitleTooltip = new Tooltip("Edit Note Title");
+        toggleModeTooltip.setText(mainCtrl.isDarkMode() ? "Switch to Light Mode" : "Switch to Dark Mode");
 
         Tooltip.install(addNoteButton, addNoteTooltip);
         Tooltip.install(refreshNotesButton, refreshNotesTooltip);
         Tooltip.install(removeNoteButton, removeNoteTooltip);
         Tooltip.install(editTitleButton, editTitleTooltip);
+        Tooltip.install(toggleModeButton, toggleModeTooltip);
     }
+
+
 
     private void handleNoteNavigation() {
         boolean useCommand = isMacOS(); // Check if the app is running on macOS
