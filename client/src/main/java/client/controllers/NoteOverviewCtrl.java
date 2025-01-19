@@ -1045,7 +1045,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                     noteDisplay.setEditable(true);
                     String updatedChangedNote = message.substring(message.indexOf("UpdatedChangedNote") +19 );
                     updateNoteDisplay(updatedChangedNote);
-                    markdownRenderManager.renderMarkdown(updatedChangedNote);
+                    eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, updatedChangedNote, curNoteId, notesList.getSelectionModel().getSelectedIndex(), aliases));
+                    refreshNotes();
                     webSocketChange = true;
                 });
             }
