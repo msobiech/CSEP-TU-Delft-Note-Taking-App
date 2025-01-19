@@ -29,7 +29,7 @@ public class NoteManager {
     private static final int THRESHOLD = 5;
     private final ServerUtils server;
 
-    private final WebSocketClientApp webSocketClientApp;
+    private WebSocketClientApp webSocketClientApp;
 
 
 
@@ -47,6 +47,7 @@ public class NoteManager {
         switch(type){
             case TITLE_CHANGE:
                 handleNoteTitleChanged(event);
+                webSocketClientApp.broadcastRefresh();
                 break;
             case CONTENT_CHANGE:
                 handleNoteContentChanged(event);
