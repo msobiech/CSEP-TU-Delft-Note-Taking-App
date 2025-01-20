@@ -6,10 +6,7 @@ import client.WebSockets.GlobalWebSocketManager;
 import client.WebSockets.WebSocketClientApp;
 import client.WebSockets.WebSocketMessageListener;
 import client.event.*;
-import client.managers.LanguageManager;
-import client.managers.MarkdownRenderManager;
-import client.managers.NoteListManager;
-import client.managers.NoteManager;
+import client.managers.*;
 import client.utils.DebounceService;
 import client.utils.NoteService;
 import client.utils.ServerUtils;
@@ -86,16 +83,30 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private WebView markdownContent;
 
     @FXML
+    private HBox fileListContainer;
+
+    @FXML
     private ComboBox<Pair<Long, String>> collectionDropdown;
 
     @FXML
     private ComboBox<Pair<Long, String>> noteCollectionDropdown;
 
     @FXML
-    private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton;
+    private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton, toggleModeButton;
 
     @FXML
-    private HBox fileListContainer;
+    private void toggleMode() {
+        mainCtrl.toggleMode();
+        toggleModeTooltip.setText(mainCtrl.isDarkMode()
+                ? language.getString("tooltip.toggleLightMode")
+                : language.getString("tooltip.toggleDarkMode"));
+    }
+
+    private Tooltip addNoteTooltip;
+    private Tooltip removeNoteTooltip;
+    private Tooltip refreshNotesTooltip;
+    private Tooltip editTitleTooltip;
+    private Tooltip toggleModeTooltip;
 
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
@@ -128,6 +139,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         GlobalWebSocketManager.getInstance().addMessageListener(this);
         id = (int) (Math.random() * (1000 + 1));
+        Platform.runLater(() -> new KeyEventManager(eventBus, searchBar));
     }
 
     @Override
@@ -149,28 +161,84 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         handleNoteSelectionChange();
         handleNoteContentChange();
         handleLanguageChange();
+        handleEscapeKeyPressed();
+        handleNoteNavigation();
+        setupTooltips();
 
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             removeNoteButton.setDisable(newValue == null);
         });
 
-        handleEditCollectionsPressed();
         setupKeyboardShortcuts();
+    }
+
+    private void setupTooltips() {
+        addNoteTooltip = new Tooltip();
+        refreshNotesTooltip = new Tooltip();
+        removeNoteTooltip = new Tooltip();
+        editTitleTooltip = new Tooltip();
+        toggleModeTooltip = new Tooltip();
+
+        // Attach tooltips to elements
+        Tooltip.install(addNoteButton, addNoteTooltip);
+        Tooltip.install(refreshNotesButton, refreshNotesTooltip);
+        Tooltip.install(removeNoteButton, removeNoteTooltip);
+        Tooltip.install(editTitleButton, editTitleTooltip);
+        Tooltip.install(toggleModeButton, toggleModeTooltip);
+
+        // Set initial text
+        updateTooltips();
+    }
+
+    public void updateTooltips() {
+        addNoteTooltip.setText(language.getString("tooltip.addNote"));
+        refreshNotesTooltip.setText(language.getString("tooltip.refreshNotes"));
+        removeNoteTooltip.setText(language.getString("tooltip.removeNote"));
+        editTitleTooltip.setText(language.getString("tooltip.editTitle"));
+        toggleModeTooltip.setText(mainCtrl.isDarkMode()
+                ? language.getString("tooltip.toggleLightMode")
+                : language.getString("tooltip.toggleDarkMode"));
+    }
+
+
+    private void handleNoteNavigation() {
+        boolean useCommand = isMacOS(); // Check if the app is running on macOS
+
+        Platform.runLater(() -> {
+            noteDisplay.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                if ((useCommand && event.isMetaDown()) || (!useCommand && event.isControlDown())) {
+                    switch (event.getCode()) {
+                        case UP:
+                            eventBus.publish(new NoteNavigationEvent(NoteNavigationEvent.Direction.PREVIOUS));
+                            event.consume();
+                            break;
+                        case DOWN:
+                            eventBus.publish(new NoteNavigationEvent(NoteNavigationEvent.Direction.NEXT));
+                            event.consume();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+        });
+    }
+
+    private void handleEscapeKeyPressed() {
+        Platform.runLater(() -> {
+            searchBar.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    eventBus.publish(new EscapeKeyEvent()); // Publish the ESC key event
+                    event.consume(); // Prevent further propagation
+                }
+            });
+        });
     }
 
     private void handleLanguageChange() {
         flagDropdown.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             System.out.println("Language changed to " +  newValue.getKey());
             eventBus.publish(new LanguageEvent(newValue.getKey()));
-        });
-    }
-
-    private void handleEditCollectionsPressed() {
-        collectionDropdown.setOnAction(event -> {
-            Pair<Long, String> selectedOption = collectionDropdown.getValue();
-            if ("Edit Collections...".equals(selectedOption.getValue())) {
-                mainCtrl.showEditCollections(); // Call the method to show the popup
-            }
         });
     }
 
@@ -270,17 +338,37 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private ListCell<Pair<String, String>> createFlagCell() {
         return new ListCell<>() {
             private final ImageView flagImage = new ImageView();
+            private final Tooltip tooltip = new Tooltip();
             @Override
             public void updateItem(Pair<String, String> item, boolean empty) {
                 super.updateItem(item, empty);
                 if (!empty && item != null) {
                     updateFlagCell(this, flagImage, item.getValue());
+                    setTooltip(tooltip);
+                    tooltip.setText(getLanguageName(item.getKey()));
                 } else {
                     setText(null);
                     setGraphic(null);
                 }
             }
         };
+    }
+
+    private String getLanguageName(String languageCode) {
+        switch (languageCode) {
+            case "en":
+                return "English";
+            case "nl":
+                return "Nederlands";
+            case "pl":
+                return "Polski";
+            case "it":
+                return "Italiano";
+            case "ro":
+                return "Română";
+            default:
+                return "";
+        }
     }
 
     private void updateFlagCell(ListCell<Pair<String, String>> cell, ImageView flagImage, String path) {
@@ -291,11 +379,17 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         cell.setPadding(new Insets(4,4,4,4)); cell.setGraphic(flagImage); cell.setText(null);
     }
 
+    private boolean isMacOS() {
+        return System.getProperty("os.name").toLowerCase().contains("mac");
+    }
+
     private void setupKeyboardShortcuts() {
+        // Determine the appropriate modifier key based on the OS
+        String modifierKey = isMacOS() ? "Meta" : "Ctrl"; // Use "Meta" for Command on macOS, "Ctrl" otherwise
         addNoteButton.sceneProperty().addListener((_, _, newScene) -> {
             if (newScene != null) {
                 newScene.getAccelerators().put(
-                        KeyCombination.keyCombination("Ctrl+N"),
+                        KeyCombination.keyCombination(modifierKey + "+N"),
                         this::addNote
                 );
             }
@@ -304,7 +398,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         refreshNotesButton.sceneProperty().addListener((_, _, newScene) -> {
             if (newScene != null) {
                 newScene.getAccelerators().put(
-                        KeyCombination.keyCombination("Ctrl+R"),
+                        KeyCombination.keyCombination(modifierKey + "+R"),
                         this::refreshNotes
                 );
             }
@@ -313,7 +407,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         removeNoteButton.sceneProperty().addListener((_, _, newScene) -> {
                 if (newScene != null) {
                     newScene.getAccelerators().put(
-                            KeyCombination.keyCombination("Ctrl+D"),
+                            KeyCombination.keyCombination(modifierKey + "+D"),
                             this::removeNote
                     );
                 }
@@ -592,6 +686,10 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         }
     }
 
+    public void refreshCollections() {
+
+    }
+
     /**
      * Method to add notes
      */
@@ -703,7 +801,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                 refreshNotes();
                 break;
             case -2:
-                //showEditCollectionsScreen();
+                mainCtrl.showEditCollections();
                 refreshNotes();
                 break;
             default:
