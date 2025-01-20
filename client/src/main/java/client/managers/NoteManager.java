@@ -13,6 +13,7 @@ import client.utils.ServerUtils;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.util.Pair;
+import models.Note;
 
 import java.net.URI;
 import java.util.Timer;

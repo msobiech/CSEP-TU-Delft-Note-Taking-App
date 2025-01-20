@@ -131,7 +131,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         this.dialogFactory = dialogFactory;
         this.eventBus = eventbus;
         GlobalWebSocketManager.getInstance().addMessageListener(this);
-        Platform.runLater(() -> new KeyEventManager(eventBus, searchBar));
+        Platform.runLater(KeyEventManager::new);
     }
 
     @Override
@@ -156,6 +156,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         handleEscapeKeyPressed();
         handleNoteNavigation();
         setupTooltips();
+        handleEditCollectionShortcut();
 
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             removeNoteButton.setDisable(newValue == null);
@@ -222,6 +223,18 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                 if (event.getCode() == KeyCode.ESCAPE) {
                     eventBus.publish(new EscapeKeyEvent()); // Publish the ESC key event
                     event.consume(); // Prevent further propagation
+                }
+            });
+        });
+    }
+
+    private void handleEditCollectionShortcut() {
+        Platform.runLater(() -> {
+            searchBar.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                boolean isModifierPressed = isMacOS() ? event.isMetaDown() : event.isControlDown();
+                if (isModifierPressed && event.getCode() == KeyCode.M) {
+                    eventBus.publish(new EditCollectionsEvent());
+                    event.consume();
                 }
             });
         });
@@ -679,10 +692,17 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     /**
      * Method to add notes
      */
-    public void addNote(){
+    public void addNote() {
         System.out.println("Adding a new note");
         eventBus.publish(new NoteStatusEvent(NoteEvent.EventType.NOTE_ADD, null));
         refreshNotes();
+        if (!notes.isEmpty()) {
+            Pair<Long, String> newNotePair = notes.getLast(); // Get the last note added
+            notesList.getSelectionModel().select(newNotePair);
+            notesList.scrollTo(newNotePair);
+            notesList.requestFocus();
+            noteDisplay.requestFocus();
+        }
     }
 
     @FXML
@@ -742,6 +762,15 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         } else {
             notesList.getSelectionModel().clearSelection(); // Clear selection if no valid note
         }
+        // Focus on the first note and enable immediate text editing
+        if (!notes.isEmpty()) {
+            notesList.getSelectionModel().selectFirst(); // Select the first note
+            notesList.requestFocus(); // Set focus on the list
+            // Automatically focus on the text input field for editing
+            noteDisplay.requestFocus();
+        } else {
+            notesList.getSelectionModel().clearSelection(); // Clear selection if no valid note
+        }
     }
 
     @FXML
@@ -787,8 +816,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                 refreshNotes();
                 break;
             case -2:
-                mainCtrl.showEditCollections();
-                refreshNotes();
+                eventBus.publish(new EditCollectionsEvent());
                 break;
             default:
                 List<Note> notesInCollection = server.getNotesByCollectionId(selectedCollection.getKey());
