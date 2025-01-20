@@ -7,7 +7,6 @@ import client.event.EditCollectionsEvent;
 import client.event.EscapeKeyEvent;
 import client.event.EventBus;
 import jakarta.inject.Inject;
-import javafx.scene.control.TextField;
 
 public class KeyEventManager {
 

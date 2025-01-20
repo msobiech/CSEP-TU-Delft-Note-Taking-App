@@ -157,6 +157,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         handleNoteNavigation();
         setupTooltips();
         handleEditCollectionShortcut();
+        handleUndoRedo();
 
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             removeNoteButton.setDisable(newValue == null);
@@ -212,6 +213,25 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                         default:
                             break;
                     }
+                }
+            });
+        });
+    }
+
+    private void handleUndoRedo() {
+        Platform.runLater(() -> {
+            searchBar.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                boolean isModifierPressed = isMacOS() ? event.isMetaDown() : event.isControlDown();
+                boolean isShiftPressed = event.isShiftDown();
+                // Undo: Cmd+Z or Ctrl+Z
+                if (isModifierPressed && !isShiftPressed && event.getCode() == KeyCode.Z) {
+                    eventBus.publish(new UndoRequestedEvent());
+                    event.consume();
+                }
+                // Redo: Shift+Cmd+Z or Shift+Ctrl+Z
+                if (isModifierPressed && isShiftPressed && event.getCode() == KeyCode.Z) {
+                    eventBus.publish(new RedoRequestedEvent());
+                    event.consume();
                 }
             });
         });
