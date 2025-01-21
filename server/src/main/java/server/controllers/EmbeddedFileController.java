@@ -14,11 +14,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/files")
-public class EmbeddedFilesController {
+public class EmbeddedFileController {
     private final EmbeddedFileService embeddedFileService;
 
     @Autowired
-    public EmbeddedFilesController(EmbeddedFileServiceImpl fileService) {
+    public EmbeddedFileController(EmbeddedFileServiceImpl fileService) {
         this.embeddedFileService = fileService;
     }
 
