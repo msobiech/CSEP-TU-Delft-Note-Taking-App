@@ -28,7 +28,7 @@ public class NoteManager {
     private static final int THRESHOLD = 5;
     private final ServerUtils server;
 
-    private final WebSocketClientApp webSocketClientApp;
+    private WebSocketClientApp webSocketClientApp;
 
 
 
@@ -46,6 +46,7 @@ public class NoteManager {
         switch(type){
             case TITLE_CHANGE:
                 handleNoteTitleChanged(event);
+                webSocketClientApp.broadcastRefresh();
                 break;
             case CONTENT_CHANGE:
                 handleNoteContentChanged(event);
@@ -134,6 +135,7 @@ public class NoteManager {
         Long noteId = event.getNoteId();
         int noteIndex = event.getListIndex();
         String newTitle = event.getChange();
+        WebSocketClientApp webSocketClientApp1 = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         if (noteId == null || noteIndex == -1 || newTitle == null) {
             System.err.println("Invalid title change event.");
             return;
@@ -148,8 +150,11 @@ public class NoteManager {
             ObservableList<Pair<Long, String>> notes = noteOverviewCtrl.getNotes();
             notes.set(noteIndex, new Pair<>(noteId, newTitle));
 
+
             // Update the title on the server
             noteService.updateNoteTitle(newTitle, noteId);
+            webSocketClientApp1.broadcastTitle(newTitle,noteId);
+
 
             // Refresh the notes list
             Platform.runLater(noteOverviewCtrl::refreshNotes);

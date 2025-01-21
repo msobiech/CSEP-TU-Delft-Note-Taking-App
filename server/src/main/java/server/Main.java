@@ -24,7 +24,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 public class Main {
 
     public static void main(String[] args) {
-        WebSocketServerApp webApp = new WebSocketServerApp(3030);
+        WebSocketServerApp webApp = new WebSocketServerApp(8008);
         webApp.startWebSocketServer();
         SpringApplication.run(Main.class, args);
     }

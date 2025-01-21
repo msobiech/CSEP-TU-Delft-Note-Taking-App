@@ -34,7 +34,6 @@ public class EmbeddedFile {
         this.fileName = fileName;
     }
 
-
     public void setFileContent(byte[] fileContent) {
         this.fileContent = fileContent;
     }
@@ -80,6 +79,10 @@ public class EmbeddedFile {
 
     public Long getId() {
         return id;
+    }
+
+    public void setFileId(long id) {
+        this.id = id;
     }
 
     public static String getNameWithoutExtension(String file) {
