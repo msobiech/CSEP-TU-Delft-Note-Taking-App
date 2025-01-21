@@ -1,5 +1,6 @@
 package client.managers;
 
+import client.InjectorProvider;
 import client.event.EventBus;
 import client.event.RedoRequestedEvent;
 import client.event.UndoRequestedEvent;
@@ -13,11 +14,10 @@ public class UndoManager {
 
     private final Deque<UndoableActionEvent> undoStack = new ArrayDeque<>();
     private final Deque<UndoableActionEvent> redoStack = new ArrayDeque<>();
-    private final EventBus eventBus;
+    private static final EventBus eventBus = InjectorProvider.getInjector().getInstance(EventBus.class);
 
     @Inject
-    public UndoManager(EventBus eventBus) {
-        this.eventBus = eventBus;
+    public UndoManager() {
         this.eventBus.subscribe(UndoableActionEvent.class, this::handleUndoableAction);
         this.eventBus.subscribe(UndoRequestedEvent.class, event -> undo());
         this.eventBus.subscribe(RedoRequestedEvent.class, event -> redo());
@@ -31,6 +31,7 @@ public class UndoManager {
     public void undo() {
         if (!undoStack.isEmpty()) {
             UndoableActionEvent action = undoStack.pop();
+            System.out.println("popped from stack: " + action);
             action.undo();
             redoStack.push(action);
         } else {

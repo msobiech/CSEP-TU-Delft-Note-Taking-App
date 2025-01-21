@@ -111,6 +111,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private NoteListManager noteListManager;
     private MarkdownRenderManager markdownRenderManager;
     private LanguageManager languageManager;
+    private UndoManager undoManager;
 
     private ResourceBundle language;
 
@@ -137,9 +138,10 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         markdownRenderManager = new MarkdownRenderManager(markdownContent,markdownPreview,mainCtrl);
-        noteManager = new NoteManager(noteService, server);
+        noteManager = new NoteManager(noteService, server, this);
         noteListManager = new NoteListManager(notesList);
         languageManager = new LanguageManager();
+        undoManager = new UndoManager();
         language = ResourceBundle.getBundle("client.controllers.language", LanguageManager.getLanguage());
         setupSearch();
         setupSelectCollection();
@@ -455,23 +457,15 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         }
         String newTitle = noteTitle.getText().trim();
         if (newTitle.isEmpty()) {
-            newTitle = noteService.generateUniqueTitle();
+            newTitle = noteService.generateUniqueTitle(); // Generate unique title if empty
             noteTitle.setText(newTitle);
         }
-        try {
-            if (noteService.titleExists(newTitle)){
-                if (!newTitle.equals(notes.get(curNoteIndex).getValue())) {
-                    mainCtrl.showError("This title is already in use. Please choose a different title.");
-                }
-                return;
-            }
-            notes.set(curNoteIndex, new Pair<>(curNoteId, newTitle));
-            noteService.updateNoteTitle(newTitle, curNoteId);
-            refreshNotes();
-            System.out.println("Title updated successfully!");
-        } catch (Exception e) {
-            mainCtrl.showError("Failed to update the title. Please try again.");
-        }
+        eventBus.publish(new NoteEvent(
+                NoteEvent.EventType.TITLE_CHANGE,
+                newTitle,
+                curNoteId,
+                curNoteIndex
+        ));
     }
 
     private void handleNoteContentChange() {
@@ -493,6 +487,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
             updateContentAndTitle(oldNote, newNote);
             refreshFiles();
+            undoManager.clearUndoStack();
+            System.out.println("Cleared undo stack");
         });
     }
 
@@ -631,7 +627,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
      * @param note the content to set the display to
      * This method only fills out the client fields. It does not communicate with the server in order to save the content.
      */
-    private void updateNoteDisplay(String note) {
+    public void updateNoteDisplay(String note) {
         noteDisplay.setText(note);
     }
 
