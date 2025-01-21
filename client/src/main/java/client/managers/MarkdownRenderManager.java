@@ -54,7 +54,7 @@ public class MarkdownRenderManager {
         }
     }
 
-    private void renderMarkdown(String markdownText) throws InterruptedException {
+    public void renderMarkdown(String markdownText) {
 
         String cssFile = null;
         String htmlContent = null;

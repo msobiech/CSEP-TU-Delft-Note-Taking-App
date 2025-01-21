@@ -3,6 +3,7 @@ package client.controllers;
 
 import client.DialogFactory;
 import client.WebSockets.GlobalWebSocketManager;
+import client.WebSockets.WebSocketClientApp;
 import client.WebSockets.WebSocketMessageListener;
 import client.event.*;
 import client.managers.*;
@@ -35,6 +36,7 @@ import models.Note;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -53,6 +55,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private final DialogFactory dialogFactory;
     private final EventBus eventBus;
     public Button showShortcutsButton;
+
+    private boolean webSocketChange = true;
 
     @FXML
     private ComboBox<Pair<String, String>> flagDropdown;
@@ -119,7 +123,9 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private Long curNoteId = null;
     private Integer curNoteIndex = null;
 
-    Map<String, String> aliases = new HashMap<>();
+    private static WebSocketClientApp webSocketClientApp;
+    private static int id;
+     Map<String, String> aliases = new HashMap<>();
 
     @Inject
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl, NoteService noteService,
@@ -130,7 +136,9 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         this.debounceService = debounceService;
         this.dialogFactory = dialogFactory;
         this.eventBus = eventbus;
+        webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         GlobalWebSocketManager.getInstance().addMessageListener(this);
+        id = (int) (Math.random() * (1000 + 1));
         Platform.runLater(() -> new KeyEventManager(eventBus, searchBar));
     }
 
@@ -417,6 +425,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
     @FXML
     void updateTitle() {
+        WebSocketClientApp webSocketClientApp1 = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         if (curNoteId == null || curNoteIndex == null) {
             return; // No note is currently selected
         }
@@ -434,6 +443,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             }
             notes.set(curNoteIndex, new Pair<>(curNoteId, newTitle));
             noteService.updateNoteTitle(newTitle, curNoteId);
+            webSocketClientApp1.broadcastTitle(newTitle,curNoteId);
             refreshNotes();
             System.out.println("Title updated successfully!");
         } catch (Exception e) {
@@ -442,7 +452,11 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     }
 
     private void handleNoteContentChange() {
+        WebSocketClientApp webSocketClientApp1 = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
+            if(webSocketChange){
+                webSocketClientApp1.broadcastContent(newValue,curNoteId);
+            }
             eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, newValue, curNoteId, curNoteIndex, aliases));
         });
         removeNoteButton.setDisable(true);
@@ -1111,9 +1125,41 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     @Override
     public void onMessageReceived(String message) {
         System.out.println("Received WebSocket message in NoteOverviewCtrl: " + message);
-        Platform.runLater(()->{
-            refreshNotes();
-        });
+        if(message.equals("noteAdded") || message.equals("noteDeleted") || message.equals("refreshNotes")) {
+            Platform.runLater(() -> {
+                refreshNotes();
+            });
+        }else if(message.contains("UpdatedNoteTitle")){
+            if(!(Integer.parseInt(message.split(" ")[0]) == id)){
+                Platform.runLater(() -> {
+                    refreshNotes();
+                });
+            }
+        } else if(message.contains("UpdatedChangedNote")){
+            if(!(Integer.parseInt(message.split(" ")[0]) == id) && curNoteId != null && curNoteId == Long.parseLong(message.split(" ")[1])){
+                Platform.runLater(() -> {
+                    webSocketChange = false;
+                    System.out.println(webSocketClientApp.getId());
+                    noteDisplay.setEditable(true);
+                    String updatedChangedNote = message.substring(message.indexOf("UpdatedChangedNote") +19 );
+                    updateNoteDisplay(updatedChangedNote);
+                    eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, updatedChangedNote, curNoteId, notesList.getSelectionModel().getSelectedIndex(), aliases));
+                    refreshNotes();
+                    webSocketChange = true;
+                });
+            }
+
+
+
+        }
+    }
+
+    public static int getId(){
+        return id;
+    }
+
+    public static void broadcastMessage(String text){
+        webSocketClientApp.broadcastContent(text, null);
     }
 
 }
