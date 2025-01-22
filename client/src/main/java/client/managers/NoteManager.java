@@ -3,16 +3,14 @@ package client.managers;
 import client.InjectorProvider;
 import client.WebSockets.WebSocketClientApp;
 import client.controllers.NoteOverviewCtrl;
-import client.event.EventBus;
-import client.event.MainEventBus;
-import client.event.NoteEvent;
+import client.event.*;
 import client.event.NoteEvent.EventType;
-import client.event.NoteStatusEvent;
 import client.utils.NoteService;
 import client.utils.ServerUtils;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.util.Pair;
+import models.Note;
 
 import java.net.URI;
 import java.util.Timer;
@@ -20,6 +18,7 @@ import java.util.TimerTask;
 
 public class NoteManager {
     private static final EventBus eventBus = InjectorProvider.getInjector().getInstance(MainEventBus.class);
+    private final NoteOverviewCtrl noteOverviewCtrl;
     private static int changeCountTitle = 0;
     private static int changeCountContent = 0;
     private Timer debounceTimer = new Timer();
@@ -34,16 +33,16 @@ public class NoteManager {
 
 
 
-    public NoteManager(NoteService noteService, ServerUtils server) {
+    public NoteManager(NoteService noteService, ServerUtils server, NoteOverviewCtrl noteOverviewCtrl) {
         this.noteService = noteService;
         this.server = server;
+        this.noteOverviewCtrl = noteOverviewCtrl;
         eventBus.subscribe(NoteEvent.class, this::handleContentChange);
         webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
     }
 
     private void handleContentChange(NoteEvent event) {
         EventType type = event.getEventType();
-        System.out.println(event + " has been received by " + this.getClass().getSimpleName());
         switch(type){
             case TITLE_CHANGE:
                 handleNoteTitleChanged(event);
@@ -69,19 +68,44 @@ public class NoteManager {
         debounce(() -> {
             if (event.getNoteId() != null) {
                 try {
+                    String previousContent = noteService.getNoteContent(event.getNoteId()); // Fetch current content before change
                     noteService.updateNoteContent(event.getChange(), event.getNoteId());
-                    changeCountContent = 0;
+                    eventBus.publish(new UndoableActionEvent(
+                            event.getNoteId(),
+                            UndoableActionEvent.ActionType.EDIT_TEXT,
+                            previousContent,
+                            state -> {
+                                noteService.updateNoteContent((String) state, event.getNoteId());
+                                Platform.runLater(() -> {
+                                    noteOverviewCtrl.refreshNotes();
+                                    noteOverviewCtrl.updateNoteDisplay((String) state);
+                                });
+                            }
+                    ));
                 } catch (Exception e) {
                     System.err.println("Failed to update content: " + e.getMessage());
                 }
             }
         }, DELAY);
         if (changeCountContent >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
+            debounceTimer.cancel();
             if (event.getNoteId() != null) {
                 try {
+                    String previousContent = noteService.getNoteContent(event.getNoteId());
                     noteService.updateNoteContent(event.getChange(), event.getNoteId());
                     changeCountContent = 0;
-                    debounceTimer.cancel(); // Cancel any pending debounced update
+                    eventBus.publish(new UndoableActionEvent(
+                            event.getNoteId(),
+                            UndoableActionEvent.ActionType.EDIT_TEXT,
+                            previousContent,
+                            state -> {
+                                noteService.updateNoteContent((String) state, event.getNoteId());
+                                Platform.runLater(() -> {
+                                    noteOverviewCtrl.refreshNotes();
+                                    noteOverviewCtrl.updateNoteDisplay((String) state);
+                                });
+                            }
+                    ));
                 } catch (Exception e) {
                     System.err.println("Failed to update content: " + e.getMessage());
                 }
@@ -110,29 +134,67 @@ public class NoteManager {
     }
 
     private void handleNoteTitleChanged(NoteEvent event) {
-        changeCountTitle++;
-        debounce(() -> {
-            try {
-                noteService.updateNoteTitle(event.getChange(), event.getNoteId());
-                System.out.println("Note " + event.getNoteId() + " title update handled successfully.");
-            } catch (Exception e) {
-                System.err.println("Failed to update title: " + e.getMessage());
+        Long noteId = event.getNoteId();
+        int noteIndex = event.getListIndex();
+        String newTitle = event.getChange();
+        WebSocketClientApp webSocketClientApp1 = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
+        if (noteId == null || noteIndex == -1 || newTitle == null) {
+            System.err.println("Invalid title change event.");
+            return;
+        }
+        try {
+            if (noteService.titleExists(newTitle)) {
+                System.err.println("This title is already in use. Please choose a different title.");
+                return;
             }
-        },DELAY);
-        if (changeCountTitle >= THRESHOLD) { // If the change count is bigger than the threshold set (here 5 characters) we need to update
-            try {
-                noteService.updateNoteTitle(event.getChange(), event.getNoteId());
-                System.out.println("Note " + event.getNoteId() + " title update handled successfully.");
-                changeCountTitle = 0;
-            } catch (Exception e) {
-                System.err.println("Failed to update title: " + e.getMessage());
-            }
-            debounceTimer.cancel(); // Cancel any pending debounced update
+            String previousTitle = noteService.getNoteTitle(noteId); // Fetch the current title before updating
+
+            ObservableList<Pair<Long, String>> notes = noteOverviewCtrl.getNotes();
+            notes.set(noteIndex, new Pair<>(noteId, newTitle));
+
+
+            // Update the title on the server
+            noteService.updateNoteTitle(newTitle, noteId);
+            webSocketClientApp1.broadcastTitle(newTitle,noteId);
+
+
+            // Refresh the notes list
+            Platform.runLater(noteOverviewCtrl::refreshNotes);
+
+            // Publish an UndoableActionEvent for title change
+            eventBus.publish(new UndoableActionEvent(
+                    event.getNoteId(),
+                    UndoableActionEvent.ActionType.EDIT_TITLE,
+                    previousTitle,
+                    state -> {
+                        noteService.updateNoteTitle((String) state, noteId);
+                        Platform.runLater(() -> {
+                            notes.set(noteIndex, new Pair<>(noteId, (String) state));
+                            noteOverviewCtrl.refreshNotes();
+                        });
+                    }
+            ));
+            System.out.println("Title updated successfully!");
+        } catch (Exception e) {
+            System.err.println("Failed to update the title: " + e.getMessage());
         }
     }
 
-    private void handleNoteAddition(){
-        server.addNote();
+    private void handleNoteAddition() {
+        try {
+            Note addedNote = server.addNote();
+            Long noteId = addedNote.getId();
+            String noteTitle = addedNote.getTitle();
+            eventBus.publish(new UndoableActionEvent(
+                    -1,
+                    UndoableActionEvent.ActionType.ADD_FILE,
+                    new Pair<>(noteId, noteTitle), // Store the note as a Pair for undo purposes
+                    state -> server.deleteNoteByID(((Pair<Long, String>) state).getKey()) // Undo logic: Delete the added note
+            ));
+            System.out.println("Note added successfully: " + addedNote);
+        } catch (Exception e) {
+            System.err.println("Failed to add note: " + e.getMessage());
+        }
     }
 
     private void handleNoteDeletion(NoteStatusEvent event) {

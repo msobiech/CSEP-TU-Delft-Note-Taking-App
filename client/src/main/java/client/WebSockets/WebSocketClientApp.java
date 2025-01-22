@@ -147,6 +147,13 @@ public class WebSocketClientApp extends WebSocketClient {
 
     public void broadcastRefresh(){
         WebSocketClientApp webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
-        webSocketClientApp.send("refreshNotes");
+        try {
+            if(webSocketClientApp.connectBlocking()){
+                webSocketClientApp.send("refreshNotes");
+
+            }
+        } catch (InterruptedException e) {
+            System.out.println("Problem here buddy");
+        }
     }
 }

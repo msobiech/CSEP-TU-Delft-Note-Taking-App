@@ -221,4 +221,8 @@ public class MainCtrl {
     public boolean isDarkMode() {
         return isDarkMode;
     }
+
+    public Stage getPrimaryStage() {
+        return primaryStage;
+    }
 }

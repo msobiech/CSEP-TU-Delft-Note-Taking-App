@@ -1,10 +1,7 @@
 package client.managers;
 
 import client.InjectorProvider;
-import client.event.EventBus;
-import client.event.MainEventBus;
-import client.event.NoteEvent;
-import client.event.NoteNavigationEvent;
+import client.event.*;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
@@ -17,9 +14,7 @@ public class NoteListManager {
 
     public NoteListManager(ListView<Pair<Long, String>> notesList) {
         this.notesList = notesList;
-        eventBus.subscribe(NoteEvent.class, event -> {
-            handleChange(event);
-        });
+        eventBus.subscribe(NoteEvent.class, this::handleChange);
         eventBus.subscribe(NoteNavigationEvent.class, this::handleNavigation);
     }
 
@@ -45,18 +40,37 @@ public class NoteListManager {
 
     private void handleChange(NoteEvent event) {
         NoteEvent.EventType type = event.getEventType();
-        System.out.println(event + " has been received by " + this.getClass().getSimpleName());
         switch(type){
             case TITLE_CHANGE:
-                try{
-                    notes.set(event.getListIndex(), new Pair<>(event.getNoteId(), event.getChange().trim()));
-                } catch(Exception e){
-                    System.err.println(e.getMessage());
-                }
+                handleTitleChange(event);
                 break;
             case NOTE_REMOVE:
                 handleNoteDeletion();
                 break;
+        }
+    }
+
+    private void handleTitleChange(NoteEvent event) {
+        try {
+            int index = event.getListIndex();
+            Pair<Long, String> oldNote = notes.get(index);
+            Pair<Long, String> newNote = new Pair<>(event.getNoteId(), event.getChange().trim());
+
+            // Update the title in the notes list
+            notes.set(index, newNote);
+
+            // Register undo action
+            eventBus.publish(new UndoableActionEvent(
+                    event.getNoteId(),
+                    UndoableActionEvent.ActionType.EDIT_TITLE,
+                    oldNote, // Save the old title as the previous state
+                    previousState -> {
+                        notes.set(index, (Pair<Long, String>) previousState);
+                        notesList.refresh();
+                    } // Undo logic
+            ));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
         }
     }
 

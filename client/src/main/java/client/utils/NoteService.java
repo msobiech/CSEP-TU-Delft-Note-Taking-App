@@ -45,4 +45,51 @@ public class NoteService {
             return "Untitled Note"; // Fallback if the server call fails
         }
     }
+
+    /**
+     * Fetches the current title of the note by its ID.
+     *
+     * @param noteId the ID of the note.
+     * @return the current title of the note.
+     */
+    public String getNoteTitle(Long noteId) {
+        try {
+            Note note = server.getNoteByID(noteId);
+            return note.getTitle();
+        } catch (Exception e) {
+            System.err.println("Error fetching note title: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Fetches the current content of the note by its ID.
+     *
+     * @param noteId the ID of the note.
+     * @return the current content of the note.
+     */
+    public String getNoteContent(Long noteId) {
+        try {
+            Note note = server.getNoteByID(noteId);
+            return note.getContent();
+        } catch (Exception e) {
+            System.err.println("Error fetching note content: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Fetches the entire note object by its ID.
+     *
+     * @param noteId the ID of the note.
+     * @return the note object.
+     */
+    public Note getNoteByID(Long noteId) {
+        try {
+            return server.getNoteByID(noteId);
+        } catch (Exception e) {
+            System.err.println("Error fetching note: " + e.getMessage());
+            return null;
+        }
+    }
 }
