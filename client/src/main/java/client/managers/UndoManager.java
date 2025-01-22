@@ -29,8 +29,7 @@ public class UndoManager {
             undoStack.push(event);
             redoStack.clear(); // Clear redo stack on any new action
 
-        }
-        else{
+        } else{
             clearUndoStack();
             undoStack.push(event);
             currentID = event.getNoteID();
