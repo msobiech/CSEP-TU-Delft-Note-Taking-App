@@ -68,7 +68,7 @@ public class WebSocketClientApp extends WebSocketClient {
         } catch (InterruptedException _) {
             return "ErrorCaught";
         }
-        return null;
+        return "noteAdded";
     }
 
     public Integer getId() {
@@ -93,7 +93,7 @@ public class WebSocketClientApp extends WebSocketClient {
         } catch (InterruptedException _) {
             return ("ErrorCaught");
         }
-        return null;
+        return "noteDeleted";
     }
 
     public String broadcastChange(String change){
@@ -108,7 +108,7 @@ public class WebSocketClientApp extends WebSocketClient {
         } catch (InterruptedException _) {
             return ("Erro Caught");
         }
-        return null;
+        return ("NewChangeDetected");
     }
 
     public String broadcastContent(String change, Long id){
@@ -126,7 +126,7 @@ public class WebSocketClientApp extends WebSocketClient {
             return "Error Caught";
 
         }
-        return null;
+        return ("content broadcast");
     }
 
 
