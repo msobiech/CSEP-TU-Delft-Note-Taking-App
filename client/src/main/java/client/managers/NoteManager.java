@@ -30,9 +30,6 @@ public class NoteManager {
     private final ServerUtils server;
 
     private WebSocketClientApp webSocketClientApp;
-    private static NoteOverviewCtrl noteOverviewCtrl;
-
-
 
 
     public NoteManager(NoteService noteService, ServerUtils server, NoteOverviewCtrl noteOverviewCtrl) {
@@ -201,14 +198,14 @@ public class NoteManager {
     }
 
     private void handleNoteDeletion(NoteStatusEvent event) {
-        ResourceBundle lang = controller.getLanguage();
+        ResourceBundle lang = noteOverviewCtrl.getLanguage();
         try {
             if (event.getChangeID() != null) {
                 // Delete the note from the backend
                 server.deleteNoteByID(event.getChangeID());
-                controller.showFadeBox(lang.getString("good.delete"), true);
+                noteOverviewCtrl.showFadeBox(lang.getString("good.delete"), true);
 
-                controller.getNoteListManager().handleNoteDeletion();
+                noteOverviewCtrl.getNoteListManager().handleNoteDeletion();
 
                     // Assuming there's a way to get the ObservableList from the controller
                     NoteOverviewCtrl controller = InjectorProvider.getInjector().getInstance(NoteOverviewCtrl.class);
@@ -221,10 +218,10 @@ public class NoteManager {
                     }
 
                 }else {
-                controller.showFadeBox(lang.getString("bad.delete"), false);
+                noteOverviewCtrl.showFadeBox(lang.getString("bad.delete"), false);
             }
         } catch (Exception e) {
-             controller.showFadeBox(lang.getString("bad.delete"), false);
+            noteOverviewCtrl.showFadeBox(lang.getString("bad.delete"), false);
         }
     }
 
