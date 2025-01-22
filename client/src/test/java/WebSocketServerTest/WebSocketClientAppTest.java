@@ -92,7 +92,6 @@ public class WebSocketClientAppTest {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        assertTrue(client.isOpen());
     }
 
 

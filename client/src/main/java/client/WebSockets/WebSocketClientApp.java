@@ -159,6 +159,5 @@ public class WebSocketClientApp extends WebSocketClient {
             System.out.println("Problem here buddy");
             return "Error Caught";
         }
-        return null;
-    }
+        return ("Notes refreshed");    }
 }
