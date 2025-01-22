@@ -6,7 +6,6 @@ import client.controllers.NoteOverviewCtrl;
 import client.event.EditCollectionsEvent;
 import client.event.EscapeKeyEvent;
 import client.event.EventBus;
-import jakarta.inject.Inject;
 
 public class KeyEventManager {
 
@@ -16,7 +15,6 @@ public class KeyEventManager {
 
 
 
-    @Inject
     public KeyEventManager() {
         this.eventBus.subscribe(EscapeKeyEvent.class, event -> handleEscapeKey());
         this.eventBus.subscribe(EditCollectionsEvent.class, event -> handleEditCollections());
@@ -37,5 +35,7 @@ public class KeyEventManager {
         if (noteOverviewCtrl != null) {
             noteOverviewCtrl.refreshNotes();
         }
+        System.out.println(mainCtrl);
+        System.out.println(noteOverviewCtrl);
     }
 }
