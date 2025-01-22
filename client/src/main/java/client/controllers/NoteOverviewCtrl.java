@@ -705,9 +705,14 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
      * Method to add notes
      */
     public void addNote(){
-        System.out.println("Adding a new note");
-        eventBus.publish(new NoteStatusEvent(NoteEvent.EventType.NOTE_ADD, null));
-        refreshNotes();
+        try{
+            System.out.println("Adding a new note");
+            eventBus.publish(new NoteStatusEvent(NoteEvent.EventType.NOTE_ADD, null));
+            refreshNotes();
+        } catch(Exception e){
+            System.out.println("Failed to add note: " + e.getMessage());
+        }
+
     }
 
     @FXML
