@@ -1,10 +1,7 @@
 package client.managers;
 
 import client.InjectorProvider;
-import client.event.EventBus;
-import client.event.MainEventBus;
-import client.event.NoteEvent;
-import client.event.NoteNavigationEvent;
+import client.event.*;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
@@ -55,12 +52,12 @@ public class NoteListManager {
                 }
                 break;
             case NOTE_REMOVE:
-                handleNoteDeletion();
+                //handleNoteDeletion();
                 break;
         }
     }
 
-    private void handleNoteDeletion() {
+    public void handleNoteDeletion() {
         var selectedNote = notesList.getSelectionModel().getSelectedItem();
         notesList.getItems().remove(selectedNote);
     }

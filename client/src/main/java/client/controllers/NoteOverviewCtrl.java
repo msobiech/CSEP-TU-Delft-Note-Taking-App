@@ -1213,4 +1213,9 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     public static void broadcastMessage(String text){
         webSocketClientApp.broadcastContent(text, null);
     }
+
+    public NoteListManager getNoteListManager() {
+        return noteListManager;
+    }
 }
+

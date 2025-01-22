@@ -128,10 +128,10 @@ public class ServerUtils {
 			if (response.statusCode() == 204) {
 				System.out.println("Note deleted successfully.");
 			} else {
-				System.err.println("Failed to delete note: " + response.statusCode());
+				throw new RuntimeException("Failed to delete a note");
 			}
 		} catch (Exception e) {
-			System.out.println("Exception encountered.");
+			throw new RuntimeException("Failed to delete a note");
 		}
 	}
 

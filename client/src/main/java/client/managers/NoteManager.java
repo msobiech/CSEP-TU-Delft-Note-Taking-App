@@ -154,7 +154,7 @@ public class NoteManager {
                 server.deleteNoteByID(event.getChangeID());
                 controller.showFadeBox(lang.getString("good.delete"), true);
 
-                // Update the UI (must be done on the JavaFX thread)
+                controller.getNoteListManager().handleNoteDeletion();
 
                     // Assuming there's a way to get the ObservableList from the controller
                     NoteOverviewCtrl controller = InjectorProvider.getInjector().getInstance(NoteOverviewCtrl.class);
