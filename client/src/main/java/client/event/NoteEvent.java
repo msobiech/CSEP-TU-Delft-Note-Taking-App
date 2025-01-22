@@ -39,10 +39,10 @@ public class NoteEvent extends Event {
         this.aliases = aliases;
     }
 
-    public NoteEvent(EventType eventType, String change, Long NoteId, Integer ListIndex, Map<String,String> aliases) {
+    public NoteEvent(EventType eventType, String change, Long noteId, Integer listIndex, Map<String,String> aliases) {
         this(eventType, change, aliases);
-        this.NoteId = NoteId;
-        this.ListIndex = ListIndex;
+        this.NoteId = noteId;
+        this.ListIndex = listIndex;
     }
 
     public EventType getEventType() {

@@ -77,7 +77,7 @@
                     <ScrollPane prefWidth="400.0" hbarPolicy="ALWAYS" vbarPolicy="NEVER" prefHeight="100.0">
                         <HBox fx:id="fileListContainer" spacing="5" />
                     </ScrollPane>
-                    <Button onAction="#AddFile">
+                    <Button onAction="#addFile">
                         <graphic>
                             <FontIcon iconLiteral="fa-plus" />
                         </graphic>

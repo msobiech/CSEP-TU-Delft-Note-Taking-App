@@ -907,7 +907,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
 
 
-    public void AddFile() throws IOException {
+    public void addFile() throws IOException {
         if(curNoteId==null){
             return;
         }
