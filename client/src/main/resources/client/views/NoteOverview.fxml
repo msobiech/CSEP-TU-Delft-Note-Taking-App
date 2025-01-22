@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -8,111 +7,91 @@
 <?import javafx.scene.web.*?>
 <?import org.kordamp.ikonli.javafx.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.NoteOverviewCtrl">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.NoteOverviewCtrl">
     <center>
         <HBox spacing="5.0">
-            <VBox fx:id="notesContainer" prefWidth="300.0" spacing="5.0" style="-fx-padding: 5px;-fx-background-color: #CCD5AE; -fx-text-fill: #333333">
-                <ListView fx:id="notesList" style="-fx-background-color: #E0E5B6; -fx-text-fill: #333333;" VBox.vgrow="ALWAYS" />
-                <HBox alignment="CENTER" spacing="5.0" style="-fx-background-color: #E0E5B6; -fx-text-fill: #333333">
+            <VBox fx:id="notesContainer" prefWidth="300.0" spacing="5.0">
+                <ListView fx:id="notesList" VBox.vgrow="ALWAYS" />
+                <HBox alignment="CENTER" spacing="5.0">
                     <Button fx:id="addNoteButton" mnemonicParsing="false" onAction="#addNote">
                         <graphic>
                             <FontIcon iconLiteral="fa-plus" />
                         </graphic>
-                        <styleClass>
-                            <String fx:value="button-icon" />
-                            <String fx:value="flat" />
-                        </styleClass>
                     </Button>
                     <Button fx:id="removeNoteButton" mnemonicParsing="false" onAction="#removeNote">
                         <graphic>
                             <FontIcon iconLiteral="fa-minus" />
                         </graphic>
-                        <styleClass>
-                            <String fx:value="button-icon" />
-                            <String fx:value="flat" />
-                        </styleClass>
                     </Button>
                     <Button fx:id="refreshNotesButton" mnemonicParsing="false" onAction="#refreshNotes">
                         <graphic>
                             <FontIcon iconLiteral="fa-rotate-right" />
                         </graphic>
-                        <styleClass>
-                            <String fx:value="button-icon" />
-                            <String fx:value="flat" />
-                        </styleClass>
                     </Button>
                 </HBox>
             </VBox>
 
             <VBox>
                 <HBox alignment="CENTER" prefHeight="26.0" prefWidth="327.0" spacing="5.0">
-                    <TextField fx:id="noteTitle" maxHeight="23.0" minHeight="23.0" promptText="%note.title.text" style="-fx-background-color: #e2e4d0; -fx-text-fill: #211f1f" HBox.hgrow="ALWAYS">
+                    <TextField fx:id="noteTitle" maxHeight="23.0" minHeight="23.0" promptText="%note.title.text" HBox.hgrow="ALWAYS">
                         <font>
-                            <Font name="Comic Sans MS" size="12.0" />
+                            <Font name="System" size="12.0" />
                         </font>
                     </TextField>
                     <Button fx:id="editTitleButton" mnemonicParsing="false" onAction="#updateTitle">
                         <graphic>
                             <FontIcon iconLiteral="fa-edit" />
                         </graphic>
-                        <styleClass>
-                            <String fx:value="button-icon" />
-                            <String fx:value="flat" />
-                        </styleClass>
                     </Button>
-               <ComboBox fx:id="noteCollectionDropdown" prefHeight="26.0" prefWidth="65.0" style="-fx-background-color: #f6f3f3; -fx-border-color: #000000; -fx-border-width: 0.5px;" />
+                    <ComboBox fx:id="noteCollectionDropdown" prefHeight="26.0" prefWidth="65.0" />
                 </HBox>
                 <TextArea fx:id="noteDisplay" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333" wrapText="true" VBox.vgrow="ALWAYS" />
                 <HBox alignment="CENTER" prefHeight="46.0" spacing="5.0">
-                    <Label minWidth="100.0" text="Embedded Files:" />
-                    <ScrollPane prefWidth="400.0" hbarPolicy="ALWAYS" vbarPolicy="NEVER" prefHeight="100.0">
-                        <HBox fx:id="fileListContainer" spacing="10" />
+                    <Label minWidth="100.0" text="%embedded.files" />
+                    <ScrollPane hbarPolicy="ALWAYS" prefHeight="100.0" prefWidth="400.0" vbarPolicy="NEVER">
+                        <HBox fx:id="fileListContainer" spacing="5" />
                     </ScrollPane>
                     <Button onAction="#AddFile">
                         <graphic>
                             <FontIcon iconLiteral="fa-plus" />
                         </graphic>
-                        <styleClass>
-                            <String fx:value="button-icon" />
-                            <String fx:value="flat" />
-                        </styleClass>
                     </Button>
                 </HBox>
             </VBox>
 
-
-            <ScrollPane fx:id="markdownPreview" fitToHeight="true" fitToWidth="true" prefWidth="350.0" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333;" HBox.hgrow="ALWAYS">
-                <WebView fx:id="markdownContent" style="-fx-padding: 10px; -fx-background-color: #E0E5B6; -fx-text-fill: #333333;" VBox.vgrow="ALWAYS">
+            <ScrollPane fx:id="markdownPreview" fitToHeight="true" fitToWidth="true" prefWidth="350.0" HBox.hgrow="ALWAYS">
+                <WebView fx:id="markdownContent" VBox.vgrow="ALWAYS">
                     <!-- Rendered Markdown Content Will Be Added Dynamically -->
                 </WebView>
             </ScrollPane>
         </HBox>
-
     </center>
     <top>
-        <HBox alignment="CENTER" prefHeight="42.0" prefWidth="600.0" spacing="5.0" style="-fx-background-color: #FEFAE0;">
+        <HBox alignment="CENTER" prefHeight="42.0" prefWidth="600.0" spacing="5.0">
             <padding>
                 <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
             </padding>
             <children>
-                <TextField fx:id="searchBar" prefHeight="28.0" prefWidth="277.0" promptText="%search.panel.text" style="-fx-background-color: #F2EED5; -fx-text-fill: #333333; -fx-padding: 5px;">
+                <TextField fx:id="searchBar" prefHeight="28.0" prefWidth="277.0" promptText="%search.panel.text">
                     <font>
-                        <Font name="Comic Sans MS" size="12.0" />
+                        <Font name="System" size="12.0" />
                     </font>
                 </TextField>
                 <Region HBox.hgrow="ALWAYS" />
-            <Button fx:id="showShortcutsButton" mnemonicParsing="false" onAction="#showShortcutsPopUp" text="?" />
-                <ComboBox fx:id="flagDropdown" prefHeight="27.0" prefWidth="55.0" style="-fx-background-color: #f6f3f3; -fx-border-color: #000000; -fx-border-width: 0.5px;" stylesheets="@client/css/styles.css" />
+            <Button mnemonicParsing="false" text="?" fx:id="showShortcutsButton" onAction="#showShortcutsPopUp" />
+                <Button fx:id="toggleModeButton" onAction="#toggleMode">
+                    <graphic>
+                        <FontIcon iconLiteral="fa-moon-o" />
+                    </graphic>
+                </Button>
+                <ComboBox fx:id="flagDropdown" prefHeight="27.0" prefWidth="55.0" />
                 <Label fx:id="collectionText" alignment="CENTER_RIGHT" contentDisplay="RIGHT" text="%collection.text" textAlignment="RIGHT">
                     <font>
-                        <Font name="Comic Sans MS Bold" size="12.0" />
+                        <Font name="System" size="12.0" />
                     </font>
                 </Label>
-                <ComboBox fx:id="collectionDropdown" prefHeight="27.0" prefWidth="97.0" style="-fx-background-color: #f6f3f3; -fx-border-color: #000000; -fx-border-width: 0.5px;" />
+                <ComboBox fx:id="collectionDropdown" prefHeight="27.0" prefWidth="97.0" />
             </children>
         </HBox>
     </top>
-
-
-
 </BorderPane>

@@ -49,6 +49,7 @@ public class LanguageManager {
         var overview = FXML.load(NoteOverviewCtrl.class, bundle, "client", "views", "NoteOverview.fxml");
         var collectionsEdit = FXML.load(EditCollectionsPopUpCtrl.class, bundle, "client", "views", "EditCollectionsPopUp.fxml");
         var shortcuts = FXML.load(ShortcutsPopUpCtrl.class, bundle, "client", "views", "ShowShortcutsPopUp.fxml");
+        overview.getKey().updateTooltips();
         var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
         mainCtrl.setLanguage(bundle);
         mainCtrl.updateOverview(overview);

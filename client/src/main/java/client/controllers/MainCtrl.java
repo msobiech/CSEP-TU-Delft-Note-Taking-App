@@ -21,7 +21,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-import org.kordamp.bootstrapfx.BootstrapFX;
 
 import java.util.ResourceBundle;
 
@@ -37,9 +36,6 @@ public class MainCtrl {
     private NoteOverviewCtrl overviewCtrl;
     private Scene overview;
 
-    private AddNoteCtrl addCtrl;
-    private Scene add;
-
     private ErrorPopUpCtrl errorCtrl;
     private Scene errorScene;
 
@@ -54,12 +50,13 @@ public class MainCtrl {
 
     private ResourceBundle language;
 
+    private boolean isDarkMode = false;
+    private final String LIGHT_MODE_CSS = "/client/css/styles.css";
+    private final String DARK_MODE_CSS = "/client/css/darkstyles.css";
     /**
      * Initialization of the main Stage
      * @param primaryStage the stage that will be used to display the app's fronted
      * @param overview the pair of controller for NoteOverview and JavaFX class Parent that links the corresponding UI with its controller
-     * @param add the pair of controller for NoteAddition and JavaFX class Parent that links the corresponding UI with its controller
-     *            (Currently not functional)
      * @param error the pair of controller for the handling of error message popups and JavaFX class Parent that links the corresponding UI
      *              with its controller.
      * @param serverURL the pair of controller for the handling of Server selection
@@ -72,15 +69,11 @@ public class MainCtrl {
      *                      and JavaFX class Parent that links the corresponding UI with its
      *                      controller
      */
-    public void initialize(Stage primaryStage, Pair<NoteOverviewCtrl, Parent> overview,
-            Pair<AddNoteCtrl, Parent> add, Pair<ErrorPopUpCtrl, Parent> error, Pair<ServerSelectionCtrl, Parent> serverURL, Pair<EditCollectionsPopUpCtrl, Parent> collectionEdit
-            ,Pair<ShortcutsPopUpCtrl, Parent> showShortcuts) {
+    public void initialize(Stage primaryStage, Pair<NoteOverviewCtrl, Parent> overview, Pair<ErrorPopUpCtrl, Parent> error
+            ,Pair<ServerSelectionCtrl, Parent> serverURL, Pair<EditCollectionsPopUpCtrl, Parent> collectionEdit, Pair<ShortcutsPopUpCtrl, Parent> showShortcuts) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
-
-        this.addCtrl = add.getKey();
-        this.add = new Scene(add.getValue());
 
         this.errorCtrl = error.getKey();
         this.errorScene = new Scene(error.getValue());
@@ -95,6 +88,9 @@ public class MainCtrl {
         this.shortcutsScene = new Scene(showShortcuts.getValue());
 
         //showServerSelection();
+
+        applyStylesheet(this.overview);
+        applyStylesheet(this.editScene);
         showOverview();
         primaryStage.show();
     }
@@ -108,21 +104,31 @@ public class MainCtrl {
     public void showOverview() {
         primaryStage.setTitle(language.getString("window.primary.title"));
         primaryStage.setScene(overview);
-        overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
+        applyStylesheet(overview);
+//        overview.getStylesheets().add(BootstrapFX.bootstrapFXStylesheet());
         primaryStage.setResizable(true);
         primaryStage.setMinWidth(700);
         primaryStage.setMinHeight(500);
         overviewCtrl.refreshNotes();
 
     }
+    public void toggleMode() {
+        isDarkMode = !isDarkMode;
+        if(primaryStage!=null){
+            applyStylesheet(primaryStage.getScene());
+        }
+        if(popUp!=null){
+            applyStylesheet(popUp.getScene());
+        }
+    }
 
-    /**
-     * Method to show the scene for note addition
-     */
-    public void showAdd() {
-        //primaryStage.setTitle("Notes: Adding Note");
-        //primaryStage.setScene(add);
-        //primaryStage.setResizable(false);
+    public void applyStylesheet(Scene scene) {
+        scene.getStylesheets().clear();
+        if (isDarkMode) {
+            scene.getStylesheets().add(DARK_MODE_CSS);
+        } else {
+            scene.getStylesheets().add(LIGHT_MODE_CSS);
+        }
     }
 
     /**
@@ -203,5 +209,9 @@ public class MainCtrl {
     public void updateShortcuts(Pair<ShortcutsPopUpCtrl, Parent> shortcuts) {
         this.shortcutsCtrl = shortcuts.getKey();
         this.shortcutsScene = new Scene(shortcuts.getValue());
+    }
+
+    public boolean isDarkMode() {
+        return isDarkMode;
     }
 }

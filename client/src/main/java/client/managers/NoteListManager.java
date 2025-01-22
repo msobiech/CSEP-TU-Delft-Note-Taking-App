@@ -4,6 +4,8 @@ import client.InjectorProvider;
 import client.event.EventBus;
 import client.event.MainEventBus;
 import client.event.NoteEvent;
+import client.event.NoteNavigationEvent;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
 import javafx.util.Pair;
@@ -18,8 +20,28 @@ public class NoteListManager {
         eventBus.subscribe(NoteEvent.class, event -> {
             handleChange(event);
         });
+        eventBus.subscribe(NoteNavigationEvent.class, this::handleNavigation);
     }
 
+    private void handleNavigation(NoteNavigationEvent event) {
+        Platform.runLater(() -> {
+            ObservableList<Pair<Long, String>> items = notesList.getItems();
+            int currentIndex = notesList.getSelectionModel().getSelectedIndex();
+
+            if (event.getDirection() == NoteNavigationEvent.Direction.NEXT) {
+                if (currentIndex < items.size() - 1) {
+                    notesList.getSelectionModel().select(currentIndex + 1);
+                    notesList.scrollTo(currentIndex + 1);
+                }
+            } else if (event.getDirection() == NoteNavigationEvent.Direction.PREVIOUS) {
+                if (currentIndex > 0) {
+                    notesList.getSelectionModel().select(currentIndex - 1);
+                    notesList.scrollTo(currentIndex - 1);
+                    System.out.println("Navigating to PREVIOUS");
+                }
+            }
+        });
+    }
 
     private void handleChange(NoteEvent event) {
         NoteEvent.EventType type = event.getEventType();

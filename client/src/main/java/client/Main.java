@@ -41,7 +41,6 @@ public class Main extends Application {
 		ResourceBundle bundle = ResourceBundle.getBundle("client.controllers.language", currentLanguage);
 
 		var overview = FXML.load(NoteOverviewCtrl.class, bundle, "client", "views", "NoteOverview.fxml");
-		var add = FXML.load(AddNoteCtrl.class, bundle, "client", "views", "AddNote.fxml");
 		var error = FXML.load(ErrorPopUpCtrl.class, bundle, "client", "views", "ErrorPopUp.fxml");
 		var serverURL = FXML.load(ServerSelectionCtrl.class, bundle, "client", "views", "ServerSelection.fxml");
 		var collectionsEdit = FXML.load(EditCollectionsPopUpCtrl.class, bundle, "client", "views", "EditCollectionsPopUp.fxml");
@@ -49,7 +48,7 @@ public class Main extends Application {
 
 		var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
 		mainCtrl.setLanguage(bundle);
-		mainCtrl.initialize(primaryStage, overview, add, error, serverURL, collectionsEdit, showShortcuts);
+		mainCtrl.initialize(primaryStage, overview, error, serverURL, collectionsEdit, showShortcuts);
                 primaryStage.setOnCloseRequest(_ -> {
 			Platform.exit();
 			System.exit(0); // Force stop

@@ -3,12 +3,10 @@ package client.controllers;
 
 import client.DialogFactory;
 import client.WebSockets.GlobalWebSocketManager;
+import client.WebSockets.WebSocketClientApp;
 import client.WebSockets.WebSocketMessageListener;
 import client.event.*;
-import client.managers.LanguageManager;
-import client.managers.MarkdownRenderManager;
-import client.managers.NoteListManager;
-import client.managers.NoteManager;
+import client.managers.*;
 import client.utils.DebounceService;
 import client.utils.NoteService;
 import client.utils.ServerUtils;
@@ -38,6 +36,7 @@ import models.Note;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -56,6 +55,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private final DialogFactory dialogFactory;
     private final EventBus eventBus;
     public Button showShortcutsButton;
+
+    private boolean webSocketChange = true;
 
     @FXML
     private ComboBox<Pair<String, String>> flagDropdown;
@@ -82,16 +83,30 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private WebView markdownContent;
 
     @FXML
+    private HBox fileListContainer;
+
+    @FXML
     private ComboBox<Pair<Long, String>> collectionDropdown;
 
     @FXML
     private ComboBox<Pair<Long, String>> noteCollectionDropdown;
 
     @FXML
-    private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton;
+    private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton, toggleModeButton;
 
     @FXML
-    private HBox fileListContainer;
+    private void toggleMode() {
+        mainCtrl.toggleMode();
+        toggleModeTooltip.setText(mainCtrl.isDarkMode()
+                ? language.getString("tooltip.toggleLightMode")
+                : language.getString("tooltip.toggleDarkMode"));
+    }
+
+    private Tooltip addNoteTooltip;
+    private Tooltip removeNoteTooltip;
+    private Tooltip refreshNotesTooltip;
+    private Tooltip editTitleTooltip;
+    private Tooltip toggleModeTooltip;
 
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
@@ -108,6 +123,10 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private Long curNoteId = null;
     private Integer curNoteIndex = null;
 
+    private static WebSocketClientApp webSocketClientApp;
+    private static int id;
+     Map<String, String> aliases = new HashMap<>();
+
     @Inject
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl, NoteService noteService,
                             DebounceService debounceService, DialogFactory dialogFactory, EventBus eventbus) {
@@ -117,7 +136,10 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         this.debounceService = debounceService;
         this.dialogFactory = dialogFactory;
         this.eventBus = eventbus;
+        webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         GlobalWebSocketManager.getInstance().addMessageListener(this);
+        id = (int) (Math.random() * (1000 + 1));
+        Platform.runLater(() -> new KeyEventManager(eventBus, searchBar));
     }
 
     @Override
@@ -139,13 +161,78 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         handleNoteSelectionChange();
         handleNoteContentChange();
         handleLanguageChange();
+        handleEscapeKeyPressed();
+        handleNoteNavigation();
+        setupTooltips();
 
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             removeNoteButton.setDisable(newValue == null);
         });
 
-//        handleEditCollectionsPressed();
         setupKeyboardShortcuts();
+    }
+
+    private void setupTooltips() {
+        addNoteTooltip = new Tooltip();
+        refreshNotesTooltip = new Tooltip();
+        removeNoteTooltip = new Tooltip();
+        editTitleTooltip = new Tooltip();
+        toggleModeTooltip = new Tooltip();
+
+        // Attach tooltips to elements
+        Tooltip.install(addNoteButton, addNoteTooltip);
+        Tooltip.install(refreshNotesButton, refreshNotesTooltip);
+        Tooltip.install(removeNoteButton, removeNoteTooltip);
+        Tooltip.install(editTitleButton, editTitleTooltip);
+        Tooltip.install(toggleModeButton, toggleModeTooltip);
+
+        // Set initial text
+        updateTooltips();
+    }
+
+    public void updateTooltips() {
+        addNoteTooltip.setText(language.getString("tooltip.addNote"));
+        refreshNotesTooltip.setText(language.getString("tooltip.refreshNotes"));
+        removeNoteTooltip.setText(language.getString("tooltip.removeNote"));
+        editTitleTooltip.setText(language.getString("tooltip.editTitle"));
+        toggleModeTooltip.setText(mainCtrl.isDarkMode()
+                ? language.getString("tooltip.toggleLightMode")
+                : language.getString("tooltip.toggleDarkMode"));
+    }
+
+
+    private void handleNoteNavigation() {
+        boolean useCommand = isMacOS(); // Check if the app is running on macOS
+
+        Platform.runLater(() -> {
+            noteDisplay.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                if ((useCommand && event.isMetaDown()) || (!useCommand && event.isControlDown())) {
+                    switch (event.getCode()) {
+                        case UP:
+                            eventBus.publish(new NoteNavigationEvent(NoteNavigationEvent.Direction.PREVIOUS));
+                            event.consume();
+                            break;
+                        case DOWN:
+                            eventBus.publish(new NoteNavigationEvent(NoteNavigationEvent.Direction.NEXT));
+                            event.consume();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+        });
+    }
+
+    private void handleEscapeKeyPressed() {
+        Platform.runLater(() -> {
+            searchBar.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    eventBus.publish(new EscapeKeyEvent()); // Publish the ESC key event
+                    event.consume(); // Prevent further propagation
+                }
+            });
+        });
     }
 
     private void handleLanguageChange() {
@@ -154,15 +241,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             eventBus.publish(new LanguageEvent(newValue.getKey()));
         });
     }
-
-//    private void handleEditCollectionsPressed() {
-//        collectionDropdown.setOnAction(event -> {
-//            Pair<Long, String> selectedOption = collectionDropdown.getValue();
-//            if ("Edit Collections...".equals(selectedOption.getValue())) {
-//                mainCtrl.showEditCollections(); // Call the method to show the popup
-//            }
-//        });
-//    }
 
     public void setupNoteCollectionDropdown() {
         List<Collection> collections = server.getAllCollectionsFromServer();
@@ -260,17 +338,37 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private ListCell<Pair<String, String>> createFlagCell() {
         return new ListCell<>() {
             private final ImageView flagImage = new ImageView();
+            private final Tooltip tooltip = new Tooltip();
             @Override
             public void updateItem(Pair<String, String> item, boolean empty) {
                 super.updateItem(item, empty);
                 if (!empty && item != null) {
                     updateFlagCell(this, flagImage, item.getValue());
+                    setTooltip(tooltip);
+                    tooltip.setText(getLanguageName(item.getKey()));
                 } else {
                     setText(null);
                     setGraphic(null);
                 }
             }
         };
+    }
+
+    private String getLanguageName(String languageCode) {
+        switch (languageCode) {
+            case "en":
+                return "English";
+            case "nl":
+                return "Nederlands";
+            case "pl":
+                return "Polski";
+            case "it":
+                return "Italiano";
+            case "ro":
+                return "Română";
+            default:
+                return "";
+        }
     }
 
     private void updateFlagCell(ListCell<Pair<String, String>> cell, ImageView flagImage, String path) {
@@ -281,11 +379,17 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         cell.setPadding(new Insets(4,4,4,4)); cell.setGraphic(flagImage); cell.setText(null);
     }
 
+    private boolean isMacOS() {
+        return System.getProperty("os.name").toLowerCase().contains("mac");
+    }
+
     private void setupKeyboardShortcuts() {
+        // Determine the appropriate modifier key based on the OS
+        String modifierKey = isMacOS() ? "Meta" : "Ctrl"; // Use "Meta" for Command on macOS, "Ctrl" otherwise
         addNoteButton.sceneProperty().addListener((_, _, newScene) -> {
             if (newScene != null) {
                 newScene.getAccelerators().put(
-                        KeyCombination.keyCombination("Ctrl+N"),
+                        KeyCombination.keyCombination(modifierKey + "+N"),
                         this::addNote
                 );
             }
@@ -294,7 +398,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         refreshNotesButton.sceneProperty().addListener((_, _, newScene) -> {
             if (newScene != null) {
                 newScene.getAccelerators().put(
-                        KeyCombination.keyCombination("Ctrl+R"),
+                        KeyCombination.keyCombination(modifierKey + "+R"),
                         this::refreshNotes
                 );
             }
@@ -303,7 +407,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         removeNoteButton.sceneProperty().addListener((_, _, newScene) -> {
                 if (newScene != null) {
                     newScene.getAccelerators().put(
-                            KeyCombination.keyCombination("Ctrl+D"),
+                            KeyCombination.keyCombination(modifierKey + "+D"),
                             this::removeNote
                     );
                 }
@@ -321,6 +425,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
     @FXML
     void updateTitle() {
+        WebSocketClientApp webSocketClientApp1 = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         if (curNoteId == null || curNoteIndex == null) {
             return; // No note is currently selected
         }
@@ -338,6 +443,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             }
             notes.set(curNoteIndex, new Pair<>(curNoteId, newTitle));
             noteService.updateNoteTitle(newTitle, curNoteId);
+            webSocketClientApp1.broadcastTitle(newTitle,curNoteId);
             refreshNotes();
             System.out.println("Title updated successfully!");
         } catch (Exception e) {
@@ -346,8 +452,12 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     }
 
     private void handleNoteContentChange() {
+        WebSocketClientApp webSocketClientApp1 = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         noteDisplay.textProperty().addListener((_, _, newValue) -> {
-            eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, newValue, curNoteId, curNoteIndex));
+            if(webSocketChange){
+                webSocketClientApp1.broadcastContent(newValue,curNoteId);
+            }
+            eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, newValue, curNoteId, curNoteIndex, aliases));
         });
         removeNoteButton.setDisable(true);
     }
@@ -576,6 +686,10 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         }
     }
 
+    public void refreshCollections() {
+
+    }
+
     /**
      * Method to add notes
      */
@@ -730,6 +844,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
     private void refreshFiles(){
         var noteToSearch = notesList.getSelectionModel().getSelectedItem();
+        var noteListIndex = notesList.getSelectionModel().getSelectedIndex();
         if(noteToSearch==null){
             return;
         }
@@ -738,10 +853,19 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         System.out.println("Refreshing files for note " + idToSearch);
         List<EmbeddedFile> files = server.getFilesForNote(idToSearch);
         fileListContainer.getChildren().clear();
+        aliases.clear();
         for(var file:files){
             fileListContainer.getChildren().add(createFileBox(file.getFileName(),file.getId(), file.getFileType(), idToSearch));
+            String path = ServerUtils.getSERVER()+"files/"+idToSearch+"/"+file.getId()+"/download";
+            String fileName = file.getFileName();
+            if(file.getFileType().contains("image")){
+                aliases.put(fileName,path);
+            }
         }
+        eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, noteDisplay.getText(), noteToSearch.getKey(), noteListIndex, aliases));
     }
+
+
 
     public void AddFile() throws IOException {
         if(curNoteId==null){
@@ -764,7 +888,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             URLConnection connection = file.toURL().openConnection();
             String mimeType = connection.getContentType();
             Note curNote = server.getNoteByID(curNoteId);
-            EmbeddedFile EmbFile = new EmbeddedFile(file.getName(), mimeType, Files.readAllBytes(file.toPath()), curNote);
+            EmbeddedFile EmbFile = new EmbeddedFile(EmbeddedFile.getNameWithoutExtension(file.getName()), mimeType, Files.readAllBytes(file.toPath()), curNote);
             System.out.println("Adding a file " + file.getName() + " to Note " + curNote.getId());
             server.addFile(EmbFile);
             refreshFiles();
@@ -772,12 +896,61 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
     }
 
-    private void handleEditAlias(HBox box) {
-        System.out.println("Editing alias: " + box.getUserData().toString());
+    private void saveEdit(Label label, TextField textField, HBox box, int indexOfChange) {
+        if(!textField.getText().isEmpty()){
+            label.setText(textField.getText().trim().substring(0, Math.min(textField.getText().length(), 249)));
+        }
+        if(indexOfChange!=-1){
+            box.getChildren().set(indexOfChange, label);
+        }
+
     }
 
+    private void handleEditAlias(HBox file, Label fileLabel) {
+        int labelIndex = file.getChildren().indexOf(fileLabel);
+        if (labelIndex == -1) {
+            System.err.println("Couldn't change the title");
+            return;
+        }
+        TextField textField = new TextField(fileLabel.getText());
+        file.getChildren().set(labelIndex, textField);
+        textField.requestFocus();
+        Long fileId = Long.parseLong(file.getUserData().toString());
+        textField.setOnAction(_ -> {
+            saveEdit(fileLabel, textField, file, labelIndex);
+            try {
+                server.modifyFileName(fileId, fileLabel.getText());
+            } catch (Exception e) {
+                System.err.println("File couldn't be found");
+                refreshFiles();
+            }
+        });
+        textField.focusedProperty().addListener((_, _, isFocused) -> {
+            if (!isFocused) {
+                saveEdit(fileLabel, textField, file, labelIndex);
+
+                try {
+                    server.modifyFileName(fileId, fileLabel.getText());
+                    refreshFiles();
+                } catch (Exception e) {
+                    System.err.println("File couldn't be found");
+                    refreshFiles();
+                }
+            }
+        });
+
+
+    }
+
+
     private void handleDeleteFile(HBox box) {
-        System.out.println("Deleting file: " + box.getUserData().toString());
+        boolean delete = server.deleteFile(Long.parseLong(box.getUserData().toString()));
+        if(delete){
+            System.out.println("Deleted file " + box.getUserData().toString());
+        } else{
+            System.out.println("Failed to delete file " + box.getUserData().toString());
+        }
+        refreshFiles();
     }
 
     private String getExtensionFromMime(String fileType){
@@ -794,24 +967,11 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         HBox file = new HBox();
         file.setUserData(fileId);
         file.setAlignment(Pos.CENTER);
-        file.setStyle("-fx-padding: 2px 5px; -fx-border-width: 1px 1px; -fx-border-color: rgba(0,0,0,0.47); -fx-border-radius: 15px");
+        file.setStyle("-fx-spacing: 3px; -fx-padding: 2px 5px; -fx-border-width: 1px 1px; -fx-border-color: rgba(0,0,0,0.47); -fx-border-radius: 15px");
         Label fileLabel = new Label(name);
 
         fileLabel.setOnMouseClicked((MouseEvent _) -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save File");
-            fileChooser.setInitialDirectory(Paths.get(System.getProperty("user.home")).toFile());
-            String fileExtension = getExtensionFromMime(fileType);
-            fileChooser.setInitialFileName(name + fileExtension);
-            File downloadLocation = fileChooser.showSaveDialog(noteDisplay.getScene().getWindow());
-
-            if(downloadLocation != null){
-                try {
-                    server.downloadFile(noteId, fileId, downloadLocation);
-                } catch (FileNotFoundException e) {
-                    System.err.println("Error downloading file");
-                }
-            }
+            downloadFile(fileId, fileType, noteId, fileLabel);
         });
         Button editButton = new Button();
         FontIcon editIcon = new FontIcon("fa-pencil");
@@ -823,11 +983,29 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         deleteButton.setGraphic(deleteIcon);
         deleteButton.getStyleClass().addAll("button-icon", "flat");
 
-        editButton.setOnAction(_ -> handleEditAlias(file));
-        deleteButton.setOnAction(_ -> handleDeleteFile(file));
-
         file.getChildren().addAll(fileLabel, editButton, deleteButton);
+
+        editButton.setOnAction(_ -> handleEditAlias(file,fileLabel));
+        deleteButton.setOnAction(_ -> handleDeleteFile(file));
         return file;
+    }
+
+    private void downloadFile(Long fileId, String fileType, Long noteId, Label fileLabel) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save File");
+        fileChooser.setInitialDirectory(Paths.get(System.getProperty("user.home")).toFile());
+        String fileExtension = getExtensionFromMime(fileType);
+        fileChooser.setInitialFileName(fileLabel.getText());
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(fileType, "*"+fileExtension));
+        File downloadLocation = fileChooser.showSaveDialog(noteDisplay.getScene().getWindow());
+
+        if(downloadLocation != null){
+            try {
+                server.downloadFile(noteId, fileId, downloadLocation);
+            } catch (FileNotFoundException e) {
+                System.err.println("Error downloading file");
+            }
+        }
     }
 
     // Getters and setters for testing
@@ -947,9 +1125,41 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     @Override
     public void onMessageReceived(String message) {
         System.out.println("Received WebSocket message in NoteOverviewCtrl: " + message);
-        Platform.runLater(()->{
-            refreshNotes();
-        });
+        if(message.equals("noteAdded") || message.equals("noteDeleted") || message.equals("refreshNotes")) {
+            Platform.runLater(() -> {
+                refreshNotes();
+            });
+        }else if(message.contains("UpdatedNoteTitle")){
+            if(!(Integer.parseInt(message.split(" ")[0]) == id)){
+                Platform.runLater(() -> {
+                    refreshNotes();
+                });
+            }
+        } else if(message.contains("UpdatedChangedNote")){
+            if(!(Integer.parseInt(message.split(" ")[0]) == id) && curNoteId != null && curNoteId == Long.parseLong(message.split(" ")[1])){
+                Platform.runLater(() -> {
+                    webSocketChange = false;
+                    System.out.println(webSocketClientApp.getId());
+                    noteDisplay.setEditable(true);
+                    String updatedChangedNote = message.substring(message.indexOf("UpdatedChangedNote") +19 );
+                    updateNoteDisplay(updatedChangedNote);
+                    eventBus.publish(new NoteContentEvent(NoteEvent.EventType.CONTENT_CHANGE, updatedChangedNote, curNoteId, notesList.getSelectionModel().getSelectedIndex(), aliases));
+                    refreshNotes();
+                    webSocketChange = true;
+                });
+            }
+
+
+
+        }
+    }
+
+    public static int getId(){
+        return id;
+    }
+
+    public static void broadcastMessage(String text){
+        webSocketClientApp.broadcastContent(text, null);
     }
 
 }

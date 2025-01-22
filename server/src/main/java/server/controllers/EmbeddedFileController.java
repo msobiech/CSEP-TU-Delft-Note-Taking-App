@@ -14,11 +14,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/files")
-public class EmbeddedFilesController {
+public class EmbeddedFileController {
     private final EmbeddedFileService embeddedFileService;
 
     @Autowired
-    public EmbeddedFilesController(EmbeddedFileServiceImpl fileService) {
+    public EmbeddedFileController(EmbeddedFileServiceImpl fileService) {
         this.embeddedFileService = fileService;
     }
 
@@ -53,15 +53,36 @@ public class EmbeddedFilesController {
     }
 
     @PostMapping
-    public ResponseEntity<EmbeddedFile> createFile(@RequestBody EmbeddedFile file) throws IllegalAccessException {
-        EmbeddedFile addedFile = embeddedFileService.saveFile(file);
+    public ResponseEntity<EmbeddedFile> createFile(@RequestBody EmbeddedFile file) {
+        EmbeddedFile addedFile = null;
+        try {
+            addedFile = embeddedFileService.saveFile(file);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
         System.out.println("Created new file with id: " + addedFile.getId());
         return ResponseEntity.ok(addedFile);
     }
 
     @PutMapping("/{fileId}")
-    public ResponseEntity<EmbeddedFile> updateFile(@PathVariable("fileId") Long fileId,@RequestBody String newName) throws IllegalAccessException {
-        EmbeddedFile file = embeddedFileService.modifyFileNameById(fileId, newName);
+    public ResponseEntity<EmbeddedFile> updateFile(@PathVariable("fileId") Long fileId, @RequestBody String newName){
+        EmbeddedFile file = null;
+        try {
+            file = embeddedFileService.modifyFileNameById(fileId, newName);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(file);
+    }
+
+    @DeleteMapping("/{fileid}")
+    public ResponseEntity<Boolean> deleteFile(@PathVariable("fileid") Long fileId){
+        try{
+            embeddedFileService.deleteFileById(fileId);
+            return ResponseEntity.ok(true);
+        }catch(Exception e){
+            return ResponseEntity.notFound().build();
+        }
+
     }
 }

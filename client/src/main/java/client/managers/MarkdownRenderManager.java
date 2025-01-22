@@ -17,6 +17,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import static client.event.NoteEvent.EventType.CONTENT_CHANGE;
 
@@ -39,7 +40,13 @@ public class MarkdownRenderManager {
         System.out.println(noteEvent + " has been received by " + this.getClass().getSimpleName());
         if(noteEvent.getEventType() == CONTENT_CHANGE){
             try {
-                renderMarkdown(noteEvent.getChange());
+                String markdownText = "";
+                Map<String,String> aliases = noteEvent.getAliases();
+                for(var alias : aliases.keySet()){
+                    markdownText += "["+ alias + "]: " + aliases.get(alias) + "\n";
+                }
+                markdownText+=noteEvent.getChange();
+                renderMarkdown(markdownText);
             } catch (Exception e) {
                 e.printStackTrace();
                 mainCtrl.showError(e.toString());
@@ -47,7 +54,7 @@ public class MarkdownRenderManager {
         }
     }
 
-    private void renderMarkdown(String markdownText) throws InterruptedException {
+    public void renderMarkdown(String markdownText) {
 
         String cssFile = null;
         String htmlContent = null;

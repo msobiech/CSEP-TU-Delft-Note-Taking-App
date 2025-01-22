@@ -1,11 +1,15 @@
 package client.WebSockets;
 
+import org.java_websocket.WebSocket;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class GlobalWebSocketManager {
 
+    private static int noteOverviewId ;
     // Singleton instance
     private static GlobalWebSocketManager instance;
 
@@ -14,6 +18,8 @@ public class GlobalWebSocketManager {
 
     // Listeners to notify on message reception
     private final List<WebSocketMessageListener> listeners = new ArrayList<>();
+
+    private static final Set<WebSocket> connections = new CopyOnWriteArraySet<>();
 
     // Private constructor to enforce singleton pattern
     private GlobalWebSocketManager() { }
@@ -66,5 +72,23 @@ public class GlobalWebSocketManager {
     public void removeMessageListener(WebSocketMessageListener listener) {
         listeners.remove(listener);
     }
+
+    public static void addConnection(WebSocket conn) {
+        connections.add(conn);
+    }
+
+    public static void removeConnection(WebSocket conn) {
+        connections.remove(conn);
+    }
+
+    public static void setNoteOverviewId(Integer id){
+        noteOverviewId = id;
+    }
+
+    public Integer getNoteOverviewId(){
+        return noteOverviewId;
+    }
+
+
 }
 
