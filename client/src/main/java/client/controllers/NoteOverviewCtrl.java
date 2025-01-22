@@ -1,6 +1,6 @@
 package client.controllers;
 
-
+import javafx.animation.FadeTransition;
 import client.DialogFactory;
 import client.WebSockets.GlobalWebSocketManager;
 import client.WebSockets.WebSocketClientApp;
@@ -11,6 +11,7 @@ import client.utils.DebounceService;
 import client.utils.NoteService;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,10 +26,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import javafx.util.Pair;
 import models.Collection;
 import models.EmbeddedFile;
@@ -45,6 +49,8 @@ import java.util.*;
 
 import org.apache.tika.mime.*;
 
+import javafx.scene.paint.Color;
+
 
 public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener {
 
@@ -56,7 +62,11 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private final EventBus eventBus;
     public Button showShortcutsButton;
 
+
     private boolean webSocketChange = true;
+
+    @FXML
+    private VBox feedBox;
 
     @FXML
     private ComboBox<Pair<String, String>> flagDropdown;
@@ -116,7 +126,9 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private MarkdownRenderManager markdownRenderManager;
     private LanguageManager languageManager;
 
-    private ResourceBundle language;
+    private static ResourceBundle language;
+
+    private FadeTransition currentAnimation;
 
     private Runnable lastTask = null;
 
@@ -145,7 +157,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         markdownRenderManager = new MarkdownRenderManager(markdownContent,markdownPreview,mainCtrl);
-        noteManager = new NoteManager(noteService, server);
+        noteManager = new NoteManager(noteService, server, this);
         noteListManager = new NoteListManager(notesList);
         languageManager = new LanguageManager();
         language = ResourceBundle.getBundle("client.controllers.language", LanguageManager.getLanguage());
@@ -621,7 +633,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
      */
     public void refreshNotes() {
         System.out.println("Refreshed the note list");
-
         if (noteListManager == null) {
             System.err.println("NoteListManager is not initialized. Skipping refresh.");
             return;
@@ -1008,7 +1019,48 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         }
     }
 
+    public void showFadeBox(String text, boolean isGood) {
+        if (currentAnimation != null && currentAnimation.getStatus() == Timeline.Status.RUNNING) {
+            feedBox.setVisible(false);
+            currentAnimation.stop();
+        }
+        feedBox.setBackground(Background.fill(isGood? Color.DARKSEAGREEN:Color.INDIANRED));
+        var children = feedBox.getChildren();
+        Label label = (Label) children.getFirst();
+        label.setText(text);
+        feedBox.setVisible(true);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), feedBox);
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(0.8);
+        currentAnimation = fadeIn;
+        fadeIn.setOnFinished(_ -> fadeOut());
+        fadeIn.play();
+    }
+
+    private void fadeOut() {
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(1), feedBox);
+        fadeOut.setFromValue(0.8);
+        fadeOut.setToValue(0.0);
+        currentAnimation = fadeOut;
+        fadeOut.setOnFinished(_ -> feedBox.setVisible(false));
+        fadeOut.play();
+    }
+
+    public void refreshNotesAction() {
+        try{
+            refreshNotes();
+        } catch(Exception e){
+            showFadeBox(language.getString("bad.refresh"), false);
+            return;
+        }
+        showFadeBox(language.getString("good.refresh"), true);
+
+
+    }
     // Getters and setters for testing
+    public ResourceBundle getLanguage(){
+        return language;
+    }
     public Label getCollectionText() {
         return collectionText;
     }
@@ -1161,5 +1213,4 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     public static void broadcastMessage(String text){
         webSocketClientApp.broadcastContent(text, null);
     }
-
 }

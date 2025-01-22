@@ -17,6 +17,7 @@
 <?import javafx.scene.web.WebView?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
+<?import javafx.scene.layout.StackPane?>
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.NoteOverviewCtrl" >
     <center>
         <HBox spacing="5.0">
@@ -41,7 +42,7 @@
                             <String fx:value="flat" />
                         </styleClass>
                     </Button>
-                    <Button fx:id="refreshNotesButton" mnemonicParsing="false" onAction="#refreshNotes">
+                    <Button fx:id="refreshNotesButton" mnemonicParsing="false" onAction="#refreshNotesAction">
                         <graphic>
                             <FontIcon iconLiteral="fa-rotate-right" />
                         </graphic>
@@ -71,7 +72,13 @@
                     </Button>
                     <ComboBox fx:id="noteCollectionDropdown" prefHeight="26.0" prefWidth="65.0" />
                 </HBox>
-                <TextArea fx:id="noteDisplay" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333" wrapText="true" VBox.vgrow="ALWAYS" />
+                <StackPane VBox.vgrow="ALWAYS">
+                    <TextArea fx:id="noteDisplay" style="-fx-background-color: #CCD5AE; -fx-text-fill: #333333" wrapText="true" />
+                    <VBox fx:id="feedBox" opacity="0.0" visible="false" maxHeight="50.0" style="-fx-background-color: lightblue; -fx-padding: 10; -fx-border-color: gray; -fx-border-width: 1" alignment="CENTER" StackPane.alignment="CENTER">
+                        <Label text="This is a fading message" style="-fx-font-size: 14; -fx-text-fill: black;"/>
+                    </VBox>
+
+                </StackPane>
                 <HBox alignment="CENTER" prefHeight="46.0" spacing="5.0">
                     <Label minWidth="100.0" text="%embedded.files" />
                     <ScrollPane prefWidth="400.0" hbarPolicy="ALWAYS" vbarPolicy="NEVER" prefHeight="100.0">

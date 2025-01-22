@@ -15,6 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.net.URI;
+import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -30,13 +31,15 @@ public class NoteManager {
     private final ServerUtils server;
 
     private WebSocketClientApp webSocketClientApp;
+    private static NoteOverviewCtrl controller;
 
 
 
 
-    public NoteManager(NoteService noteService, ServerUtils server) {
+    public NoteManager(NoteService noteService, ServerUtils server, NoteOverviewCtrl noteOverviewCtrl) {
         this.noteService = noteService;
         this.server = server;
+        this.controller = noteOverviewCtrl;
         eventBus.subscribe(NoteEvent.class, this::handleContentChange);
         webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
     }
@@ -132,15 +135,24 @@ public class NoteManager {
     }
 
     private void handleNoteAddition(){
-        server.addNote();
+        ResourceBundle lang = controller.getLanguage();
+        try{
+            server.addNote();
+        }catch(Exception e){
+            controller.showFadeBox(lang.getString("bad.add"), false);
+            return;
+        }
+        controller.showFadeBox(lang.getString("good.add"), true);
+
     }
 
     private void handleNoteDeletion(NoteStatusEvent event) {
+        ResourceBundle lang = controller.getLanguage();
         try {
             if (event.getChangeID() != null) {
                 // Delete the note from the backend
                 server.deleteNoteByID(event.getChangeID());
-                System.out.println("Note " + event.getChangeID() + " deleted successfully.");
+                controller.showFadeBox(lang.getString("good.delete"), true);
 
                 // Update the UI (must be done on the JavaFX thread)
 
@@ -155,10 +167,10 @@ public class NoteManager {
                     }
 
                 }else {
-                System.err.println("Note ID is null. Cannot delete note.");
+                controller.showFadeBox(lang.getString("bad.delete"), false);
             }
         } catch (Exception e) {
-            System.err.println("Error while deleting note: " + e.getMessage());
+             controller.showFadeBox(lang.getString("bad.delete"), false);
         }
     }
 
