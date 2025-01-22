@@ -59,12 +59,12 @@ e.g: public void whateverMethod(){
         <module name="ParameterName">
         </module>
         <module name="LocalVariableName">
-            <property name="severity" value="warning"/>
         </module>
         <module name="StaticVariableName">
             <property name="severity" value="warning"/>
         </module>
         <module name="LambdaParameterName">
+            <property name="severity" value="warning"/>
         </module>
         <module name="TypeName">
         </module>

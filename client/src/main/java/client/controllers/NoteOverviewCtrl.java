@@ -928,9 +928,9 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             URLConnection connection = file.toURL().openConnection();
             String mimeType = connection.getContentType();
             Note curNote = server.getNoteByID(curNoteId);
-            EmbeddedFile EmbFile = new EmbeddedFile(EmbeddedFile.getNameWithoutExtension(file.getName()), mimeType, Files.readAllBytes(file.toPath()), curNote);
+            EmbeddedFile embFile = new EmbeddedFile(EmbeddedFile.getNameWithoutExtension(file.getName()), mimeType, Files.readAllBytes(file.toPath()), curNote);
             System.out.println("Adding a file " + file.getName() + " to Note " + curNote.getId());
-            server.addFile(EmbFile);
+            server.addFile(embFile);
             refreshFiles();
         }
 

@@ -51,14 +51,15 @@ public class WebSocketClientAppTest {
         URI mockUri = URI.create("ws://localhost:8008/websocket-endpoint");
         WebSocketClientApp client = spy(new WebSocketClientApp(mockUri));
 
+
         // Simulate receiving a message
-        client.onMessage("noteAdded");
-        client.onMessage("noteDeleted");
-        client.onMessage("otherMessage");
+        client.onMessage("11 noteAdded");
+        client.onMessage("11 noteDeleted");
+        client.onMessage("11 otherMessage");
 
         // Verify the message handling
-        verify(client, times(1)).onMessage("noteAdded");
-        verify(client, times(1)).onMessage("noteDeleted");
+        verify(client, times(1)).onMessage("11 noteAdded");
+        verify(client, times(1)).onMessage("11 noteDeleted");
     }
     @Test
     public void testBroadcastRefresh() {
