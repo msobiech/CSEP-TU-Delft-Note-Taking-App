@@ -31,7 +31,7 @@ public class WebSocketClientApp extends WebSocketClient {
             String actualMessage = message.split(" ")[1];
             switch(actualMessage){
                 case "noteAdded" :
-                    System.out.println("addition received");
+                    System.out.println("addition received by " + this);
                     break;
                 case "noteDeleted":
                     System.out.println("Delete received");
@@ -69,6 +69,7 @@ public class WebSocketClientApp extends WebSocketClient {
             return "ErrorCaught";
         }
         return "noteAdded";
+        webSocketClientApp.close();
     }
 
     public Integer getId() {
@@ -94,6 +95,7 @@ public class WebSocketClientApp extends WebSocketClient {
             return ("ErrorCaught");
         }
         return "noteDeleted";
+        webSocketClientApp.close();
     }
 
     public String broadcastChange(String change){
@@ -127,6 +129,7 @@ public class WebSocketClientApp extends WebSocketClient {
 
         }
         return ("content broadcast");
+        webSocketClientApp.close();
     }
 
 
@@ -144,7 +147,8 @@ public class WebSocketClientApp extends WebSocketClient {
             return ("Error caught");
 
         }
-        return null;
+        return ("Title broadcasted");
+        webSocketClientApp.close();
     }
 
     public String broadcastRefresh(){
@@ -160,4 +164,6 @@ public class WebSocketClientApp extends WebSocketClient {
             return "Error Caught";
         }
         return ("Notes refreshed");    }
+        webSocketClientApp.close();
+    }
 }

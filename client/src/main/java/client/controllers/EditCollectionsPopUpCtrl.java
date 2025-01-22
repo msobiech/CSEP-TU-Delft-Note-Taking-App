@@ -13,6 +13,7 @@ import javafx.scene.control.TextField;
 import models.Collection;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 public class EditCollectionsPopUpCtrl {
     @FXML
@@ -44,6 +45,8 @@ public class EditCollectionsPopUpCtrl {
 
     @FXML
     private Label statusLabel;
+
+    private ResourceBundle language;
 
     private final ServerUtils serverUtils;
     private ObservableList<Collection> collections;
