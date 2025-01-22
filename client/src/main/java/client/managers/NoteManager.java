@@ -32,12 +32,15 @@ public class NoteManager {
     private WebSocketClientApp webSocketClientApp;
 
 
-    public NoteManager(NoteService noteService, ServerUtils server, NoteOverviewCtrl noteOverviewCtrl) {
+
+
+    public NoteManager(NoteService noteService, ServerUtils server, NoteOverviewCtrl noteOverviewCtrl, WebSocketClientApp app) {
+
         this.noteService = noteService;
         this.server = server;
         this.noteOverviewCtrl = noteOverviewCtrl;
         eventBus.subscribe(NoteEvent.class, this::handleContentChange);
-        webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
+        webSocketClientApp = app;
     }
 
     private void handleContentChange(NoteEvent event) {
@@ -185,6 +188,7 @@ public class NoteManager {
             Note addedNote = server.addNote();
             Long noteId = addedNote.getId();
             String noteTitle = addedNote.getTitle();
+
             eventBus.publish(new UndoableActionEvent(
                     -1,
                     UndoableActionEvent.ActionType.ADD_FILE,

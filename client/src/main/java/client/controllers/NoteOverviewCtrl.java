@@ -2,6 +2,7 @@ package client.controllers;
 
 import javafx.animation.FadeTransition;
 import client.DialogFactory;
+import client.InjectorProvider;
 import client.WebSockets.GlobalWebSocketManager;
 import client.WebSockets.WebSocketClientApp;
 import client.WebSockets.WebSocketMessageListener;
@@ -12,6 +13,7 @@ import client.utils.NoteService;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import javafx.animation.Timeline;
+import com.google.inject.Singleton;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -52,6 +54,7 @@ import org.apache.tika.mime.*;
 import javafx.scene.paint.Color;
 
 
+@Singleton
 public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener {
 
     private final ServerUtils server;
@@ -126,6 +129,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private MarkdownRenderManager markdownRenderManager;
     private LanguageManager languageManager;
     private UndoManager undoManager;
+    private KeyEventManager keyEventManager;
 
     private static ResourceBundle language;
 
@@ -149,19 +153,20 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         this.debounceService = debounceService;
         this.dialogFactory = dialogFactory;
         this.eventBus = eventbus;
+
         webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
-        GlobalWebSocketManager.getInstance().addMessageListener(this);
+        InjectorProvider.getInjector().getInstance(GlobalWebSocketManager.class).addMessageListener(this);
         id = (int) (Math.random() * (1000 + 1));
-        Platform.runLater(KeyEventManager::new);
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         markdownRenderManager = new MarkdownRenderManager(markdownContent,markdownPreview,mainCtrl);
-        noteManager = new NoteManager(noteService, server, this);
+        noteManager = new NoteManager(noteService, server, this, webSocketClientApp);
         noteListManager = new NoteListManager(notesList);
         languageManager = new LanguageManager();
         undoManager = new UndoManager();
+        keyEventManager = new KeyEventManager();
         language = ResourceBundle.getBundle("client.controllers.language", LanguageManager.getLanguage());
         setupSearch();
         setupSelectCollection();
@@ -275,6 +280,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             searchBar.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
                 boolean isModifierPressed = isMacOS() ? event.isMetaDown() : event.isControlDown();
                 if (isModifierPressed && event.getCode() == KeyCode.M) {
+
                     eventBus.publish(new EditCollectionsEvent());
                     event.consume();
                 }
