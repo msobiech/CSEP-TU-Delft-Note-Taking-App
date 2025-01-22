@@ -172,7 +172,7 @@ public class MainCtrl {
     public void showEditCollections(){
         this.popUp = new Stage();
         popUp.setScene(editScene);
-        popUp.setTitle("Collections: Edit");
+        popUp.setTitle(language.getString("collections.popup.primary.title")    );
         popUp.setResizable(false);
         popUp.show();
     }
@@ -180,7 +180,7 @@ public class MainCtrl {
     public void showShortcuts(){
         this.popUp = new Stage();
         popUp.setScene(shortcutsScene);
-        popUp.setTitle("Shortcuts: Overview");
+        popUp.setTitle(language.getString("shortcuts.popup.primary.title"));
         popUp.setResizable(false);
         popUp.show();
     }
@@ -195,4 +195,13 @@ public class MainCtrl {
         showOverview();
     }
 
+    public void updateEditCollections(Pair<EditCollectionsPopUpCtrl, Parent> collectionEdit) {
+        this.editCtrl = collectionEdit.getKey();
+        this.editScene = new Scene(collectionEdit.getValue());
+    }
+
+    public void updateShortcuts(Pair<ShortcutsPopUpCtrl, Parent> shortcuts) {
+        this.shortcutsCtrl = shortcuts.getKey();
+        this.shortcutsScene = new Scene(shortcuts.getValue());
+    }
 }

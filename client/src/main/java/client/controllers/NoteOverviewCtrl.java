@@ -144,7 +144,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             removeNoteButton.setDisable(newValue == null);
         });
 
-        handleEditCollectionsPressed();
+//        handleEditCollectionsPressed();
         setupKeyboardShortcuts();
     }
 
@@ -155,14 +155,14 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         });
     }
 
-    private void handleEditCollectionsPressed() {
-        collectionDropdown.setOnAction(event -> {
-            Pair<Long, String> selectedOption = collectionDropdown.getValue();
-            if ("Edit Collections...".equals(selectedOption.getValue())) {
-                mainCtrl.showEditCollections(); // Call the method to show the popup
-            }
-        });
-    }
+//    private void handleEditCollectionsPressed() {
+//        collectionDropdown.setOnAction(event -> {
+//            Pair<Long, String> selectedOption = collectionDropdown.getValue();
+//            if ("Edit Collections...".equals(selectedOption.getValue())) {
+//                mainCtrl.showEditCollections(); // Call the method to show the popup
+//            }
+//        });
+//    }
 
     public void setupNoteCollectionDropdown() {
         List<Collection> collections = server.getAllCollectionsFromServer();
@@ -687,7 +687,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                 refreshNotes();
                 break;
             case -2:
-                //showEditCollectionsScreen();
+                mainCtrl.showEditCollections();
                 refreshNotes();
                 break;
             default:

@@ -39,7 +39,7 @@ public class MainEventBus implements EventBus {
 
 
     @Override
-    public void unsubcribeAll(){
+    public void unsubscribeAll(){
         subscribers.clear();
     }
 
