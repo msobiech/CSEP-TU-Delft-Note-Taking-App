@@ -31,7 +31,7 @@ public class WebSocketClientApp extends WebSocketClient {
     public void onMessage(String message) {
         switch(message){
             case "noteAdded" :
-                System.out.println("addition received");
+                System.out.println("addition received by " + this );
                 break;
             case "noteDeleted":
                 System.out.println("Delete received");
@@ -55,7 +55,7 @@ public class WebSocketClientApp extends WebSocketClient {
         this.connect();
     }
 
-    public void broadcastAdd(){
+    public void broadcastAdd() {
         WebSocketClientApp webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         try {
             if (webSocketClientApp.connectBlocking()) {
@@ -65,6 +65,7 @@ public class WebSocketClientApp extends WebSocketClient {
             }
         } catch (InterruptedException _) {
         }
+        webSocketClientApp.close();
 
     }
 
@@ -91,6 +92,7 @@ public class WebSocketClientApp extends WebSocketClient {
             }
         } catch (InterruptedException _) {
         }
+        webSocketClientApp.close();
 
     }
 
@@ -120,6 +122,7 @@ public class WebSocketClientApp extends WebSocketClient {
         } catch (InterruptedException e) {
 
         }
+        webSocketClientApp.close();
     }
 
     public int getLocalPort() {
@@ -144,6 +147,7 @@ public class WebSocketClientApp extends WebSocketClient {
         } catch (InterruptedException e) {
 
         }
+        webSocketClientApp.close();
     }
 
     public void broadcastRefresh(){
@@ -156,5 +160,6 @@ public class WebSocketClientApp extends WebSocketClient {
         } catch (InterruptedException e) {
             System.out.println("Problem here buddy");
         }
+        webSocketClientApp.close();
     }
 }
