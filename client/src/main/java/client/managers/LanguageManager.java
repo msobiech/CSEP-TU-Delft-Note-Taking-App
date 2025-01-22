@@ -23,7 +23,6 @@ public class LanguageManager {
     public static final String SETTINGS_LOCATION = "settings.ser";
 
     public LanguageManager() {
-        System.out.println(this + " subscribed for " + LanguageEvent.class.getSimpleName());
         eventBus.subscribe(LanguageEvent.class, this::handleLanguageChange);
 
     }
@@ -38,7 +37,6 @@ public class LanguageManager {
         }
     }
     private void handleLanguageChange(LanguageEvent languageEvent) {
-        System.out.println(languageEvent + " has been received by " + this.getClass().getSimpleName());
         String language = languageEvent.getLanguage().toLowerCase();
         Locale locale = new Locale(language);
         saveLanguageSetting(SETTINGS_LOCATION, locale);

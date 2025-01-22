@@ -125,6 +125,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private NoteListManager noteListManager;
     private MarkdownRenderManager markdownRenderManager;
     private LanguageManager languageManager;
+    private UndoManager undoManager;
 
     private static ResourceBundle language;
 
@@ -151,7 +152,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         GlobalWebSocketManager.getInstance().addMessageListener(this);
         id = (int) (Math.random() * (1000 + 1));
-        Platform.runLater(() -> new KeyEventManager(eventBus, searchBar));
+        Platform.runLater(KeyEventManager::new);
     }
 
     @Override
@@ -160,6 +161,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         noteManager = new NoteManager(noteService, server, this);
         noteListManager = new NoteListManager(notesList);
         languageManager = new LanguageManager();
+        undoManager = new UndoManager();
         language = ResourceBundle.getBundle("client.controllers.language", LanguageManager.getLanguage());
         setupSearch();
         setupSelectCollection();
@@ -176,6 +178,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         handleEscapeKeyPressed();
         handleNoteNavigation();
         setupTooltips();
+        handleEditCollectionShortcut();
+        handleUndoRedo();
 
         notesList.getSelectionModel().selectedItemProperty().addListener((_, _, newValue) -> {
             removeNoteButton.setDisable(newValue == null);
@@ -236,12 +240,43 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         });
     }
 
+    private void handleUndoRedo() {
+        Platform.runLater(() -> {
+            searchBar.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                boolean isModifierPressed = isMacOS() ? event.isMetaDown() : event.isControlDown();
+                boolean isShiftPressed = event.isShiftDown();
+                // Undo: Cmd+Z or Ctrl+Z
+                if (isModifierPressed && !isShiftPressed && event.getCode() == KeyCode.Z) {
+                    eventBus.publish(new UndoRequestedEvent());
+                    event.consume();
+                }
+                // Redo: Shift+Cmd+Z or Shift+Ctrl+Z
+                if (isModifierPressed && isShiftPressed && event.getCode() == KeyCode.Z) {
+                    eventBus.publish(new RedoRequestedEvent());
+                    event.consume();
+                }
+            });
+        });
+    }
+
     private void handleEscapeKeyPressed() {
         Platform.runLater(() -> {
             searchBar.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
                 if (event.getCode() == KeyCode.ESCAPE) {
                     eventBus.publish(new EscapeKeyEvent()); // Publish the ESC key event
                     event.consume(); // Prevent further propagation
+                }
+            });
+        });
+    }
+
+    private void handleEditCollectionShortcut() {
+        Platform.runLater(() -> {
+            searchBar.getScene().addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, event -> {
+                boolean isModifierPressed = isMacOS() ? event.isMetaDown() : event.isControlDown();
+                if (isModifierPressed && event.getCode() == KeyCode.M) {
+                    eventBus.publish(new EditCollectionsEvent());
+                    event.consume();
                 }
             });
         });
@@ -437,30 +472,20 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
     @FXML
     void updateTitle() {
-        WebSocketClientApp webSocketClientApp1 = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         if (curNoteId == null || curNoteIndex == null) {
             return; // No note is currently selected
         }
         String newTitle = noteTitle.getText().trim();
         if (newTitle.isEmpty()) {
-            newTitle = noteService.generateUniqueTitle();
+            newTitle = noteService.generateUniqueTitle(); // Generate unique title if empty
             noteTitle.setText(newTitle);
         }
-        try {
-            if (noteService.titleExists(newTitle)){
-                if (!newTitle.equals(notes.get(curNoteIndex).getValue())) {
-                    mainCtrl.showError("This title is already in use. Please choose a different title.");
-                }
-                return;
-            }
-            notes.set(curNoteIndex, new Pair<>(curNoteId, newTitle));
-            noteService.updateNoteTitle(newTitle, curNoteId);
-            webSocketClientApp1.broadcastTitle(newTitle,curNoteId);
-            refreshNotes();
-            System.out.println("Title updated successfully!");
-        } catch (Exception e) {
-            mainCtrl.showError("Failed to update the title. Please try again.");
-        }
+        eventBus.publish(new NoteEvent(
+                NoteEvent.EventType.TITLE_CHANGE,
+                newTitle,
+                curNoteId,
+                curNoteIndex
+        ));
     }
 
     private void handleNoteContentChange() {
@@ -624,7 +649,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
      * @param note the content to set the display to
      * This method only fills out the client fields. It does not communicate with the server in order to save the content.
      */
-    private void updateNoteDisplay(String note) {
+    public void updateNoteDisplay(String note) {
         noteDisplay.setText(note);
     }
 
@@ -704,15 +729,21 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     /**
      * Method to add notes
      */
-    public void addNote(){
+    public void addNote() {
         try{
             System.out.println("Adding a new note");
             eventBus.publish(new NoteStatusEvent(NoteEvent.EventType.NOTE_ADD, null));
             refreshNotes();
+            if (!notes.isEmpty()) {
+                Pair<Long, String> newNotePair = notes.getLast(); // Get the last note added
+                notesList.getSelectionModel().select(newNotePair);
+                notesList.scrollTo(newNotePair);
+                notesList.requestFocus();
+                noteDisplay.requestFocus();
+            }
         } catch(Exception e){
             System.out.println("Failed to add note: " + e.getMessage());
         }
-
     }
 
     @FXML
@@ -772,6 +803,15 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         } else {
             notesList.getSelectionModel().clearSelection(); // Clear selection if no valid note
         }
+        // Focus on the first note and enable immediate text editing
+        if (!notes.isEmpty()) {
+            notesList.getSelectionModel().selectFirst(); // Select the first note
+            notesList.requestFocus(); // Set focus on the list
+            // Automatically focus on the text input field for editing
+            noteDisplay.requestFocus();
+        } else {
+            notesList.getSelectionModel().clearSelection(); // Clear selection if no valid note
+        }
     }
 
     @FXML
@@ -817,8 +857,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                 refreshNotes();
                 break;
             case -2:
-                mainCtrl.showEditCollections();
-                refreshNotes();
+                eventBus.publish(new EditCollectionsEvent());
                 break;
             default:
                 List<Note> notesInCollection = server.getNotesByCollectionId(selectedCollection.getKey());

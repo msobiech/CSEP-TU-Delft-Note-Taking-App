@@ -37,7 +37,6 @@ public class MarkdownRenderManager {
     }
 
     private void handleContentChange(NoteEvent noteEvent) {
-        System.out.println(noteEvent + " has been received by " + this.getClass().getSimpleName());
         if(noteEvent.getEventType() == CONTENT_CHANGE){
             try {
                 String markdownText = "";
