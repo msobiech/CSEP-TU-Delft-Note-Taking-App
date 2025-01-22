@@ -36,9 +36,6 @@ public class MainCtrl {
     private NoteOverviewCtrl overviewCtrl;
     private Scene overview;
 
-    private AddNoteCtrl addCtrl;
-    private Scene add;
-
     private ErrorPopUpCtrl errorCtrl;
     private Scene errorScene;
 
@@ -60,8 +57,6 @@ public class MainCtrl {
      * Initialization of the main Stage
      * @param primaryStage the stage that will be used to display the app's fronted
      * @param overview the pair of controller for NoteOverview and JavaFX class Parent that links the corresponding UI with its controller
-     * @param add the pair of controller for NoteAddition and JavaFX class Parent that links the corresponding UI with its controller
-     *            (Currently not functional)
      * @param error the pair of controller for the handling of error message popups and JavaFX class Parent that links the corresponding UI
      *              with its controller.
      * @param serverURL the pair of controller for the handling of Server selection
@@ -74,15 +69,11 @@ public class MainCtrl {
      *                      and JavaFX class Parent that links the corresponding UI with its
      *                      controller
      */
-    public void initialize(Stage primaryStage, Pair<NoteOverviewCtrl, Parent> overview,
-            Pair<AddNoteCtrl, Parent> add, Pair<ErrorPopUpCtrl, Parent> error, Pair<ServerSelectionCtrl, Parent> serverURL, Pair<EditCollectionsPopUpCtrl, Parent> collectionEdit
-            ,Pair<ShortcutsPopUpCtrl, Parent> showShortcuts) {
+    public void initialize(Stage primaryStage, Pair<NoteOverviewCtrl, Parent> overview, Pair<ErrorPopUpCtrl, Parent> error
+            ,Pair<ServerSelectionCtrl, Parent> serverURL, Pair<EditCollectionsPopUpCtrl, Parent> collectionEdit, Pair<ShortcutsPopUpCtrl, Parent> showShortcuts) {
         this.primaryStage = primaryStage;
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
-
-        this.addCtrl = add.getKey();
-        this.add = new Scene(add.getValue());
 
         this.errorCtrl = error.getKey();
         this.errorScene = new Scene(error.getValue());
@@ -119,8 +110,8 @@ public class MainCtrl {
         primaryStage.setMinWidth(700);
         primaryStage.setMinHeight(500);
         overviewCtrl.refreshNotes();
-    }
 
+    }
     public void toggleMode() {
         isDarkMode = !isDarkMode;
         if(primaryStage!=null){
@@ -138,14 +129,6 @@ public class MainCtrl {
         } else {
             scene.getStylesheets().add(LIGHT_MODE_CSS);
         }
-    }
-    /**
-     * Method to show the scene for note addition
-     */
-    public void showAdd() {
-        //primaryStage.setTitle("Notes: Adding Note");
-        //primaryStage.setScene(add);
-        //primaryStage.setResizable(false);
     }
 
     /**
@@ -195,7 +178,7 @@ public class MainCtrl {
     public void showEditCollections(){
         this.popUp = new Stage();
         popUp.setScene(editScene);
-        popUp.setTitle("Collections: Edit");
+        popUp.setTitle(language.getString("collections.popup.primary.title")    );
         popUp.setResizable(false);
         popUp.show();
     }
@@ -203,7 +186,7 @@ public class MainCtrl {
     public void showShortcuts(){
         this.popUp = new Stage();
         popUp.setScene(shortcutsScene);
-        popUp.setTitle("Shortcuts: Overview");
+        popUp.setTitle(language.getString("shortcuts.popup.primary.title"));
         popUp.setResizable(false);
         popUp.show();
     }
@@ -216,6 +199,16 @@ public class MainCtrl {
         this.overviewCtrl = overview.getKey();
         this.overview = new Scene(overview.getValue());
         showOverview();
+    }
+
+    public void updateEditCollections(Pair<EditCollectionsPopUpCtrl, Parent> collectionEdit) {
+        this.editCtrl = collectionEdit.getKey();
+        this.editScene = new Scene(collectionEdit.getValue());
+    }
+
+    public void updateShortcuts(Pair<ShortcutsPopUpCtrl, Parent> shortcuts) {
+        this.shortcutsCtrl = shortcuts.getKey();
+        this.shortcutsScene = new Scene(shortcuts.getValue());
     }
 
     public boolean isDarkMode() {

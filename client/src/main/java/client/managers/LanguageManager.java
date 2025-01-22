@@ -2,8 +2,10 @@ package client.managers;
 
 import client.InjectorProvider;
 import client.MyFXML;
+import client.controllers.EditCollectionsPopUpCtrl;
 import client.controllers.MainCtrl;
 import client.controllers.NoteOverviewCtrl;
+import client.controllers.ShortcutsPopUpCtrl;
 import client.event.EventBus;
 import client.event.LanguageEvent;
 import client.event.MainEventBus;
@@ -41,12 +43,16 @@ public class LanguageManager {
         Locale locale = new Locale(language);
         saveLanguageSetting(SETTINGS_LOCATION, locale);
         ResourceBundle bundle = ResourceBundle.getBundle("client.controllers.language", locale);
-        eventBus.unsubcribeAll();
+        eventBus.unsubscribeAll();
         var overview = FXML.load(NoteOverviewCtrl.class, bundle, "client", "views", "NoteOverview.fxml");
+        var collectionsEdit = FXML.load(EditCollectionsPopUpCtrl.class, bundle, "client", "views", "EditCollectionsPopUp.fxml");
+        var shortcuts = FXML.load(ShortcutsPopUpCtrl.class, bundle, "client", "views", "ShowShortcutsPopUp.fxml");
         overview.getKey().updateTooltips();
         var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
         mainCtrl.setLanguage(bundle);
         mainCtrl.updateOverview(overview);
+        mainCtrl.updateEditCollections(collectionsEdit);
+        mainCtrl.updateShortcuts(shortcuts);
     }
 
     private static void saveLanguageSetting(String location, Locale locale) {
