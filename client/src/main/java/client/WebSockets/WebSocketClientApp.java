@@ -68,8 +68,8 @@ public class WebSocketClientApp extends WebSocketClient {
         } catch (InterruptedException _) {
             return "ErrorCaught";
         }
-        return "noteAdded";
         webSocketClientApp.close();
+        return "noteAdded";
     }
 
     public Integer getId() {
@@ -94,8 +94,8 @@ public class WebSocketClientApp extends WebSocketClient {
         } catch (InterruptedException _) {
             return ("ErrorCaught");
         }
-        return "noteDeleted";
         webSocketClientApp.close();
+        return "noteDeleted";
     }
 
     public String broadcastChange(String change){
@@ -128,8 +128,8 @@ public class WebSocketClientApp extends WebSocketClient {
             return "Error Caught";
 
         }
-        return ("content broadcast");
         webSocketClientApp.close();
+        return ("content broadcast");
     }
 
 
@@ -147,8 +147,8 @@ public class WebSocketClientApp extends WebSocketClient {
             return ("Error caught");
 
         }
-        return ("Title broadcasted");
         webSocketClientApp.close();
+        return ("Title broadcasted");
     }
 
     public String broadcastRefresh(){
@@ -163,7 +163,8 @@ public class WebSocketClientApp extends WebSocketClient {
             System.out.println("Problem here buddy");
             return "Error Caught";
         }
-        return ("Notes refreshed");    }
         webSocketClientApp.close();
+        return ("Notes refreshed");
     }
+
 }

@@ -15,6 +15,14 @@ public class GlobalWebSocketManager {
     // Singleton instance
     private static GlobalWebSocketManager instance;
 
+    public static GlobalWebSocketManager getInstance() {
+        return instance;
+    }
+
+    public static void setInstance(GlobalWebSocketManager instance) {
+        GlobalWebSocketManager.instance = instance;
+    }
+
     public WebSocketClientApp getWebSocketClient() {
         return webSocketClient;
     }
