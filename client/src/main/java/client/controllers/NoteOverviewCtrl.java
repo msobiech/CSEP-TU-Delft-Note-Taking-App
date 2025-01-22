@@ -446,7 +446,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             if (newScene != null) {
                 newScene.getAccelerators().put(
                         KeyCombination.keyCombination(modifierKey + "+R"),
-                        this::refreshNotes
+                        this::refreshNotesAction
                 );
             }
         });
