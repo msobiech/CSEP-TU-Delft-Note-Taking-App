@@ -3,7 +3,6 @@ package client.WebSockets;
 
 import client.controllers.NoteOverviewCtrl;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 

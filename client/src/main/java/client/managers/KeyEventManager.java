@@ -6,7 +6,6 @@ import client.controllers.NoteOverviewCtrl;
 import client.event.EditCollectionsEvent;
 import client.event.EscapeKeyEvent;
 import client.event.EventBus;
-import jakarta.inject.Inject;
 
 public class KeyEventManager {
 
