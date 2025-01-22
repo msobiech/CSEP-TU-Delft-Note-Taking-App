@@ -71,6 +71,7 @@ public class NoteManager {
                     String previousContent = noteService.getNoteContent(event.getNoteId()); // Fetch current content before change
                     noteService.updateNoteContent(event.getChange(), event.getNoteId());
                     eventBus.publish(new UndoableActionEvent(
+                            event.getNoteId(),
                             UndoableActionEvent.ActionType.EDIT_TEXT,
                             previousContent,
                             state -> {
@@ -94,6 +95,7 @@ public class NoteManager {
                     noteService.updateNoteContent(event.getChange(), event.getNoteId());
                     changeCountContent = 0;
                     eventBus.publish(new UndoableActionEvent(
+                            event.getNoteId(),
                             UndoableActionEvent.ActionType.EDIT_TEXT,
                             previousContent,
                             state -> {
@@ -161,6 +163,7 @@ public class NoteManager {
 
             // Publish an UndoableActionEvent for title change
             eventBus.publish(new UndoableActionEvent(
+                    event.getNoteId(),
                     UndoableActionEvent.ActionType.EDIT_TITLE,
                     previousTitle,
                     state -> {
@@ -183,6 +186,7 @@ public class NoteManager {
             Long noteId = addedNote.getId();
             String noteTitle = addedNote.getTitle();
             eventBus.publish(new UndoableActionEvent(
+                    -1,
                     UndoableActionEvent.ActionType.ADD_FILE,
                     new Pair<>(noteId, noteTitle), // Store the note as a Pair for undo purposes
                     state -> server.deleteNoteByID(((Pair<Long, String>) state).getKey()) // Undo logic: Delete the added note

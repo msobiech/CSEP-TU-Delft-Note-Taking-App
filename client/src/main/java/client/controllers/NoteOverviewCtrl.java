@@ -499,8 +499,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldNote, newNote) -> {
             updateContentAndTitle(oldNote, newNote);
             refreshFiles();
-            undoManager.clearUndoStack();
-            System.out.println("Cleared undo stack");
         });
     }
 

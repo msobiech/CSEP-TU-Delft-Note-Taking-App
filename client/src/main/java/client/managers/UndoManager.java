@@ -15,6 +15,7 @@ public class UndoManager {
     private final Deque<UndoableActionEvent> undoStack = new ArrayDeque<>();
     private final Deque<UndoableActionEvent> redoStack = new ArrayDeque<>();
     private static final EventBus eventBus = InjectorProvider.getInjector().getInstance(EventBus.class);
+    private long currentID = -1;
 
     @Inject
     public UndoManager() {
@@ -24,8 +25,16 @@ public class UndoManager {
     }
 
     private void handleUndoableAction(UndoableActionEvent event) {
-        undoStack.push(event);
-        redoStack.clear(); // Clear redo stack on any new action
+        if(currentID == event.getNoteID()) {
+            undoStack.push(event);
+            redoStack.clear(); // Clear redo stack on any new action
+
+        }
+        else{
+            clearUndoStack();
+            undoStack.push(event);
+            currentID = event.getNoteID();
+        }
     }
 
     public void undo() {
@@ -53,5 +62,6 @@ public class UndoManager {
     public void clearUndoStack() {
         undoStack.clear();
         redoStack.clear();
+        System.out.println("cleared the undo stack");
     }
 }

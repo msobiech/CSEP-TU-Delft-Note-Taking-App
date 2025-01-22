@@ -61,6 +61,7 @@ public class NoteListManager {
 
             // Register undo action
             eventBus.publish(new UndoableActionEvent(
+                    event.getNoteId(),
                     UndoableActionEvent.ActionType.EDIT_TITLE,
                     oldNote, // Save the old title as the previous state
                     previousState -> {

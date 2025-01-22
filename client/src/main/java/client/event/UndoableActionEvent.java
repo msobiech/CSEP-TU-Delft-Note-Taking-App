@@ -6,11 +6,13 @@ public class UndoableActionEvent extends Event{
 
     public enum ActionType { EDIT_TEXT, EDIT_TITLE, ADD_FILE, MOVE_COLLECTION }
 
+    private final long noteID;
     private final ActionType type;
     private final Object previousState;
     private final Consumer<Object> undoLogic;
 
-    public UndoableActionEvent(ActionType type, Object previousState, Consumer<Object> undoLogic) {
+    public UndoableActionEvent(long noteID, ActionType type, Object previousState, Consumer<Object> undoLogic) {
+        this.noteID = noteID;
         this.type = type;
         this.previousState = previousState;
         this.undoLogic = undoLogic;
@@ -26,6 +28,10 @@ public class UndoableActionEvent extends Event{
 
     public Object getPreviousState() {
         return previousState;
+    }
+
+    public long getNoteID() {
+        return noteID;
     }
 
     @Override
