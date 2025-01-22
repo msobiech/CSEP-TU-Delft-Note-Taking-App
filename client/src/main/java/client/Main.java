@@ -33,7 +33,7 @@ public class Main extends Application {
 			System.err.println(msg);
 			return;
 		}
-		GlobalWebSocketManager webSocketManager = GlobalWebSocketManager.getInstance();
+		GlobalWebSocketManager webSocketManager = INJECTOR.getInstance(GlobalWebSocketManager.class);
 		webSocketManager.initializeWebSocket("ws://localhost:8008/ws");
 		Locale currentLanguage = LanguageManager.getLanguage();
 

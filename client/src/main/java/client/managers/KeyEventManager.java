@@ -16,7 +16,6 @@ public class KeyEventManager {
 
 
 
-    @Inject
     public KeyEventManager() {
         this.eventBus.subscribe(EscapeKeyEvent.class, event -> handleEscapeKey());
         this.eventBus.subscribe(EditCollectionsEvent.class, event -> handleEditCollections());
@@ -37,5 +36,7 @@ public class KeyEventManager {
         if (noteOverviewCtrl != null) {
             noteOverviewCtrl.refreshNotes();
         }
+        System.out.println(mainCtrl);
+        System.out.println(noteOverviewCtrl);
     }
 }

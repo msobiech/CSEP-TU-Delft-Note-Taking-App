@@ -1,5 +1,6 @@
 package client.WebSockets;
 
+import com.google.inject.Singleton;
 import org.java_websocket.WebSocket;
 import java.net.URI;
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+@Singleton
 public class GlobalWebSocketManager {
 
     private static int noteOverviewId ;
@@ -22,15 +24,7 @@ public class GlobalWebSocketManager {
     private static final Set<WebSocket> connections = new CopyOnWriteArraySet<>();
 
     // Private constructor to enforce singleton pattern
-    private GlobalWebSocketManager() { }
-
-    // Get the singleton instance
-    public static synchronized GlobalWebSocketManager getInstance() {
-        if (instance == null) {
-            instance = new GlobalWebSocketManager();
-        }
-        return instance;
-    }
+    public GlobalWebSocketManager() { }
 
     // Initialize the WebSocket connection
     public void initializeWebSocket(String serverUri) {
@@ -65,6 +59,7 @@ public class GlobalWebSocketManager {
 
     // Add a listener to receive messages
     public void addMessageListener(WebSocketMessageListener listener) {
+        System.out.println("ADDED " + listener);
         listeners.add(listener);
     }
 
