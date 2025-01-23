@@ -9,10 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import server.services.CollectionServiceImpl;
 import server.services.NoteService;
 
-import javax.sound.midi.SysexMessage;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  *
