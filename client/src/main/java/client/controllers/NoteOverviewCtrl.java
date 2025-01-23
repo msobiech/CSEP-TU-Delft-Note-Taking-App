@@ -169,7 +169,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         keyEventManager = new KeyEventManager();
         language = ResourceBundle.getBundle("client.controllers.language", LanguageManager.getLanguage());
         setupSearch();
-        setupSelectCollection();
+        refreshCollectionChoice();
 
         setupNoteCollectionDropdown();
         handleNoteCollectionChange();
@@ -296,6 +296,23 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     }
 
     public void setupNoteCollectionDropdown() {
+        refreshNoteCollectionDropdown();
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
+            if (newValue != null) {
+                Collection curNoteCollection = server.getCollectionByNoteID(newValue.getKey());
+                if (curNoteCollection != null) {
+                    // Find the corresponding Pair in the ComboBox items
+                    Pair<Long, String> matchingCollection = noteCollectionDropdown.getItems().stream()
+                            .filter(pair -> pair.getKey().equals(curNoteCollection.getId()))
+                            .findFirst()
+                            .orElse(null);
+                    noteCollectionDropdown.setValue(matchingCollection);
+                }
+            }
+        });
+    }
+
+    public void refreshNoteCollectionDropdown() {
         List<Collection> collections = server.getAllCollectionsFromServer();
         List<Pair<Long, String>> listOfCollections = new ArrayList<>();
         for (Collection collection : collections) {
@@ -319,22 +336,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             protected void updateItem(Pair<Long, String> item, boolean empty) {
                 super.updateItem(item, empty);
                 setText((empty || item == null) ? null : item.getValue());
-            }
-        });
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
-            if (newValue != null) {
-                Collection curNoteCollection = server.getCollectionByNoteID(newValue.getKey());
-                if (curNoteCollection != null) {
-                    // Find the corresponding Pair in the ComboBox items
-                    Pair<Long, String> matchingCollection = noteCollectionDropdown.getItems().stream()
-                            .filter(pair -> pair.getKey().equals(curNoteCollection.getId()))
-                            .findFirst()
-                            .orElse(null);
-                    noteCollectionDropdown.setValue(matchingCollection);
-                    if(oldValue!=null) {
-                        refreshNotes();
-                    }
-                }
             }
         });
     }
@@ -559,7 +560,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
      * setup for 'select collection' menu.
      * adds 'All' collection, user collections and the edit collection
      */
-    private void setupSelectCollection() {
+    public void refreshCollectionChoice() {
         List<Collection> collections = server.getAllCollectionsFromServer();       //server.getAllCollections();
 
         Pair<Long, String> allNotesCollection = new Pair<>((long) -1, language.getString("collections.all.text"));
@@ -724,9 +725,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         }
     }
 
-    public void refreshCollections() {
-
-    }
 
     /**
      * Method to add notes

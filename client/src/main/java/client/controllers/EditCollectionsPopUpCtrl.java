@@ -1,5 +1,6 @@
 package client.controllers;
 
+import client.InjectorProvider;
 import client.managers.CollectionListManager;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
@@ -50,6 +51,7 @@ public class EditCollectionsPopUpCtrl implements Initializable {
     private final ServerUtils serverUtils;
     private final ObservableList<Collection> collections;
     private CollectionListManager collectionListManager;
+    private NoteOverviewCtrl noteOverviewCtrl = InjectorProvider.getInjector().getInstance(NoteOverviewCtrl.class);
 
     @Inject
     public EditCollectionsPopUpCtrl(ServerUtils serverUtils) {
@@ -75,6 +77,8 @@ public class EditCollectionsPopUpCtrl implements Initializable {
         try {
             Collection addedCollection = serverUtils.addCollection(newCollection);
             collections.add(addedCollection);
+            noteOverviewCtrl.refreshCollectionChoice();
+            noteOverviewCtrl.refreshNoteCollectionDropdown();
             collectionTitleField.clear();
             System.out.println("Collection added successfully");
         } catch (Exception e) {
