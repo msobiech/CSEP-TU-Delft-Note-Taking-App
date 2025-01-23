@@ -1,21 +1,20 @@
 package client.controllers;
 
+import client.managers.CollectionListManager;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
 import models.Collection;
 
+import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class EditCollectionsPopUpCtrl {
+public class EditCollectionsPopUpCtrl implements Initializable {
     @FXML
     public Button addCollectionButton;
 
@@ -49,7 +48,8 @@ public class EditCollectionsPopUpCtrl {
     private ResourceBundle language;
 
     private final ServerUtils serverUtils;
-    private ObservableList<Collection> collections;
+    private final ObservableList<Collection> collections;
+    private CollectionListManager collectionListManager;
 
     @Inject
     public EditCollectionsPopUpCtrl(ServerUtils serverUtils) {
@@ -57,7 +57,12 @@ public class EditCollectionsPopUpCtrl {
         this.collections = FXCollections.observableArrayList();
     }
 
-    public void addCollection(ActionEvent actionEvent) {
+    public void initialize(URL location, ResourceBundle resources) {
+        collectionListManager = new CollectionListManager(collectionListView);
+        refreshCollections();
+    }
+
+    public void addCollection() {
         String title = collectionTitleField.getText();
         if (title.isEmpty()) {
             System.out.println("Collection title is empty");
@@ -77,11 +82,11 @@ public class EditCollectionsPopUpCtrl {
         }
     }
 
-    public void deleteCollection(ActionEvent actionEvent) {
+    public void deleteCollection() {
         //to be implemented
     }
 
-    public void refreshCollections(ActionEvent actionEvent) {
+    public void refreshCollections() {
         try {
             List<Collection> fetchedCollections = serverUtils.getAllCollectionsFromServer();
             collections.setAll(fetchedCollections);
@@ -90,6 +95,22 @@ public class EditCollectionsPopUpCtrl {
             System.out.println("Failed to refresh collections");
             System.out.println(e.getMessage());
         }
+
+        collectionListManager.setCollections(collections);
+
+        collectionListView.setItems(collections);
+
+        collectionListView.setCellFactory(_ -> new ListCell<>() {
+            @Override
+            protected void updateItem(Collection item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.getName());
+                }
+            }
+        });
     }
 
     @FXML
