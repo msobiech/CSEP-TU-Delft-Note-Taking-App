@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-import java.net.InetSocketAddress;
 import java.net.URI;
 
 
@@ -28,14 +27,17 @@ public class WebSocketClientApp extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        switch(message){
-            case "noteAdded" :
-                System.out.println("addition received by " + this );
-                break;
-            case "noteDeleted":
-                System.out.println("Delete received");
-                break;
-            default:
+        if(Integer.parseInt(message.split(" ")[0]) == NoteOverviewCtrl.getId() && (message.split(" ")).length == 2){
+            String actualMessage = message.split(" ")[1];
+            switch(actualMessage){
+                case "noteAdded" :
+                    System.out.println("addition received by " + this);
+                    break;
+                case "noteDeleted":
+                    System.out.println("Delete received");
+                    break;
+                default:
+            }
         }
     }
 
@@ -47,25 +49,27 @@ public class WebSocketClientApp extends WebSocketClient {
 
     @Override
     public void onError(Exception ex) {
-        ex.printStackTrace();
+        System.out.println("Error caught "+ ex.getCause());
     }
 
     public void startClient(){
         this.connect();
     }
 
-    public void broadcastAdd() {
+    public String broadcastAdd(){
         WebSocketClientApp webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         try {
             if (webSocketClientApp.connectBlocking()) {
-                webSocketClientApp.send("noteAdded");
+                webSocketClientApp.send(NoteOverviewCtrl.getId()+ " noteAdded");
+                return "noteAdded";
             } else {
                 System.err.println("WebSocket is not connected!");
             }
         } catch (InterruptedException _) {
+            return "ErrorCaught";
         }
         webSocketClientApp.close();
-
+        return "noteAdded";
     }
 
     public Integer getId() {
@@ -77,88 +81,90 @@ public class WebSocketClientApp extends WebSocketClient {
         this.id = id;
     }
 
-    public void revertId(){
-        this.id = reserve;
-    }
 
-    public void broadcastDelete(){
+    public String broadcastDelete(){
         WebSocketClientApp webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         try {
             if (webSocketClientApp.connectBlocking()) {
-                webSocketClientApp.send("noteDeleted");
+                webSocketClientApp.send(NoteOverviewCtrl.getId()+ " noteDeleted");
+                return "noteDeleted";
             } else {
                 System.err.println("WebSocket is not connected!");
             }
         } catch (InterruptedException _) {
+            return ("ErrorCaught");
         }
         webSocketClientApp.close();
-
+        return "noteDeleted";
     }
 
-    public void broadcastChange(String change){
+    public String broadcastChange(String change){
         try {
             if (this.connectBlocking()) {
                 this.send("NewChangeDetected "+change);
+                return ("NewChangeDetected");
 
             } else {
                 System.err.println("WebSocket is not connected!");
             }
         } catch (InterruptedException _) {
+            return ("Erro Caught");
         }
-
+        return ("NewChangeDetected");
     }
 
-    public void broadcastContent(String change, Long id){
+    public String broadcastContent(String change, Long id){
         System.out.println("content arrived");
         WebSocketClientApp webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         try {
             if (webSocketClientApp.connectBlocking()) {
                 System.out.println("content broadcast");
                 webSocketClientApp.send(NoteOverviewCtrl.getId() +" " +id +" UpdatedChangedNote " + change);
+                return ("content broadcast");
             } else {
                 System.err.println("WebSocket is not connected!");
             }
         } catch (InterruptedException e) {
+            return "Error Caught";
 
         }
         webSocketClientApp.close();
+        return ("content broadcast");
     }
 
-    public int getLocalPort() {
-        if (getConnection() != null) {
-            InetSocketAddress localSocketAddress = getConnection().getLocalSocketAddress();
-            if (localSocketAddress != null) {
-                return localSocketAddress.getPort();
-            }
-        }
-        return -1; // Return -1 if not connected
-    }
 
-    public void broadcastTitle(String title, Long id){
+    public String broadcastTitle(String title, Long id){
         WebSocketClientApp webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         try {
             if (webSocketClientApp.connectBlocking()) {
                 System.out.println("title broadcast");
                 webSocketClientApp.send(NoteOverviewCtrl.getId() +" " +id +" UpdatedNoteTitle " + title);
+                return ("Title broadcasted");
             } else {
                 System.err.println("WebSocket is not connected!");
             }
         } catch (InterruptedException e) {
+            return ("Error caught");
 
         }
         webSocketClientApp.close();
+        return ("Title broadcasted");
     }
 
-    public void broadcastRefresh(){
+    public String broadcastRefresh(){
         WebSocketClientApp webSocketClientApp = new WebSocketClientApp(URI.create("ws://localhost:8008/websocket-endpoint"));
         try {
             if(webSocketClientApp.connectBlocking()){
                 webSocketClientApp.send("refreshNotes");
+                return ("Notes refreshed");
 
             }
         } catch (InterruptedException e) {
             System.out.println("Problem here buddy");
+            return "Error Caught";
         }
         webSocketClientApp.close();
+        return ("Notes refreshed");
     }
+
 }

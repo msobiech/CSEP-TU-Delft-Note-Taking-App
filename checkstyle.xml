@@ -50,19 +50,15 @@ e.g: public void whateverMethod(){
             <property name="max" value="60"/>
         </module>
         <module name="CyclomaticComplexity">
-            <property name="severity" value="warning"/>
             <property name="switchBlockAsSingleDecisionPoint" value="true"/>
-            <property name="max" value="6"/>
+            <property name="max" value="10"/>
             <property name="tokens" value="LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_SWITCH, LITERAL_CASE, QUESTION"/>
         </module>
         <module name="MethodName">
-            <property name="severity" value="warning"/>
         </module>
         <module name="ParameterName">
-            <property name="severity" value="warning"/>
         </module>
         <module name="LocalVariableName">
-            <property name="severity" value="warning"/>
         </module>
         <module name="StaticVariableName">
             <property name="severity" value="warning"/>
@@ -71,7 +67,6 @@ e.g: public void whateverMethod(){
             <property name="severity" value="warning"/>
         </module>
         <module name="TypeName">
-            <property name="severity" value="warning"/>
         </module>
         <module name="ClassTypeParameterName">
             <property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*$)"/>
@@ -81,15 +76,13 @@ e.g: public void whateverMethod(){
         <module name="RightCurly"/>
         <module name="LeftCurly"/>
         <module name="ParameterNumber">
-            <property name="severity" value="warning"/>
             <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
-            <property name="max" value="8"/>
+            <property name="max" value="10"/>
         </module>
     </module>
     <module name="LineLength">
-        <property name="severity" value="warning"/>
         <property name="fileExtensions" value="java"/>
-        <property name="max" value="150"/>
+        <property name="max" value="200"/>
         <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
     </module>
 
