@@ -292,7 +292,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
 
         // Configure how items are displayed in the dropdown
-        noteCollectionDropdown.setCellFactory(comboBox -> new ListCell<>() {
+        noteCollectionDropdown.setCellFactory(_ -> new ListCell<>() {
             @Override
             protected void updateItem(Pair<Long, String> item, boolean empty) {
                 super.updateItem(item, empty);
@@ -300,7 +300,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             }
         });
 
-        // Configure the button cell to display the selected collection
+
         noteCollectionDropdown.setButtonCell(new ListCell<>() {
             @Override
             protected void updateItem(Pair<Long, String> item, boolean empty) {
@@ -309,9 +309,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             }
         });
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
-
             if (newValue != null) {
-                // Step 3: Fetch the collection of the newly selected note
                 Collection curNoteCollection = server.getCollectionByNoteID(newValue.getKey());
                 if (curNoteCollection != null) {
                     // Find the corresponding Pair in the ComboBox items
@@ -319,8 +317,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                             .filter(pair -> pair.getKey().equals(curNoteCollection.getId()))
                             .findFirst()
                             .orElse(null);
-
-                    // Step 4: Update the ComboBox's value
                     noteCollectionDropdown.setValue(matchingCollection);
                     if(oldValue!=null) {
                         refreshNotes();
@@ -331,10 +327,9 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     }
 
     public void handleNoteCollectionChange() {
-
         noteCollectionDropdown.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
             if(newValue != null && oldValue != null && newValue != oldValue) {
-                selectNewCollection(oldValue, newValue);
+                selectNewCollection(newValue);
             }
         });
     }
@@ -806,23 +801,18 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     }
 
     @FXML
-    private void selectNewCollection(Pair<Long, String> oldCollection, Pair<Long, String> newCollection) {
-        /*
+    private void selectNewCollection(Pair<Long, String> newCollection) {
         Note curNote = new Note();
+        curNoteId = notesList.getSelectionModel().getSelectedItem().getKey();
         if(curNoteId != null) {
             curNote = server.getNoteByID(curNoteId);
         }
-        System.out.println("Note: " + curNote.getTitle() +
-                "\nGot removed from collection: " + oldCollection.getValue() +
-                "\nGot added to collection: " + newCollection.getValue());
-
-        Collection removedNoteCollection = server.getCollectionByID(oldCollection.getKey());
-        removedNoteCollection.removeNoteFromCollection(curNote);
-        server.updateCollectionByID(oldCollection.getKey(), removedNoteCollection);
-
-        Collection addedNoteCollection = server.getCollectionByID(newCollection.getKey());
-        addedNoteCollection.addNoteToCollection(curNote);
-        server.updateCollectionByID(newCollection.getKey(), addedNoteCollection);*/
+        Set<Long> collectionsIds = new HashSet<>();
+        collectionsIds.add(newCollection.getKey());
+        curNote.setCollectionIds(collectionsIds);
+        curNote.setTitle(null);
+        curNote.setContent(null);
+        server.updateNoteByID(curNoteId ,curNote);
     }
 
 

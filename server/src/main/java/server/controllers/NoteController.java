@@ -79,7 +79,6 @@ public class NoteController {
             note.addCollection(defaultCollection);
             System.out.println("DEFAULT COLLECTION : " + defaultCollection.getId());
             Note savedNote = noteService.saveNote(note);
-            defaultCollection.addNoteToCollection(savedNote);
             System.out.println("SAVED NOTE: " + savedNote.toString());
             System.out.println(savedNote);
             return ResponseEntity.ok(savedNote);
