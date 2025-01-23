@@ -876,9 +876,9 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         var selectedNote = notesList.getSelectionModel().getSelectedItem();
         if (selectedNote != null) {
             Optional<ButtonType> result = dialogFactory.createConfirmationDialog(
-                    "Confirm deletion",
-                    "Are you sure you want to delete this note?",
-                    "You are trying to delete note: " + selectedNote.getValue() + ".\nDeleting a note is irreversible!"
+                    language.getString("confirmation.title"),
+                    language.getString("confirmation.question"),
+                    language.getString("confirmation.info1")+ " " + selectedNote.getValue() + "\n" + language.getString("confirmation.info2")
             );
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
