@@ -69,9 +69,15 @@ public class NoteController {
     @PostMapping("/add")
     public ResponseEntity<Note> addNote(@RequestBody Note note) {
         try {
+            System.out.println("PROCESSING ADDITION");
+            System.out.println(note);
             note.setTitle(noteService.generateUniqueTitle());
-            note.addCollection(collectionService.getDefaultCollection());
+            Collection defaultCollection = collectionService.getDefaultCollection();
+            note.addCollection(defaultCollection);
+            System.out.println("DEFAULT COLLECTION : " + defaultCollection.getId());
             Note savedNote = noteService.saveNote(note);
+            System.out.println("SAVED NOTE: " + savedNote.toString());
+            System.out.println(savedNote);
             return ResponseEntity.ok(savedNote);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

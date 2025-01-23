@@ -73,14 +73,6 @@ public class Collection {
         this.notes = notes;
     }
 
-    public void removeNoteFromCollection(Note note) {
-        this.notes.remove(note);
-    }
-
-    public void addNoteToCollection(Note note) {
-        this.notes.add(note);
-    }
-
     /**
      * Method that asserts equality between object and parameter
      * @param o object to compare to

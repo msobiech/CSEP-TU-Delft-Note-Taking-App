@@ -43,7 +43,8 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public Note saveNote(Note note) {
-        return noteRepo.save(note);
+        Note newNote = noteRepo.save(note);
+        return newNote;
     }
 
     @Override
@@ -71,7 +72,9 @@ public class NoteServiceImpl implements NoteService {
         if (fetchedNote.getTitle().isEmpty()) {
             fetchedNote.setTitle(generateUniqueTitle());// Generate unique title if only title is empty
         }
-        fetchedNote.setCollections(note.getCollections());
+        if(!note.getCollections().isEmpty()) {
+            fetchedNote.setCollections(note.getCollections());
+        }
         Set<Collection> newCollections = new HashSet<Collection>();
         for(Long collectionId:note.getCollectionIds()){
             Optional<Collection> collection = getCollectionById(collectionId);
@@ -81,7 +84,9 @@ public class NoteServiceImpl implements NoteService {
                 throw new IllegalAccessException("Collection with id " + collectionId + " does not exist.");
             }
         }
-        fetchedNote.setCollections(newCollections);
+        if(!newCollections.isEmpty()){
+            fetchedNote.setCollections(newCollections);
+        }
         return noteRepo.save(fetchedNote);
     }
 
