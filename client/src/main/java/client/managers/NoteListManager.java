@@ -45,7 +45,7 @@ public class NoteListManager {
                 handleTitleChange(event);
                 break;
             case NOTE_REMOVE:
-                handleNoteDeletion();
+                //handleNoteDeletion();
                 break;
         }
     }
@@ -74,7 +74,7 @@ public class NoteListManager {
         }
     }
 
-    private void handleNoteDeletion() {
+    public void handleNoteDeletion() {
         var selectedNote = notesList.getSelectionModel().getSelectedItem();
         notesList.getItems().remove(selectedNote);
     }

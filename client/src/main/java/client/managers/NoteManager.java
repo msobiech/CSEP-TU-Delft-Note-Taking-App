@@ -13,6 +13,7 @@ import javafx.util.Pair;
 import models.Note;
 
 import java.net.URI;
+import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,6 +35,7 @@ public class NoteManager {
 
 
     public NoteManager(NoteService noteService, ServerUtils server, NoteOverviewCtrl noteOverviewCtrl, WebSocketClientApp app) {
+
         this.noteService = noteService;
         this.server = server;
         this.noteOverviewCtrl = noteOverviewCtrl;
@@ -181,6 +183,7 @@ public class NoteManager {
     }
 
     private void handleNoteAddition() {
+        ResourceBundle lang = noteOverviewCtrl.getLanguage();
         try {
             Note addedNote = server.addNote();
             System.out.println("ADDED NOTE: " + addedNote);
@@ -193,20 +196,21 @@ public class NoteManager {
                     new Pair<>(noteId, noteTitle), // Store the note as a Pair for undo purposes
                     state -> server.deleteNoteByID(((Pair<Long, String>) state).getKey()) // Undo logic: Delete the added note
             ));
-            System.out.println("Note added successfully: " + addedNote);
+            noteOverviewCtrl.showFadeBox(lang.getString("good.add"), true);
         } catch (Exception e) {
-            System.err.println("Failed to add note: " + e.getMessage());
+            noteOverviewCtrl.showFadeBox(lang.getString("bad.add"), false);
         }
     }
 
     private void handleNoteDeletion(NoteStatusEvent event) {
+        ResourceBundle lang = noteOverviewCtrl.getLanguage();
         try {
             if (event.getChangeID() != null) {
                 // Delete the note from the backend
                 server.deleteNoteByID(event.getChangeID());
-                System.out.println("Note " + event.getChangeID() + " deleted successfully.");
+                noteOverviewCtrl.showFadeBox(lang.getString("good.delete"), true);
 
-                // Update the UI (must be done on the JavaFX thread)
+                noteOverviewCtrl.getNoteListManager().handleNoteDeletion();
 
                     // Assuming there's a way to get the ObservableList from the controller
                     NoteOverviewCtrl controller = InjectorProvider.getInjector().getInstance(NoteOverviewCtrl.class);
@@ -219,10 +223,10 @@ public class NoteManager {
                     }
 
                 }else {
-                System.err.println("Note ID is null. Cannot delete note.");
+                noteOverviewCtrl.showFadeBox(lang.getString("bad.delete"), false);
             }
         } catch (Exception e) {
-            System.err.println("Error while deleting note: " + e.getMessage());
+            noteOverviewCtrl.showFadeBox(lang.getString("bad.delete"), false);
         }
     }
 
