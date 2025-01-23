@@ -12,5 +12,7 @@ public class CollectionListManager {
         this.collectionsList = collectionsList;
     }
 
-    public void setCollections(ObservableList<Collection> collections) { this.collections = collections; }
+    public void setCollections(ObservableList<Collection> collections) {
+        this.collections = collections;
+    }
 }
