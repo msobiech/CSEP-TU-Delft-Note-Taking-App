@@ -3,6 +3,7 @@ package client.controllers;
 import client.DialogFactory;
 import client.event.CollectionEvent;
 import client.event.EventBus;
+import client.InjectorProvider;
 import client.managers.CollectionListManager;
 import client.managers.CollectionManager;
 import client.utils.ServerUtils;
@@ -62,6 +63,7 @@ public class EditCollectionsPopUpCtrl implements Initializable {
     private CollectionManager collectionManager;
     private final ObservableList<Collection> collections;
     private CollectionListManager collectionListManager;
+    private NoteOverviewCtrl noteOverviewCtrl = InjectorProvider.getInjector().getInstance(NoteOverviewCtrl.class);
 
     @Inject
     public EditCollectionsPopUpCtrl(ServerUtils server, CollectionService collectionService, DialogFactory dialogFactory, EventBus eventBus) {
@@ -91,6 +93,8 @@ public class EditCollectionsPopUpCtrl implements Initializable {
         try {
             Collection addedCollection = server.addCollection(newCollection);
             collections.add(addedCollection);
+            noteOverviewCtrl.refreshCollectionChoice();
+            noteOverviewCtrl.refreshNoteCollectionDropdown();
             collectionTitleField.clear();
             System.out.println("Collection added successfully");
         } catch (Exception e) {
