@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import server.services.CollectionServiceImpl;
 import server.services.NoteService;
 
+import javax.sound.midi.SysexMessage;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -69,9 +72,16 @@ public class NoteController {
     @PostMapping("/add")
     public ResponseEntity<Note> addNote(@RequestBody Note note) {
         try {
+            System.out.println("PROCESSING ADDITION");
+            System.out.println(note);
             note.setTitle(noteService.generateUniqueTitle());
-            note.addCollection(collectionService.getDefaultCollection());
+            Collection defaultCollection = collectionService.getDefaultCollection();
+            note.addCollection(defaultCollection);
+            System.out.println("DEFAULT COLLECTION : " + defaultCollection.getId());
             Note savedNote = noteService.saveNote(note);
+            defaultCollection.addNoteToCollection(savedNote);
+            System.out.println("SAVED NOTE: " + savedNote.toString());
+            System.out.println(savedNote);
             return ResponseEntity.ok(savedNote);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

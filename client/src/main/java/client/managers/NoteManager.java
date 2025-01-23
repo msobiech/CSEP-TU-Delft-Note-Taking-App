@@ -183,6 +183,7 @@ public class NoteManager {
     private void handleNoteAddition() {
         try {
             Note addedNote = server.addNote();
+            System.out.println("ADDED NOTE: " + addedNote);
             Long noteId = addedNote.getId();
             String noteTitle = addedNote.getTitle();
 

@@ -54,6 +54,7 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public Collection getDefaultCollection() {
+        //collectionRepo.
         return collectionRepo.findDefaultCollection();
     }
 

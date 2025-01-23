@@ -309,6 +309,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             }
         });
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
+
             if (newValue != null) {
                 // Step 3: Fetch the collection of the newly selected note
                 Collection curNoteCollection = server.getCollectionByNoteID(newValue.getKey());
@@ -323,7 +324,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                     noteCollectionDropdown.setValue(matchingCollection);
                     if(oldValue!=null) {
                         refreshNotes();
-                        //refreshFiles();
                     }
                 }
             }
@@ -331,6 +331,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     }
 
     public void handleNoteCollectionChange() {
+
         noteCollectionDropdown.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
             if(newValue != null && oldValue != null && newValue != oldValue) {
                 selectNewCollection(oldValue, newValue);
@@ -665,7 +666,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             System.err.println("No collection selected. Skipping refresh.");
             return;
         }
-
         // Fetch notes from the server based on the selected collection
         if (selectedCollection.getKey() <= -1) { // All Notes
             var notesFromServer = server.getNoteTitles();
@@ -676,6 +676,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             }
         } else { // Specific Collection
             var collectionNotes = server.getNotesByCollectionId(selectedCollection.getKey());
+            //System.out.println("Current collection list: " + collectionNotes);
             for (var note : collectionNotes) {
                 notesAsPairs.add(new Pair<>(note.getId(), note.getTitle()));
             }
@@ -806,6 +807,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
     @FXML
     private void selectNewCollection(Pair<Long, String> oldCollection, Pair<Long, String> newCollection) {
+        /*
         Note curNote = new Note();
         if(curNoteId != null) {
             curNote = server.getNoteByID(curNoteId);
@@ -820,7 +822,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
         Collection addedNoteCollection = server.getCollectionByID(newCollection.getKey());
         addedNoteCollection.addNoteToCollection(curNote);
-        server.updateCollectionByID(newCollection.getKey(), addedNoteCollection);
+        server.updateCollectionByID(newCollection.getKey(), addedNoteCollection);*/
     }
 
 
@@ -850,13 +852,14 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                 eventBus.publish(new EditCollectionsEvent());
                 break;
             default:
+                /*
                 List<Note> notesInCollection = server.getNotesByCollectionId(selectedCollection.getKey());
                 for(Note note: notesInCollection){
                     collectionNotes.add(new Pair<>(note.getId(), note.getTitle()));
                 }
                 notes = FXCollections.observableArrayList(collectionNotes);
                 noteListManager.setNotes(notes);
-                notesList.setItems(notes);
+                notesList.setItems(notes);*/
                 refreshNotes();
         }
     }
