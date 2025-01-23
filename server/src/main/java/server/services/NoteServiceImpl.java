@@ -44,8 +44,6 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public Note saveNote(Note note) {
         Note newNote = noteRepo.save(note);
-        noteRepo.flush();
-        System.out.println(noteRepo.findById(newNote.getId()).get());
         return newNote;
     }
 
