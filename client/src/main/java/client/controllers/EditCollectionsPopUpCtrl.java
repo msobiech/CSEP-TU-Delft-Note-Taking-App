@@ -27,6 +27,7 @@ public class EditCollectionsPopUpCtrl implements Initializable {
     private final CollectionService collectionService;
     private final DialogFactory dialogFactory;
     private final EventBus eventBus;
+    private final MainCtrl mainCtrl = InjectorProvider.getInjector().getInstance(MainCtrl.class);
 
     @FXML
     public Button addCollectionButton;
@@ -84,7 +85,7 @@ public class EditCollectionsPopUpCtrl implements Initializable {
         ResourceBundle language = noteOverviewCtrl.getLanguage();
         String title = collectionTitleField.getText();
         if (title.isEmpty()) {
-            System.out.println(language.getString("collection.empty.title"));
+            mainCtrl.showError(language.getString("collection.empty.title"));
             return;
         }
 
