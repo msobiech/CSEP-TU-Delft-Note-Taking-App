@@ -1,7 +1,7 @@
 # CSEP Team 34 Project
 
 ## Overview
-This repository contains the source code for the **NetCode App**, developed by Team 34.
+This repository contains the source code for the **NetNode App**, developed by Team 34.
 
 ## Running the Application
 To run the project, you need either [Maven](https://maven.apache.org/install.html) installed on your system (`mvn`) or the provided Maven wrapper (`mvnw`). Follow these steps:
@@ -33,13 +33,14 @@ When running the client, use the following VM options:
 
 ## How to use implemented features:
 
-| Feature| Description|
-| :---         | :---:    |
-| Embedded Files       | Add a file using the "+" button. Then embed it in Markdown by writing: <br> ```![alttext][nameOfFile]``` |
-| Shortcuts |**Ctrl+R** : Refresh notes<br> **Ctrl+N**: Add new note<br>**Ctrl+D**: Delete currently selected note <br> **Escape**: Focus on search bar|
-|Real-time updates| Currently synchronized events:<br> - Adding note<br> - Deleting note<br> - Modifying title<br>- Modifying content|
-|Supported languages|English, Dutch, Polish, Romanian, Italian|
-|Color themes|Switch between darkmode and lightmode using the "Crescent" button.|
+| Feature|                                                                                                          Description                                                                                                          |
+| :---         |:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| Embedded Files       |     Add a file using the "+" button. Then embed it in Markdown by writing: <br> ```![alttext][nameOfFile]``` <br>After adding multiple images with the same name, only the latest one will be considered while rendering      |
+| Shortcuts | **Ctrl+R** : Refresh notes<br> **Ctrl+N** : Add new note<br>**Ctrl+D** : Delete currently selected note <br> **Escape** : Focus on search bar  <br> **Ctrl+M** : Add a new collection<br> **Ctrl+Z** : Undo<br> **Ctrl+UP/DOWN** : Go to next/previous note<br>*On MacOS it is Command instead of Ctrl* |
+|Real-time updates|                                                       Currently synchronized events:<br> - Adding note<br> - Deleting note<br> - Modifying title<br>- Modifying content                                                       |
+|Supported languages|                                                                                           English, Dutch, Polish, Romanian, Italian                                                                                           |
+|Color themes|                                                                              Switch between darkmode and lightmode using the "Crescent" button.                                                                               |
+Autosave| Notes are automatically save every 5 characters or after 1 second of inactivity|
 
 ## Design decisions:
 
@@ -130,5 +131,6 @@ erDiagram
  ```
 
 ### Other annotations
-- The collections feature is currently not working properly because the person assigned to fix it dropped out last week.
+- The collections feature is currently partialy properly because the person assigned to fix it dropped out last week.
+- Buttons have tooltips. It might take few seconds of hovering over it for them to pop up.
 
