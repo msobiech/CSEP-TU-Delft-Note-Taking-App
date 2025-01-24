@@ -1,7 +1,7 @@
 # CSEP Team 34 Project
 
 ## Overview
-This repository contains the source code for the **NetNode App**, developed by Team 34.
+This repository contains the source code for the **NetNote App**, developed by Team 34.
 
 ## Running the Application
 To run the project, you need either [Maven](https://maven.apache.org/install.html) installed on your system (`mvn`) or the provided Maven wrapper (`mvnw`). Follow these steps:
