@@ -55,11 +55,11 @@ public class NoteManager {
                 break;
             case NOTE_ADD:
                 handleNoteAddition();
-                webSocketClientApp.broadcastRefresh();
+                webSocketClientApp.broadcastAdd();
                 break;
             case NOTE_REMOVE:
                 handleNoteDeletion((NoteStatusEvent) event);
-                webSocketClientApp.broadcastRefresh();
+                webSocketClientApp.broadcastDelete();
                 break;
 
         }
