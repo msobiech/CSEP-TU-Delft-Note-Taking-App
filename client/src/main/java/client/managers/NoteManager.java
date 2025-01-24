@@ -2,6 +2,7 @@ package client.managers;
 
 import client.InjectorProvider;
 import client.WebSockets.WebSocketClientApp;
+import client.controllers.MainCtrl;
 import client.controllers.NoteOverviewCtrl;
 import client.event.*;
 import client.event.NoteEvent.EventType;
@@ -28,6 +29,7 @@ public class NoteManager {
     private final int DELAY = 1000;
     private static final int THRESHOLD = 5;
     private final ServerUtils server;
+    private final MainCtrl mainCtrl = InjectorProvider.getInjector().getInstance(MainCtrl.class);
 
     private WebSocketClientApp webSocketClientApp;
 
@@ -136,6 +138,7 @@ public class NoteManager {
     }
 
     private void handleNoteTitleChanged(NoteEvent event) {
+        ResourceBundle lang = noteOverviewCtrl.getLanguage();
         Long noteId = event.getNoteId();
         int noteIndex = event.getListIndex();
         String newTitle = event.getChange();
@@ -146,7 +149,7 @@ public class NoteManager {
         }
         try {
             if (noteService.titleExists(newTitle)) {
-                System.err.println("This title is already in use. Please choose a different title.");
+                mainCtrl.showError(lang.getString("title.exists.error"));
                 return;
             }
             String previousTitle = noteService.getNoteTitle(noteId); // Fetch the current title before updating
