@@ -144,6 +144,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private static int id;
      Map<String, String> aliases = new HashMap<>();
 
+     boolean isCollectionSwitch = true;
+
     @Inject
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl, NoteService noteService,
                             DebounceService debounceService, DialogFactory dialogFactory, EventBus eventbus) {
@@ -298,6 +300,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     public void setupNoteCollectionDropdown() {
         refreshNoteCollectionDropdown();
         notesList.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
+            isCollectionSwitch = false;
             if (newValue != null) {
                 Collection curNoteCollection = server.getCollectionByNoteID(newValue.getKey());
                 if (curNoteCollection != null) {
@@ -309,6 +312,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                     noteCollectionDropdown.setValue(matchingCollection);
                 }
             }
+            isCollectionSwitch=true;
         });
     }
 
@@ -342,7 +346,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
     public void handleNoteCollectionChange() {
         noteCollectionDropdown.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
-            if(newValue != null && oldValue != null && newValue != oldValue) {
+            if(newValue != null && oldValue != null && newValue != oldValue && isCollectionSwitch) {
                 selectNewCollection(newValue);
             }
         });
