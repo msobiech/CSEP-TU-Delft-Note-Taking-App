@@ -81,9 +81,10 @@ public class EditCollectionsPopUpCtrl implements Initializable {
     }
 
     public void addCollection() {
+        ResourceBundle language = noteOverviewCtrl.getLanguage();
         String title = collectionTitleField.getText();
         if (title.isEmpty()) {
-            System.out.println("Collection title is empty");
+            System.out.println(language.getString("collection.empty.title"));
             return;
         }
 
@@ -103,12 +104,13 @@ public class EditCollectionsPopUpCtrl implements Initializable {
     }
 
     public void deleteCollection() {
+        language = noteOverviewCtrl.getLanguage();
         var selectedCollection = collectionListView.getSelectionModel().getSelectedItem();
         if (selectedCollection != null) {
             Optional<ButtonType> result = dialogFactory.createConfirmationDialog(
-                    "Confirm deletion",
-                    "Are you sure you want to delete this collection?",
-                    "You are trying to delete collection: " + selectedCollection.getName() + ".\nDeleting a collection is irreversible!"
+                    language.getString("collection.delete.title"),
+                    language.getString("collection.delete.question"),
+                    language.getString("collection.delete.info1") + selectedCollection.getName() + ".\n"+ language.getString("collection.delete.info2")
             );
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
