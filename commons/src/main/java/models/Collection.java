@@ -110,8 +110,4 @@ public class Collection {
     public void setDefault (boolean value){
         this.isDefault = value;
     }
-
-    public boolean getDefault() {
-        return this.isDefault;
-    }
 }
