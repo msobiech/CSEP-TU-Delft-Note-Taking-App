@@ -63,7 +63,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private final DebounceService debounceService;
     private final DialogFactory dialogFactory;
     private final EventBus eventBus;
-    public Button showShortcutsButton;
 
 
     private boolean webSocketChange = true;
@@ -105,7 +104,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private ComboBox<Pair<Long, String>> noteCollectionDropdown;
 
     @FXML
-    private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton, toggleModeButton;
+    private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton, toggleModeButton,
+            showShortcutsButton, addFileButton;
 
     @FXML
     private void toggleMode() {
@@ -120,6 +120,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private Tooltip refreshNotesTooltip;
     private Tooltip editTitleTooltip;
     private Tooltip toggleModeTooltip;
+    private Tooltip showShortcutsTooltip;
+    private Tooltip addFileTooltip;
 
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
@@ -199,6 +201,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         removeNoteTooltip = new Tooltip();
         editTitleTooltip = new Tooltip();
         toggleModeTooltip = new Tooltip();
+        showShortcutsTooltip = new Tooltip();
+        addFileTooltip = new Tooltip();
 
         // Attach tooltips to elements
         Tooltip.install(addNoteButton, addNoteTooltip);
@@ -206,6 +210,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         Tooltip.install(removeNoteButton, removeNoteTooltip);
         Tooltip.install(editTitleButton, editTitleTooltip);
         Tooltip.install(toggleModeButton, toggleModeTooltip);
+        Tooltip.install(showShortcutsButton, showShortcutsTooltip);
+        Tooltip.install(addFileButton, addFileTooltip);
 
         // Set initial text
         updateTooltips();
@@ -219,6 +225,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         toggleModeTooltip.setText(mainCtrl.isDarkMode()
                 ? language.getString("tooltip.toggleLightMode")
                 : language.getString("tooltip.toggleDarkMode"));
+        showShortcutsTooltip.setText(language.getString("tooltip.help"));
+        addFileTooltip.setText(language.getString("tooltip.addFile"));
     }
 
 
