@@ -131,6 +131,6 @@ erDiagram
  ```
 
 ### Other annotations
-- The collections feature is currently partialy properly because the person assigned to fix it dropped out last week.
+- The collections feature is not fully implemented because the person assigned to fix it dropped out last week. We tried to fix as much as we could.
 - Buttons have tooltips. It might take few seconds of hovering over it for them to pop up.
 
