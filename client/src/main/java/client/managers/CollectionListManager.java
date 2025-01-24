@@ -15,4 +15,9 @@ public class CollectionListManager {
     public void setCollections(ObservableList<Collection> collections) {
         this.collections = collections;
     }
+
+    public void handleCollectionDeletion() {
+        var selectedCollection = collectionsList.getSelectionModel().getSelectedItem();
+        collectionsList.getItems().remove(selectedCollection);
+    }
 }
