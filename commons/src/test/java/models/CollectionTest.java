@@ -67,7 +67,7 @@ class CollectionTest {
         note2.setId(2L);
         note2.setTitle("Test Note 2");
         collection.setNotes(Set.of(note1, note2));
-        assertEquals(Set.of(note1, note2), collection.getNotes(), "The notes should match the set value");
+        assertEquals(Set.of(note1, note2), collection.getNotes(), "The notes should match the given set");
     }
 
     @Test
