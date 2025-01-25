@@ -189,6 +189,7 @@ public class MainCtrl {
         popUp.setScene(shortcutsScene);
         popUp.setTitle(language.getString("shortcuts.popup.primary.title"));
         popUp.setResizable(false);
+        applyStylesheet(shortcutsScene);
         popUp.show();
     }
 

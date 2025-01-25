@@ -5,21 +5,22 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="368.0" prefWidth="260.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.ShortcutsPopUpCtrl">
+<AnchorPane prefHeight="368.0" prefWidth="260.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.controllers.ShortcutsPopUpCtrl" >
    <children>
-      <HBox alignment="CENTER" prefHeight="42.0" prefWidth="260.0" style="-fx-background-color: #FEFAE0;">
+      <HBox alignment="CENTER" prefHeight="42.0" prefWidth="260.0" styleClass="header-box">
          <children>
             <Label text="%shortcuts.header">
                <font>
                   <Font name="System Bold" size="14.0" />
                </font>
             </Label>
-         </children></HBox>
-      <VBox layoutY="42.0" prefHeight="325.0" prefWidth="260.0" spacing="5.0" style="-fx-background-color: #CCD5AE; -fx-padding: 5px;">
+         </children>
+      </HBox>
+      <VBox layoutY="42.0" prefHeight="325.0" prefWidth="260.0" spacing="5.0" styleClass="main-box">
          <children>
-            <VBox prefHeight="331.0" prefWidth="250.0" spacing="2.0" style="-fx-background-color: #e8e9e8;">
+            <VBox prefHeight="331.0" prefWidth="250.0" spacing="2.0" styleClass="inner-box">
                <children>
-                  <HBox prefHeight="37.0" prefWidth="250.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
+                  <HBox prefHeight="37.0" prefWidth="250.0" styleClass="shortcut-box">
                      <children>
                         <HBox prefHeight="18.0" prefWidth="184.0">
                            <children>
@@ -30,7 +31,7 @@
                               </Label>
                            </children>
                         </HBox>
-                        <Label prefHeight="18.0" prefWidth="55.0" text="Ctrl + N">
+                        <Label prefHeight="18.0" prefWidth="55.0" text="Ctrl + N" styleClass="shortcut-text">
                            <font>
                               <Font name="System Italic" size="12.0" />
                            </font>
@@ -40,7 +41,7 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox prefHeight="38.0" prefWidth="278.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
+                  <HBox prefHeight="38.0" prefWidth="278.0" styleClass="shortcut-box">
                      <children>
                         <HBox prefHeight="100.0" prefWidth="200.0">
                            <children>
@@ -51,7 +52,7 @@
                               </Label>
                            </children>
                         </HBox>
-                        <Label prefHeight="18.0" prefWidth="69.0" text="Ctrl + D">
+                        <Label prefHeight="18.0" prefWidth="69.0" text="Ctrl + D" styleClass="shortcut-text">
                            <font>
                               <Font name="System Italic" size="12.0" />
                            </font>
@@ -61,7 +62,7 @@
                         </Label>
                      </children>
                   </HBox>
-                  <HBox prefHeight="37.0" prefWidth="250.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
+                  <HBox prefHeight="37.0" prefWidth="250.0" styleClass="shortcut-box">
                      <children>
                         <HBox prefHeight="100.0" prefWidth="200.0">
                            <children>
@@ -72,7 +73,7 @@
                               </Label>
                            </children>
                         </HBox>
-                        <Label prefHeight="18.0" prefWidth="69.0" text="Ctrl + R">
+                        <Label prefHeight="18.0" prefWidth="69.0" text="Ctrl + R" styleClass="shortcut-text">
                            <font>
                               <Font name="System Italic" size="12.0" />
                            </font>
@@ -82,11 +83,14 @@
                         </Label>
                      </children>
                   </HBox>
-               </children></VBox>
-            <HBox alignment="CENTER_LEFT" prefHeight="87.0" prefWidth="464.0" style="-fx-background-color: #E0E5B6;">
+               </children>
+            </VBox>
+            <HBox alignment="CENTER_LEFT" prefHeight="87.0" prefWidth="464.0" styleClass="footer-box">
                <children>
                   <Button fx:id="ShortcutPopUpOKButton" mnemonicParsing="false" onAction="#closePopUp" text="OK" translateX="5.0" />
-               </children></HBox>
-         </children></VBox>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
    </children>
 </AnchorPane>
