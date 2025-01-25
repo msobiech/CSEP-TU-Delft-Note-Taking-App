@@ -64,4 +64,5 @@ public class EmbeddedFileServiceTest {
         embeddedFileService.deleteFileById(1L);
         verify(embeddedFileRepository).deleteById(1L);
     }
+
 }

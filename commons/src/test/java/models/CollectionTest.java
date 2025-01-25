@@ -22,6 +22,32 @@ class CollectionTest {
     }
 
     @Test
+    void testNotEquals() {
+        Collection collection1 = new Collection();
+        collection1.setId(1L);
+        collection1.setName("Test Collection");
+
+        Collection collection2 = new Collection();
+        collection2.setId(2L); // Different ID
+        collection2.setName("Test Collection");
+
+        assertNotEquals(collection1, collection2);
+    }
+
+    @Test
+    void testHashCodeWithDifferentObjects() {
+        Collection collection1 = new Collection();
+        collection1.setId(1L);
+        collection1.setName("Test Collection");
+
+        Collection collection2 = new Collection();
+        collection2.setId(2L); // Different ID
+        collection2.setName("Test Collection");
+
+        assertNotEquals(collection1.hashCode(), collection2.hashCode());
+    }
+
+    @Test
     void testHashCode() {
         Collection collection1 = new Collection();
         collection1.setId(1L);
