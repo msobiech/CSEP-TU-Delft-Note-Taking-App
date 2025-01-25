@@ -4,6 +4,7 @@ import models.EmbeddedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import server.services.EmbeddedFileService;
 import server.services.EmbeddedFileServiceImpl;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/files")
@@ -47,6 +49,7 @@ public class EmbeddedFileController {
         }
         ByteArrayResource resource = new ByteArrayResource(file.getFileContent());
         return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(1, TimeUnit.MINUTES))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
                 .header(HttpHeaders.CONTENT_TYPE, file.getFileType())
                 .body(resource);
