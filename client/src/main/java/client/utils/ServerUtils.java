@@ -321,11 +321,12 @@ public class ServerUtils {
 				.post(Entity.entity(collection, APPLICATION_JSON), Collection.class);
 	}
 
-	public void deleteCollectionByID(long id) {
-		ClientBuilder.newClient(new ClientConfig())
+	public boolean deleteCollectionByID(long id) {
+		var response =ClientBuilder.newClient(new ClientConfig())
 				.target(SERVER).path("/collections/delete/" + id)
 				.request()
 				.delete();
+		return !(response.getStatus() == 500);
 	}
 
 	public String getCollectionStatus(String collectionName) {

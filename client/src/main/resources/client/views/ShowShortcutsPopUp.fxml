@@ -23,14 +23,14 @@
                      <children>
                         <HBox prefHeight="18.0" prefWidth="184.0">
                            <children>
-                              <Label prefHeight="18.0" prefWidth="178.0" text="%add.shortcut.text">
+                              <Label prefHeight="18.0" prefWidth="150.0" text="%add.shortcut.text">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
                               </Label>
                            </children>
                         </HBox>
-                        <Label prefHeight="18.0" prefWidth="55.0" text="Ctrl + N">
+                        <Label prefHeight="18.0" prefWidth="91.0" text="Ctrl + N">
                            <font>
                               <Font name="System Italic" size="12.0" />
                            </font>
@@ -42,16 +42,16 @@
                   </HBox>
                   <HBox prefHeight="38.0" prefWidth="278.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
                      <children>
-                        <HBox prefHeight="100.0" prefWidth="200.0">
+                        <HBox prefHeight="100.0" prefWidth="184.0">
                            <children>
-                              <Label prefHeight="18.0" prefWidth="225.0" text="%delete.shortcut.text">
+                              <Label prefHeight="18.0" prefWidth="150.0" text="%delete.shortcut.text">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
                               </Label>
                            </children>
                         </HBox>
-                        <Label prefHeight="18.0" prefWidth="69.0" text="Ctrl + D">
+                        <Label prefHeight="18.0" prefWidth="91.0" text="Ctrl + D">
                            <font>
                               <Font name="System Italic" size="12.0" />
                            </font>
@@ -63,16 +63,121 @@
                   </HBox>
                   <HBox prefHeight="37.0" prefWidth="250.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
                      <children>
-                        <HBox prefHeight="100.0" prefWidth="200.0">
+                        <HBox prefHeight="100.0" prefWidth="184.0">
                            <children>
-                              <Label prefHeight="18.0" prefWidth="177.0" text="%refresh.shortcut.text">
+                              <Label prefHeight="18.0" prefWidth="150.0" text="%refresh.shortcut.text">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
                               </Label>
                            </children>
                         </HBox>
-                        <Label prefHeight="18.0" prefWidth="69.0" text="Ctrl + R">
+                        <Label prefHeight="18.0" prefWidth="91.0" text="Ctrl + R">
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets right="3.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="37.0" prefWidth="250.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
+                     <children>
+                        <HBox prefHeight="18.0" prefWidth="184.0">
+                           <children>
+                              <Label prefHeight="18.0" prefWidth="150.0" text="%collection.shortcut.text">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <Label prefHeight="18.0" prefWidth="91.0" text="Ctrl + M">
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets right="3.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="37.0" prefWidth="250.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
+                     <children>
+                        <HBox prefHeight="18.0" prefWidth="184.0">
+                           <children>
+                              <Label prefHeight="18.0" prefWidth="150.0" text="%undo.shortcut.text">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <Label prefHeight="18.0" prefWidth="91.0" text="Ctrl + Z">
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets right="3.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="37.0" prefWidth="250.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
+                     <children>
+                        <HBox prefHeight="18.0" prefWidth="184.0">
+                           <children>
+                              <Label prefHeight="18.0" prefWidth="150.0" text="%escape.shortcut.text">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <Label prefHeight="18.0" prefWidth="91.0" text="ESC">
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets right="3.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="37.0" prefWidth="250.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
+                     <children>
+                        <HBox prefHeight="18.0" prefWidth="184.0">
+                           <children>
+                              <Label prefHeight="18.0" prefWidth="150.0" text="%down.shortcut.text">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <Label prefHeight="18.0" prefWidth="91.0" text="Ctrl + DOWN">
+                           <font>
+                              <Font name="System Italic" size="12.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets right="3.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+                  <HBox prefHeight="37.0" prefWidth="250.0" style="-fx-padding: 10px; -fx-background-color: #ffffff;">
+                     <children>
+                        <HBox prefHeight="18.0" prefWidth="184.0">
+                           <children>
+                              <Label prefHeight="18.0" prefWidth="150.0" text="%up.shortcut.text">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </HBox>
+                        <Label prefHeight="18.0" prefWidth="91.0" text="Ctrl + UP">
                            <font>
                               <Font name="System Italic" size="12.0" />
                            </font>
