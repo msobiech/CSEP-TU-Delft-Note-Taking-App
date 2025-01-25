@@ -40,6 +40,8 @@ import models.Collection;
 import models.EmbeddedFile;
 import models.Note;
 import org.kordamp.ikonli.javafx.FontIcon;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import java.io.*;
 import java.net.URI;
@@ -48,6 +50,7 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.tika.mime.*;
 
@@ -141,12 +144,13 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
     private Long curNoteId = null;
     private Integer curNoteIndex = null;
-
+    private boolean isServerOn = true;
     private static WebSocketClientApp webSocketClientApp;
+    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private static int id;
      Map<String, String> aliases = new HashMap<>();
 
-     boolean isCollectionSwitch = true;
+    private boolean isCollectionSwitch = true;
 
     @Inject
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl, NoteService noteService,
@@ -174,7 +178,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         language = ResourceBundle.getBundle("client.controllers.language", LanguageManager.getLanguage());
         setupSearch();
         refreshCollectionChoice();
-
+        setupServerChecking();
         setupNoteCollectionDropdown();
         handleNoteCollectionChange();
 
@@ -197,6 +201,31 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         setupKeyboardShortcuts();
     }
 
+    private void setupServerChecking(){
+        Runnable checkServerTask = () -> {
+            try {
+                boolean isAvailable = server.isServerAvailable();
+                if(isAvailable!=isServerOn){
+                    if(isAvailable){
+                        Platform.runLater(()->{
+                            showFadeBox(language.getString("server.on"), true);
+                            refreshNotesAction();
+                        });
+                    } else{
+                        Platform.runLater(()->{
+                            showFadeBox(language.getString("server.off"), false);
+                        });
+                    }
+                    isServerOn = isAvailable;
+                }
+
+            } catch (Exception e) {
+                System.out.println("Error while checking the server");
+            }
+        };
+        scheduler.scheduleAtFixedRate(checkServerTask, 0, 1, TimeUnit.SECONDS);
+
+    }
     private void setupTooltips() {
         addNoteTooltip = new Tooltip();
         refreshNotesTooltip = new Tooltip();
@@ -1102,6 +1131,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     public void refreshNotesAction() {
         try{
             refreshNotes();
+            refreshNoteCollectionDropdown();
+            refreshCollectionChoice();
         } catch(Exception e){
             showFadeBox(language.getString("bad.refresh"), false);
             return;
