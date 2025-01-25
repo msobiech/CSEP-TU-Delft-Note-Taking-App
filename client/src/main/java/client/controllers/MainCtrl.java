@@ -50,7 +50,7 @@ public class MainCtrl {
 
     private ResourceBundle language;
 
-    private boolean isDarkMode = false;
+    private static boolean isDarkMode = false;
     private final String LIGHT_MODE_CSS = "/client/css/styles.css";
     private final String DARK_MODE_CSS = "/client/css/darkstyles.css";
     /**
@@ -180,6 +180,7 @@ public class MainCtrl {
         popUp.setScene(editScene);
         popUp.setTitle(language.getString("collections.popup.primary.title")    );
         popUp.setResizable(false);
+        applyStylesheet(editScene);
         popUp.show();
     }
 
