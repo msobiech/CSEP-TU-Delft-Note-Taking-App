@@ -133,3 +133,12 @@ Button {
     -fx-font-style: italic;
     -fx-font-size: 12px;
 }
+
+
+HBox[alignment="CENTER_LEFT"] {
+    -fx-background-color: #E0E5B6;
+}
+
+HBox Label {
+    -fx-padding: 3px;
+}

@@ -143,3 +143,21 @@ Button:hover {
     -fx-background-color: #666666;
     -fx-text-fill: #FFFFFF;
 }
+
+HBox[alignment="CENTER_LEFT"] {
+    -fx-background-color: #333333;
+}
+
+HBox Label {
+    -fx-padding: 3px;
+    -fx-text-fill: #CCCCCC;
+}
+
+VBox {
+    -fx-background-color: #2B2B2B;
+    -fx-padding: 5px;
+}
+
+VBox > VBox {
+    -fx-background-color: #3A3A3A;
+}
