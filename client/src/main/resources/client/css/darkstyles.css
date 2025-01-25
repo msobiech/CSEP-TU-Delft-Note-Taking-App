@@ -96,3 +96,68 @@ Button {
     -fx-border-color: transparent;
     -fx-padding: 5px;
 }
+.header-box {
+    -fx-background-color: #333333;
+    -fx-text-fill: #FFFFFF;
+}
+
+.main-box {
+    -fx-background-color: #2B2B2B;
+    -fx-padding: 5px;
+}
+
+.inner-box {
+    -fx-background-color: #404040;
+}
+
+.shortcut-box {
+    -fx-padding: 10px;
+    -fx-background-color: #505050;
+    -fx-border-color: #666666;
+    -fx-border-width: 1px;
+}
+
+.footer-box {
+    -fx-background-color: #3A3A3A;
+}
+
+.shortcut-text {
+    -fx-font-style: italic;
+    -fx-font-size: 12px;
+    -fx-text-fill: #B3B3B3;
+}
+
+Label {
+    -fx-text-fill: #E0E0E0;
+}
+
+Button {
+    -fx-background-color: #555555;
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #777777;
+    -fx-border-width: 1px;
+    -fx-cursor: hand;
+}
+
+Button:hover {
+    -fx-background-color: #666666;
+    -fx-text-fill: #FFFFFF;
+}
+
+HBox[alignment="CENTER_LEFT"] {
+    -fx-background-color: #333333;
+}
+
+HBox Label {
+    -fx-padding: 3px;
+    -fx-text-fill: #CCCCCC;
+}
+
+VBox {
+    -fx-background-color: #2B2B2B;
+    -fx-padding: 5px;
+}
+
+VBox > VBox {
+    -fx-background-color: #3A3A3A;
+}

@@ -50,9 +50,11 @@ public class MainCtrl {
 
     private ResourceBundle language;
 
-    private boolean isDarkMode = false;
+    private static boolean isDarkMode = false;
     private final String LIGHT_MODE_CSS = "/client/css/styles.css";
     private final String DARK_MODE_CSS = "/client/css/darkstyles.css";
+
+    private boolean isErrorPopUpVisible = false;
     /**
      * Initialization of the main Stage
      * @param primaryStage the stage that will be used to display the app's fronted
@@ -136,11 +138,17 @@ public class MainCtrl {
      * @param error String representing the error message text
      */
     public void showError(String error){
-        this.popUp = new Stage();
+        if (isErrorPopUpVisible)
+            return;
+        popUp = new Stage();
         popUp.setScene(errorScene);
         popUp.setTitle(language.getString("window.error.title"));
         popUp.setResizable(false);
         errorCtrl.setErrorLabel(error);
+
+        isErrorPopUpVisible = true;
+        popUp.setOnCloseRequest(e -> isErrorPopUpVisible = false);
+        popUp.setOnHidden(e -> isErrorPopUpVisible = false);
         popUp.show();
 
     }
@@ -180,6 +188,7 @@ public class MainCtrl {
         popUp.setScene(editScene);
         popUp.setTitle(language.getString("collections.popup.primary.title")    );
         popUp.setResizable(false);
+        applyStylesheet(editScene);
         popUp.show();
     }
 
@@ -188,6 +197,7 @@ public class MainCtrl {
         popUp.setScene(shortcutsScene);
         popUp.setTitle(language.getString("shortcuts.popup.primary.title"));
         popUp.setResizable(false);
+        applyStylesheet(shortcutsScene);
         popUp.show();
     }
 

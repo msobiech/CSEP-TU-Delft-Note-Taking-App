@@ -106,3 +106,39 @@ Button {
     -fx-border-color: transparent;
     -fx-padding: 5px;
 }
+
+.header-box {
+    -fx-background-color: #FEFAE0;
+}
+
+.main-box {
+    -fx-background-color: #CCD5AE;
+    -fx-padding: 5px;
+}
+
+.inner-box {
+    -fx-background-color: #e8e9e8;
+}
+
+.shortcut-box {
+    -fx-padding: 10px;
+    -fx-background-color: #ffffff;
+}
+
+.footer-box {
+    -fx-background-color: #E0E5B6;
+}
+
+.shortcut-text {
+    -fx-font-style: italic;
+    -fx-font-size: 12px;
+}
+
+
+HBox[alignment="CENTER_LEFT"] {
+    -fx-background-color: #E0E5B6;
+}
+
+HBox Label {
+    -fx-padding: 3px;
+}
