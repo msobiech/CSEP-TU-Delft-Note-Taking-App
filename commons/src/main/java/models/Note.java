@@ -27,7 +27,8 @@ public class Note {
      */
     @ManyToMany(fetch = FetchType.LAZY, cascade = {
             CascadeType.PERSIST,
-            CascadeType.MERGE
+            CascadeType.MERGE,
+            CascadeType.REFRESH
     })
     @JoinTable(
             name = "collection_notes",
@@ -172,6 +173,7 @@ public class Note {
                 .append("id", id)
                 .append("title", title)
                 .append("content", content)
+                .append("collections", collections)
                 .toString();
     }
 

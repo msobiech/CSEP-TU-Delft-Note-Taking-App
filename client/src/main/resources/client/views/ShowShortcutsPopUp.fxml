@@ -24,7 +24,7 @@
                      <children>
                         <HBox prefHeight="18.0" prefWidth="184.0">
                            <children>
-                              <Label prefHeight="18.0" prefWidth="178.0" text="%add.shortcut.text">
+                              <Label prefHeight="18.0" prefWidth="150.0" text="%add.shortcut.text">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
@@ -43,9 +43,9 @@
                   </HBox>
                   <HBox prefHeight="38.0" prefWidth="278.0" styleClass="shortcut-box">
                      <children>
-                        <HBox prefHeight="100.0" prefWidth="200.0">
+                        <HBox prefHeight="100.0" prefWidth="184.0">
                            <children>
-                              <Label prefHeight="18.0" prefWidth="225.0" text="%delete.shortcut.text">
+                              <Label prefHeight="18.0" prefWidth="150.0" text="%delete.shortcut.text">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
@@ -64,9 +64,9 @@
                   </HBox>
                   <HBox prefHeight="37.0" prefWidth="250.0" styleClass="shortcut-box">
                      <children>
-                        <HBox prefHeight="100.0" prefWidth="200.0">
+                        <HBox prefHeight="100.0" prefWidth="184.0">
                            <children>
-                              <Label prefHeight="18.0" prefWidth="177.0" text="%refresh.shortcut.text">
+                              <Label prefHeight="18.0" prefWidth="150.0" text="%refresh.shortcut.text">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>

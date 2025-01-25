@@ -128,10 +128,10 @@ public class ServerUtils {
 			if (response.statusCode() == 204) {
 				System.out.println("Note deleted successfully.");
 			} else {
-				System.err.println("Failed to delete note: " + response.statusCode());
+				throw new RuntimeException("Failed to delete a note");
 			}
 		} catch (Exception e) {
-			System.out.println("Exception encountered.");
+			throw new RuntimeException("Failed to delete a note");
 		}
 	}
 
@@ -321,11 +321,12 @@ public class ServerUtils {
 				.post(Entity.entity(collection, APPLICATION_JSON), Collection.class);
 	}
 
-	public void deleteCollectionByID(long id) {
-		ClientBuilder.newClient(new ClientConfig())
+	public boolean deleteCollectionByID(long id) {
+		var response =ClientBuilder.newClient(new ClientConfig())
 				.target(SERVER).path("/collections/delete/" + id)
 				.request()
 				.delete();
+		return !(response.getStatus() == 500);
 	}
 
 	public String getCollectionStatus(String collectionName) {

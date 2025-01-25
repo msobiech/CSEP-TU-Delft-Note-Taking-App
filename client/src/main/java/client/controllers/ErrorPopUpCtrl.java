@@ -1,11 +1,12 @@
 package client.controllers;
 
-import client.controllers.MainCtrl;
+import client.InjectorProvider;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
+import java.util.ResourceBundle;
 
 
 public class ErrorPopUpCtrl {
@@ -15,6 +16,8 @@ public class ErrorPopUpCtrl {
 
     private final MainCtrl mainCtrl;
     private final ServerUtils server;
+
+    private final NoteOverviewCtrl noteOverviewCtrl = InjectorProvider.getInjector().getInstance(NoteOverviewCtrl.class);
 
 
     @Inject
@@ -31,8 +34,8 @@ public class ErrorPopUpCtrl {
      * @return String for the text
      */
     public String setErrorLabel(String error) {
-        errorLabel.setText("Oh no! It seems the following error occurred:\n" + error +
-            "\nFor common fixes please visit: \nhttps://emmer.dev/blog/common-markdown-mistakes/");
+        ResourceBundle lang = noteOverviewCtrl.getLanguage();
+        errorLabel.setText(lang.getString("error.label") + "\n\n" + error);
         return errorLabel.getText();
     }
 

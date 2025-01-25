@@ -44,7 +44,11 @@ public class WebSocketServerApp extends WebSocketServer {
             broadcastTitleChange(message);
 
         }
-        switch(message){
+        String formattedMessage = "";
+        if(message.contains("noteAdded") || message.contains("noteDeleted")){
+            formattedMessage = message.split(" ")[1].trim();
+        }
+        switch(formattedMessage){
             case "noteAdded" :
                 broadcastAdd();
                 System.out.println("addition broadcasted");

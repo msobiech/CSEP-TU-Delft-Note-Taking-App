@@ -35,6 +35,7 @@ public interface NoteService {
      */
     Note saveNote(Note note);
 
+
     /**
      * Search note by given keyword
      * @param keyword to search by

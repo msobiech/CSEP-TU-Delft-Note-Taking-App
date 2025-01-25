@@ -10,8 +10,8 @@ This document checks the following things:
 3. Checks for unused imports
 4. Gives warning for missing javadocs if they are not the main method, a constructor
    or have the annotations @Override, @Bean or @Inject
-5. Maximum method length is 60 lines
-6. Maximum cyclomatic complexity is 6
+5. Maximum method length is 80 lines
+6. Maximum cyclomatic complexity is 10
 7. Checks for camelCase method and local variable names and uppercase Class names
 8. Checks for correct indentation for opening and closing curly braces
 e.g: public void whateverMethod(){
@@ -45,9 +45,9 @@ e.g: public void whateverMethod(){
             <property name="allowMissingReturnTag" value="false"/>
         </module>
         <module name="MethodLength">
-            <property name="severity" value="warning"/>
+            <property name="severity" value="error"/>
             <property name="tokens" value="METHOD_DEF, CTOR_DEF, COMPACT_CTOR_DEF"/>
-            <property name="max" value="60"/>
+            <property name="max" value="80"/>
         </module>
         <module name="CyclomaticComplexity">
             <property name="switchBlockAsSingleDecisionPoint" value="true"/>

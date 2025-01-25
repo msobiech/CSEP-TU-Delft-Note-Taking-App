@@ -1,6 +1,6 @@
 package client.controllers;
 
-
+import javafx.animation.FadeTransition;
 import client.DialogFactory;
 import client.InjectorProvider;
 import client.WebSockets.GlobalWebSocketManager;
@@ -12,6 +12,7 @@ import client.utils.DebounceService;
 import client.utils.NoteService;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
+import javafx.animation.Timeline;
 import com.google.inject.Singleton;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -27,15 +28,20 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import javafx.util.Pair;
 import models.Collection;
 import models.EmbeddedFile;
 import models.Note;
 import org.kordamp.ikonli.javafx.FontIcon;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import java.io.*;
 import java.net.URI;
@@ -44,8 +50,12 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.tika.mime.*;
+
+import javafx.scene.paint.Color;
+
 
 @Singleton
 public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener {
@@ -56,9 +66,12 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private final DebounceService debounceService;
     private final DialogFactory dialogFactory;
     private final EventBus eventBus;
-    public Button showShortcutsButton;
+
 
     private boolean webSocketChange = true;
+
+    @FXML
+    private VBox feedBox;
 
     @FXML
     private ComboBox<Pair<String, String>> flagDropdown;
@@ -94,7 +107,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private ComboBox<Pair<Long, String>> noteCollectionDropdown;
 
     @FXML
-    private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton, toggleModeButton;
+    private Button addNoteButton, removeNoteButton, refreshNotesButton, editTitleButton, toggleModeButton,
+            showShortcutsButton, addFileButton;
 
     @FXML
     private void toggleMode() {
@@ -109,6 +123,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private Tooltip refreshNotesTooltip;
     private Tooltip editTitleTooltip;
     private Tooltip toggleModeTooltip;
+    private Tooltip showShortcutsTooltip;
+    private Tooltip addFileTooltip;
 
     private ObservableList<Pair<Long, String>>  notes; // pair of the note ID and note title
     // We don't want to store the whole note here since we only need to fetch the one that is currently selected.
@@ -120,16 +136,21 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     private UndoManager undoManager;
     private KeyEventManager keyEventManager;
 
-    private ResourceBundle language;
+    private static ResourceBundle language;
+
+    private FadeTransition currentAnimation;
 
     private Runnable lastTask = null;
 
     private Long curNoteId = null;
     private Integer curNoteIndex = null;
-
+    private boolean isServerOn = true;
     private static WebSocketClientApp webSocketClientApp;
+    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private static int id;
      Map<String, String> aliases = new HashMap<>();
+
+    private boolean isCollectionSwitch = true;
 
     @Inject
     public NoteOverviewCtrl(ServerUtils server, MainCtrl mainCtrl, NoteService noteService,
@@ -156,8 +177,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         keyEventManager = new KeyEventManager();
         language = ResourceBundle.getBundle("client.controllers.language", LanguageManager.getLanguage());
         setupSearch();
-        setupSelectCollection();
-
+        refreshCollectionChoice();
+        setupServerChecking();
         setupNoteCollectionDropdown();
         handleNoteCollectionChange();
 
@@ -180,12 +201,39 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         setupKeyboardShortcuts();
     }
 
+    private void setupServerChecking(){
+        Runnable checkServerTask = () -> {
+            try {
+                boolean isAvailable = server.isServerAvailable();
+                if(isAvailable!=isServerOn){
+                    if(isAvailable){
+                        Platform.runLater(()->{
+                            showFadeBox(language.getString("server.on"), true);
+                            refreshNotesAction();
+                        });
+                    } else{
+                        Platform.runLater(()->{
+                            showFadeBox(language.getString("server.off"), false);
+                        });
+                    }
+                    isServerOn = isAvailable;
+                }
+
+            } catch (Exception e) {
+                System.out.println("Error while checking the server");
+            }
+        };
+        scheduler.scheduleAtFixedRate(checkServerTask, 0, 1, TimeUnit.SECONDS);
+
+    }
     private void setupTooltips() {
         addNoteTooltip = new Tooltip();
         refreshNotesTooltip = new Tooltip();
         removeNoteTooltip = new Tooltip();
         editTitleTooltip = new Tooltip();
         toggleModeTooltip = new Tooltip();
+        showShortcutsTooltip = new Tooltip();
+        addFileTooltip = new Tooltip();
 
         // Attach tooltips to elements
         Tooltip.install(addNoteButton, addNoteTooltip);
@@ -193,6 +241,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         Tooltip.install(removeNoteButton, removeNoteTooltip);
         Tooltip.install(editTitleButton, editTitleTooltip);
         Tooltip.install(toggleModeButton, toggleModeTooltip);
+        Tooltip.install(showShortcutsButton, showShortcutsTooltip);
+        Tooltip.install(addFileButton, addFileTooltip);
 
         // Set initial text
         updateTooltips();
@@ -206,6 +256,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         toggleModeTooltip.setText(mainCtrl.isDarkMode()
                 ? language.getString("tooltip.toggleLightMode")
                 : language.getString("tooltip.toggleDarkMode"));
+        showShortcutsTooltip.setText(language.getString("tooltip.help"));
+        addFileTooltip.setText(language.getString("tooltip.addFile"));
     }
 
 
@@ -283,6 +335,25 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     }
 
     public void setupNoteCollectionDropdown() {
+        refreshNoteCollectionDropdown();
+        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
+            isCollectionSwitch = false;
+            if (newValue != null) {
+                Collection curNoteCollection = server.getCollectionByNoteID(newValue.getKey());
+                if (curNoteCollection != null) {
+                    // Find the corresponding Pair in the ComboBox items
+                    Pair<Long, String> matchingCollection = noteCollectionDropdown.getItems().stream()
+                            .filter(pair -> pair.getKey().equals(curNoteCollection.getId()))
+                            .findFirst()
+                            .orElse(null);
+                    noteCollectionDropdown.setValue(matchingCollection);
+                }
+            }
+            isCollectionSwitch=true;
+        });
+    }
+
+    public void refreshNoteCollectionDropdown() {
         List<Collection> collections = server.getAllCollectionsFromServer();
         List<Pair<Long, String>> listOfCollections = new ArrayList<>();
         for (Collection collection : collections) {
@@ -292,7 +363,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
 
 
         // Configure how items are displayed in the dropdown
-        noteCollectionDropdown.setCellFactory(comboBox -> new ListCell<>() {
+        noteCollectionDropdown.setCellFactory(_ -> new ListCell<>() {
             @Override
             protected void updateItem(Pair<Long, String> item, boolean empty) {
                 super.updateItem(item, empty);
@@ -300,7 +371,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             }
         });
 
-        // Configure the button cell to display the selected collection
+
         noteCollectionDropdown.setButtonCell(new ListCell<>() {
             @Override
             protected void updateItem(Pair<Long, String> item, boolean empty) {
@@ -308,32 +379,12 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                 setText((empty || item == null) ? null : item.getValue());
             }
         });
-        notesList.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
-            if (newValue != null) {
-                // Step 3: Fetch the collection of the newly selected note
-                Collection curNoteCollection = server.getCollectionByNoteID(newValue.getKey());
-                if (curNoteCollection != null) {
-                    // Find the corresponding Pair in the ComboBox items
-                    Pair<Long, String> matchingCollection = noteCollectionDropdown.getItems().stream()
-                            .filter(pair -> pair.getKey().equals(curNoteCollection.getId()))
-                            .findFirst()
-                            .orElse(null);
-
-                    // Step 4: Update the ComboBox's value
-                    noteCollectionDropdown.setValue(matchingCollection);
-                    if(oldValue!=null) {
-                        refreshNotes();
-                        //refreshFiles();
-                    }
-                }
-            }
-        });
     }
 
     public void handleNoteCollectionChange() {
         noteCollectionDropdown.getSelectionModel().selectedItemProperty().addListener((_, oldValue, newValue) -> {
-            if(newValue != null && oldValue != null && newValue != oldValue) {
-                selectNewCollection(oldValue, newValue);
+            if(newValue != null && oldValue != null && newValue != oldValue && isCollectionSwitch) {
+                selectNewCollection(newValue);
             }
         });
     }
@@ -439,7 +490,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             if (newScene != null) {
                 newScene.getAccelerators().put(
                         KeyCombination.keyCombination(modifierKey + "+R"),
-                        this::refreshNotes
+                        this::refreshNotesAction
                 );
             }
         });
@@ -550,7 +601,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
      * setup for 'select collection' menu.
      * adds 'All' collection, user collections and the edit collection
      */
-    private void setupSelectCollection() {
+    public void refreshCollectionChoice() {
         List<Collection> collections = server.getAllCollectionsFromServer();       //server.getAllCollections();
 
         Pair<Long, String> allNotesCollection = new Pair<>((long) -1, language.getString("collections.all.text"));
@@ -651,7 +702,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
      */
     public void refreshNotes() {
         System.out.println("Refreshed the note list");
-
         if (noteListManager == null) {
             System.err.println("NoteListManager is not initialized. Skipping refresh.");
             return;
@@ -665,7 +715,6 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             System.err.println("No collection selected. Skipping refresh.");
             return;
         }
-
         // Fetch notes from the server based on the selected collection
         if (selectedCollection.getKey() <= -1) { // All Notes
             var notesFromServer = server.getNoteTitles();
@@ -676,6 +725,7 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
             }
         } else { // Specific Collection
             var collectionNotes = server.getNotesByCollectionId(selectedCollection.getKey());
+            //System.out.println("Current collection list: " + collectionNotes);
             for (var note : collectionNotes) {
                 notesAsPairs.add(new Pair<>(note.getId(), note.getTitle()));
             }
@@ -716,23 +766,24 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         }
     }
 
-    public void refreshCollections() {
-
-    }
 
     /**
      * Method to add notes
      */
     public void addNote() {
-        System.out.println("Adding a new note");
-        eventBus.publish(new NoteStatusEvent(NoteEvent.EventType.NOTE_ADD, null));
-        refreshNotes();
-        if (!notes.isEmpty()) {
-            Pair<Long, String> newNotePair = notes.getLast(); // Get the last note added
-            notesList.getSelectionModel().select(newNotePair);
-            notesList.scrollTo(newNotePair);
-            notesList.requestFocus();
-            noteDisplay.requestFocus();
+        try{
+            System.out.println("Adding a new note");
+            eventBus.publish(new NoteStatusEvent(NoteEvent.EventType.NOTE_ADD, null));
+            refreshNotes();
+            if (!notes.isEmpty()) {
+                Pair<Long, String> newNotePair = notes.getLast(); // Get the last note added
+                notesList.getSelectionModel().select(newNotePair);
+                notesList.scrollTo(newNotePair);
+                notesList.requestFocus();
+                noteDisplay.requestFocus();
+            }
+        } catch(Exception e){
+            System.out.println("Failed to add note: " + e.getMessage());
         }
     }
 
@@ -805,22 +856,18 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
     }
 
     @FXML
-    private void selectNewCollection(Pair<Long, String> oldCollection, Pair<Long, String> newCollection) {
+    private void selectNewCollection(Pair<Long, String> newCollection) {
         Note curNote = new Note();
+        curNoteId = notesList.getSelectionModel().getSelectedItem().getKey();
         if(curNoteId != null) {
             curNote = server.getNoteByID(curNoteId);
         }
-        System.out.println("Note: " + curNote.getTitle() +
-                "\nGot removed from collection: " + oldCollection.getValue() +
-                "\nGot added to collection: " + newCollection.getValue());
-
-        Collection removedNoteCollection = server.getCollectionByID(oldCollection.getKey());
-        removedNoteCollection.removeNoteFromCollection(curNote);
-        server.updateCollectionByID(oldCollection.getKey(), removedNoteCollection);
-
-        Collection addedNoteCollection = server.getCollectionByID(newCollection.getKey());
-        addedNoteCollection.addNoteToCollection(curNote);
-        server.updateCollectionByID(newCollection.getKey(), addedNoteCollection);
+        Set<Long> collectionsIds = new HashSet<>();
+        collectionsIds.add(newCollection.getKey());
+        curNote.setCollectionIds(collectionsIds);
+        curNote.setTitle(null);
+        curNote.setContent(null);
+        server.updateNoteByID(curNoteId ,curNote);
     }
 
 
@@ -850,13 +897,14 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
                 eventBus.publish(new EditCollectionsEvent());
                 break;
             default:
+                /*
                 List<Note> notesInCollection = server.getNotesByCollectionId(selectedCollection.getKey());
                 for(Note note: notesInCollection){
                     collectionNotes.add(new Pair<>(note.getId(), note.getTitle()));
                 }
                 notes = FXCollections.observableArrayList(collectionNotes);
                 noteListManager.setNotes(notes);
-                notesList.setItems(notes);
+                notesList.setItems(notes);*/
                 refreshNotes();
         }
     }
@@ -869,9 +917,9 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         var selectedNote = notesList.getSelectionModel().getSelectedItem();
         if (selectedNote != null) {
             Optional<ButtonType> result = dialogFactory.createConfirmationDialog(
-                    "Confirm deletion",
-                    "Are you sure you want to delete this note?",
-                    "You are trying to delete note: " + selectedNote.getValue() + ".\nDeleting a note is irreversible!"
+                    language.getString("confirmation.title"),
+                    language.getString("confirmation.question"),
+                    language.getString("confirmation.info1")+ " " + selectedNote.getValue() + "\n" + language.getString("confirmation.info2")
             );
 
             if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -1053,7 +1101,50 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         }
     }
 
+    public void showFadeBox(String text, boolean isGood) {
+        if (currentAnimation != null && currentAnimation.getStatus() == Timeline.Status.RUNNING) {
+            feedBox.setVisible(false);
+            currentAnimation.stop();
+        }
+        feedBox.setBackground(Background.fill(isGood? Color.DARKSEAGREEN:Color.INDIANRED));
+        var children = feedBox.getChildren();
+        Label label = (Label) children.getFirst();
+        label.setText(text);
+        feedBox.setVisible(true);
+        FadeTransition fadeIn = new FadeTransition(Duration.seconds(1), feedBox);
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(0.8);
+        currentAnimation = fadeIn;
+        fadeIn.setOnFinished(_ -> fadeOut());
+        fadeIn.play();
+    }
+
+    private void fadeOut() {
+        FadeTransition fadeOut = new FadeTransition(Duration.seconds(1), feedBox);
+        fadeOut.setFromValue(0.8);
+        fadeOut.setToValue(0.0);
+        currentAnimation = fadeOut;
+        fadeOut.setOnFinished(_ -> feedBox.setVisible(false));
+        fadeOut.play();
+    }
+
+    public void refreshNotesAction() {
+        try{
+            refreshNotes();
+            refreshNoteCollectionDropdown();
+            refreshCollectionChoice();
+        } catch(Exception e){
+            showFadeBox(language.getString("bad.refresh"), false);
+            return;
+        }
+        showFadeBox(language.getString("good.refresh"), true);
+
+
+    }
     // Getters and setters for testing
+    public ResourceBundle getLanguage(){
+        return language;
+    }
     public Label getCollectionText() {
         return collectionText;
     }
@@ -1207,4 +1298,8 @@ public class NoteOverviewCtrl implements Initializable, WebSocketMessageListener
         webSocketClientApp.broadcastContent(text, null);
     }
 
+    public NoteListManager getNoteListManager() {
+        return noteListManager;
+    }
 }
+

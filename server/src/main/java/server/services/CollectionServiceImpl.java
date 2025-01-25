@@ -34,7 +34,11 @@ public class CollectionServiceImpl implements CollectionService {
         if(!collectionExists(id)) {
             throw new IllegalAccessException("Collection with id " + id + " does not exist");
         }
-        collectionRepo.deleteById(id);
+        try {
+            collectionRepo.deleteById(id);
+        } catch (Exception e) {
+            throw new IllegalAccessException(e.getMessage());
+        }
     }
 
     @Override
@@ -54,6 +58,7 @@ public class CollectionServiceImpl implements CollectionService {
 
     @Override
     public Collection getDefaultCollection() {
+        //collectionRepo.
         return collectionRepo.findDefaultCollection();
     }
 
